@@ -1,5 +1,6 @@
 # StackMasters-WebApp
 StackMasters Web Application
+Not allowed to use firebase/Superbase Backend
 LuxFate:
 Different Repo for each part ie. one for mobile app, web app, and backend
 
