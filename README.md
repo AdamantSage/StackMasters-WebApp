@@ -1,4 +1,38 @@
 # StackMasters-WebApp
+
+Overview
+This project consists of making an HMS T&L System that has a web application and mobile application supported by a unified backend with robust backend to supprt secure user management and data storage.
+
+Mobile Application
+Platforms
+iOS
+Android
+
+Features
+Browse File-system: Select a video from the user's file system.
+Record a Video: Capture a new video using the device’s camera?
+Compress Video: Automatically compress videos to optimize upload size?
+Upload Video: Upload videos to the system.
+Browse Submissions: View previously submitted videos.
+View Feedback: Access feedback provided on submitted videos.
+
+Web Application
+Features
+Create Assignments: Set up new assignments for users.
+View Assignments: Access and review existing assignments.
+View Submissions: See video submissions related to assignments.
+Stream/Download Submission Videos: Watch or download submitted videos.
+Provide Feedback: Offer feedback on video submissions.
+Download Feedback & Marks: Export feedback and marks in .csv or .xlsx formats.
+
+Backend
+Features
+Secure Login: Implement secure authentication for user access.
+Data Stores: Manage and store data related to users, videos, assignments, and feedback.
+User Administration: Handle user roles.
+
+Technologies:
+
 StackMasters Web Application
 Not allowed to use firebase/Superbase Backend
 LuxFate:
