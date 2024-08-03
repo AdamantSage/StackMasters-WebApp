@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path")
 const mysql = require("mysql");
 const dotenv = require("dotenv");
 //dotenv is what we will use to store passwords basically, hence .env
@@ -14,6 +15,16 @@ const db = mysql.createConnection({
     database:process.env.DATABASE
 });
 
+//we will put files like css/js for frontend we might want to use
+const publicDirectory = path.join(__dirname, './public');
+
+//making the app use the files that will be in public folder. i.e style.css
+
+app.use(express.static(publicDirectory))
+//will help with views
+app.set('view engine', 'hbs');
+
+
 //connecting to the db
 db.connect ( (error) => {
     if(error) {
@@ -26,8 +37,8 @@ db.connect ( (error) => {
 //this is a get request
 //req is request. res is respond
 app.get("/", (req, res) => {
-    res.send("<h1>Home Page</h1>")
-
+    //res.send("<h1>Home Page</h1>")
+    res.render("index")
 });
 
 app.listen(5000, () => {
