@@ -21,14 +21,29 @@
     </nav>
 
     <div class="container mt-4">
-        <div class="jumbotron">
-            <h1 class="display-4">Login Page</h1>
-            <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
-            <hr class="my-4">
-            <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
-            <p class="lead">
-            <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
-            </p>
+        <div class="card" style="width: 18rem;">
+            <div class="card-header">
+                Register Form
+            </div>
+            <div class="card-body">
+                <form>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name ="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" >
+                </div>
+                    <button type="submit" class="btn btn-primary">Register User</button>
+                </form>
+            </div>
         </div>
     </div>
    <!-- js file for bootstrap if we'll use bootstrap -->
