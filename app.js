@@ -37,8 +37,14 @@ db.connect ( (error) => {
 //this is a get request
 //req is request. res is respond
 app.get("/", (req, res) => {
-    //res.send("<h1>Home Page</h1>")
-    res.render("index")
+    
+    res.render("index");
+});
+
+//this will render this page so that we can find it on the web/localhost
+app.get("/register", (req, res) => {
+    
+    res.render("register");
 });
 
 app.listen(5000, () => {
