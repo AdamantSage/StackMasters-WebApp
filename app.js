@@ -22,6 +22,10 @@ const publicDirectory = path.join(__dirname, './public');
 
 app.use(express.static(publicDirectory))
 //will help with views
+
+app.use(express.urlencoded({ extended: false}));
+app.use(express.json());
+
 app.set('view engine', 'hbs');
 
 
@@ -34,18 +38,9 @@ db.connect ( (error) => {
     }
 })
 
-//this is a get request
-//req is request. res is respond
-app.get("/", (req, res) => {
-    
-    res.render("index");
-});
-
-//this will render this page so that we can find it on the web/localhost
-app.get("/register", (req, res) => {
-    
-    res.render("register");
-});
+//define routes
+app.use('/', require('./routes/pages'));
+app.use('/auth', require('./routes/auth'));
 
 app.listen(5000, () => {
     console.log("Server is running on port 5000");
