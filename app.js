@@ -1,7 +1,9 @@
 const express = require("express");
-const path = require("path")
+const path = require("path");
 const mysql = require("mysql");
 const dotenv = require("dotenv");
+const bodyParser = require("body-parser");
+
 //dotenv is what we will use to store passwords basically, hence .env
 dotenv.config({path: './.env'})
 
@@ -23,7 +25,7 @@ const publicDirectory = path.join(__dirname, './public');
 app.use(express.static(publicDirectory))
 //will help with views
 
-app.use(express.urlencoded({ extended: false}));
+app.use(express.urlencoded({ extended: true}));
 app.use(express.json());
 
 app.set('view engine', 'hbs');
