@@ -1,5 +1,4 @@
-import { Router } from "express";
-
+const router = express.Router();
 const express = require("express");
 
 const{
@@ -8,8 +7,6 @@ const{
     updateAssignment,
     deleteAssignment
 } = require('./controllers/assignmentController');
-
-const router = express.Router();
 
 router.post('/', createAssignment);
 router.get('/', getAssignment);

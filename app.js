@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const mysql = require("mysql");
 const dotenv = require("dotenv");
+
 //dotenv is what we will use to store passwords basically, hence .env
 dotenv.config({path: './.env'});
 
@@ -45,7 +46,7 @@ db.connect ( (error) => {
     }
 });
 
-
+app.use('/', require('./routes/assignmentsRoutes'));
 
 app.listen(5000, () => {
     if(err){
