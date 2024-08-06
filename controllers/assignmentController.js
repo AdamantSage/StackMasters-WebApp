@@ -30,12 +30,12 @@ exports.createAssignment = (req, res) => {
     }, (err, results) => {
         if (err) {
             console.log(err);
-            return res.render('assignment', {
+            return res.render('assignments', {
                 message: "Error occurred."
             });
         }else {
             console.log(results);
-            return res.render('assignment', {
+            return res.render('assignments', {
                 message: "Assignment created"
             });
         }
@@ -47,22 +47,18 @@ exports.getAssignment = (req, res) => {
 
     const {
         assignmentID,
-        Module,
-        assignmentName,
-        dueDate, 
-        assignmentInfo
     } = req.body;
 
-    db.query('SELECT assignmentID FROM assignmnet WHERE assignmentID =?', 
+    db.query('SELECT * FROM assignmnets WHERE assignmentID =?', 
         [assignmentID], (err, results) => {
             if(err){
                 console.log(err);
-                return res.render('assignment', {
+                return res.render('assignments', {
                     message: "Error occurred."
                 });
             }else{
                 console.log(results);
-                return res.render('assignment', {
+                return res.render('assignments', {
                     message: "Assignment viewed"
                 });
             }
@@ -79,21 +75,42 @@ exports.updateAssignment = (req, res) => {
         assignmentInfo
     } = req.body;
 
-    db.query('UPDATE assignment SET ?', {
-       Module: Module, assignmentName: assignmentName, 
-       dueDate: dueDate, assignmentInfo: assignmentInfo 
-    }, (err, results) => {
+    db.query('UPDATE * WHERE assignmentID ?', 
+       [assignmentID], (err, results) => {
         if(err){
             console.log(err);
-            return res.render('assignment',{
+            return res.render('assignments',{
                 message: "Error occured."
             });
         }else{
             console.log(results);
-            return res.render('assignment', {
+            return res.render('assignments', {
                 message: "View assignment"
             });
         }
     });
+}
+
+exports.deleteAssignment = (req, res) => {
+    console.log(req.body);
+
+    const{
+        assignmentID,
+    } = req.body;
+
+    db.query('DELETE FROM assignment WHERE ?',
+        [assignmentID], (err, results) => {
+            if(err){
+                console.log(err);
+                return res.render('assignment', {
+                    message: "Error occured."
+                });
+            }else{
+                console.log(results);
+                return res.render('assignment', {
+                    message: "Deleted assignment"
+                });
+            }
+        });
 }
 
