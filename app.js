@@ -1,14 +1,37 @@
-const express = require("express");
+const express = require('express');
+const videoRoutes = require('./routes/videoRoutes');
+require('dotenv').config();
+
+//This code will upload file to a local folder for now 
+const multer = require('multer');
+const path = require('path');
+
+const mysql = require('mysql');
+
 
 const app = express();
+const port = process.env.PORT || 5000;
 
-//this is a get request
-//req is request. res is respond
-app.get("/", (req, res) => {
-    res.send("<h1>Home Page</h1>")
+// Middleware to handle JSON requests
+app.use(express.json());
 
+// Use video upload routes
+app.use('/routes', videoRoutes);
+
+
+//Having problem with port number, please help
+
+//Set up Multer storage
+/*const videoStorage = multer.diskStorage({
+    destination: 'videos', // Destination to store video 
+    filename: (req, file, cb) => {
+        const uniqueName = file.fieldname + '_' + Date.now() + path.extname(file.originalname);
+        cb(null, uniqueName);
+    }
 });
+const upload = multer({ storage: videoStorage });*/
 
-app.listen(5000, () => {
-    console.log("Server is running on port 5000");
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
