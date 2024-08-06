@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
 
 //dotenv is what we will use to store passwords basically, hence .env
-dotenv.config({path: './.env'})
+dotenv.config({path: './.env'});
 
 const app = express();
 
@@ -40,9 +40,17 @@ db.connect ( (error) => {
     }
 })
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
 //define routes
 app.use('/', require('./routes/pages'));
 app.use('/auth', require('./routes/auth'));
+app.use('/users', require('./routes/users'));
+
 
 app.listen(5000, () => {
     console.log("Server is running on port 5000");
