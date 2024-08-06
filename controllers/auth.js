@@ -11,33 +11,35 @@ const db = mysql.createConnection({
     });
 
 
-    exports.register = (req, res) => {
-        console.log(req.body);
-    
-        const { name, email, password, passwordConfirm } = req.body;
-    
-        db.query('SELECT email FROM users WHERE email =?', [email], (error, results) => {
-            if (error) {
-                console.log(error);
-                return res.render('register', {
-                    message: "An error occurred. Please try again."
-                });
-            }
-            if (results.length > 0) {
-                return res.render('register', {
-                    message: "Existing user, try different details"
-                });
-            } else if (password !== passwordConfirm) {
-                return res.render('register', {
-                    message: "Passwords do not match"
-                });
-            }
-    
-            // Store password as plain text
-            console.log(password);
-    
-            // Adding user into database with plain text password
-            db.query("INSERT INTO users SET ?", { name: name, email: email, password: password }, (error, results) => {
+exports.register = (req, res) => {
+    console.log(req.body);
+
+    const { name, email, password, passwordConfirm } = req.body;
+
+    db.query('SELECT email FROM users WHERE email = ?', [email], async (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.render('register', {
+                message: "An error occurred. Please try again."
+            });
+        }
+        if (results.length > 0) {
+            return res.render('register', {
+                message: "Existing user, try different details"
+            });
+        } else if (password !== passwordConfirm) {
+            return res.render('register', {
+                message: "Passwords do not match"
+            });
+        }
+
+        try {
+            // Hash the password before storing it
+            const hashedPassword = await bcrypt.hash(password, 10);
+            console.log(hashedPassword);
+
+            // Adding user into database with hashed password
+            db.query("INSERT INTO users SET ?", { name: name, email: email, password: hashedPassword }, (error, results) => {
                 if (error) {
                     console.log(error);
                     return res.render('register', {
@@ -50,35 +52,53 @@ const db = mysql.createConnection({
                     });
                 }
             });
-        });
-    }
-    
+        } catch (err) {
+            console.log(err);
+            return res.render('register', {
+                message: "An error occurred while hashing the password. Please try again."
+            });
+        }
+    });
+}
 
-    exports.login = (req, res) => {
-        console.log(req.body);
-    
-        const { email, password } = req.body;
-    
-        // Check user credentials with plain text password
-        db.query("SELECT * FROM users WHERE email = ? AND password = ?", [email, password], (error, results) => {
-            if (error) {
-                console.log(error);
+    //code used to login user
+exports.login = (req, res) => {
+    console.log(req.body);
+
+    const { email, password } = req.body;
+
+    // Fetch user by email
+    db.query("SELECT * FROM users WHERE email = ?", [email], (error, results) => {
+        if (error) {
+            console.log(error);
+            return res.status(500).send("Server error");
+        }
+        if (results.length === 0) {
+            // No user found with this email
+            return res.render('login', {
+                message: "Incorrect details"
+            });
+        }
+
+        const user = results[0];
+
+        // Compare the provided password with the hashed password
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                console.log(err);
                 return res.status(500).send("Server error");
             }
-            if (results.length === 0) {
-                // Incorrect details
+            if (isMatch) {
+                // Passwords match, user is logged in
+                return res.render('index', {
+                    message: "You have been logged in"
+                });
+            } else {
+                // Passwords do not match, no access granted
                 return res.render('login', {
                     message: "Incorrect details"
                 });
             }
-    
-            // User found and credentials are correct
-            const user = results[0];
-            
-            // Render a welcome page or another view
-            return res.render('index', {
-                message: "You have been logged in"
-            });
         });
-    }
-    
+    });
+}

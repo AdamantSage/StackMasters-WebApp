@@ -11,7 +11,7 @@ const app = express();
 
 const db = mysql.createConnection({
 //IMP: i can put ip address of cloud server here when its time to move to cloud
-    host: process.env.DATABSE_HOST,
+    host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     database:process.env.DATABASE
