@@ -36,7 +36,6 @@ app.use(express.json());
 
 app.set('view engine', 'hbs');
 
-
 //connecting to the db
 db.connect ( (error) => {
     if(error) {
@@ -48,7 +47,7 @@ db.connect ( (error) => {
 
 app.use('/', require('./routes/assignmentsRoutes'));
 
-app.listen(5000, () => {
+app.listen(5000, (err) => {
     if(err){
         console.error("Error starting server:", err)
     }else{
