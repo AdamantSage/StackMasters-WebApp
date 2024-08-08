@@ -1,8 +1,9 @@
 //Routes for assignments will be hosted using express router
-const router = express.Router();
 const express = require("express");
+const router = express.Router();
+const{validAssignmentInfo} = require('./middleware/assignmentMiddleware');
 //This is the specific functions that are coded in the controller
-const{
+const{  
     createAssignment,
     getAssignment,
     updateAssignment,
@@ -11,11 +12,11 @@ const{
 
 //This is a request to this route path to executed
 //This is used to create a new assignment 
-router.post('/', createAssignment);
+router.post('/', validAssignmentInfo , createAssignment);
 //This is used to retrieve assignment
 router.get('/', getAssignment);
 //this is used to replace data
-router.put('/', updateAssignment);
+router.put('/', validAssignmentInfo, updateAssignment);
 //this is used to remove data
 router.delete('/', deleteAssignment);
 //This is to export the router

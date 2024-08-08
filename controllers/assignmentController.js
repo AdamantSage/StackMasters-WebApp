@@ -14,7 +14,7 @@ exports.createAssignment = (req, res) => {
     //this extracts specific fields from the req.body
     const {
         assignmentID,
-        Module,
+        ModuleCode,
         assignmentName,
         uploadDate,
         dueDate,
@@ -23,7 +23,7 @@ exports.createAssignment = (req, res) => {
     //this executes the sql query using client values
     db.query('INSERT INTO assignments SET ?', {
         assignmentID : assignmentID,
-        Module: Module,
+        ModuleCode: ModuleCode,
         assignmentName: assignmentName,
         uploadDate: uploadDate,
         dueDate: dueDate,
@@ -78,13 +78,13 @@ exports.updateAssignment = (req, res) => {
     console.log(req.body);
     //this extracts specific fields from the req.body
     const{
-        Module,
+        ModuleCode,
         assignmentName,
         dueDate,
         assignmentInfo
     } = req.body;
     //this executes the sql query using client values
-    db.query('UPDATE * WHERE assignmentID ?', 
+    db.query('UPDATE assignments WHERE assignmentID ?', 
        [assignmentID], (err, results) => {
         //error handaling by checking if there is a error
         if(err){
