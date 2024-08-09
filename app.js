@@ -16,10 +16,7 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 
 // Use video upload routes
-app.use('/routes', videoRoutes);
-
-
-//Having problem with port number, please help
+app.use('/routes', require('./routes/videoRoutes'));
 
 //Set up Multer storage
 /*const videoStorage = multer.diskStorage({
