@@ -36,7 +36,7 @@ exports.create = async (req, res) => {
     }
 };
 
-//code used to login user
+//code used for logging in
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
@@ -59,15 +59,28 @@ exports.login = (req, res) => {
             if (isMatch) {
                 const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
                 
-                // Assuming req.user is populated by your authentication middleware
-                req.user = { id: user.id, role: user.role };
+                // Log the token to the console
+                console.log('Generated JWT:', token);
 
+                // Send token as part of the response
                 if (user.role === 'admin') {
-                    res.render('dashboard');
+                    res.json({
+                        message: 'Login successful',
+                        token: token,
+                        role: user.role // Optional: You can also send the user's role
+                    });
                 } else if (user.role === 'lecturer') {
-                    res.render('index');
+                    res.json({
+                        message: 'Login successful',
+                        token: token,
+                        role: user.role
+                    });
                 } else if (user.role === 'student') {
-                    res.render('index');
+                    res.json({
+                        message: 'Login successful',
+                        token: token,
+                        role: user.role
+                    });
                 } else {
                     res.status(403).send('Access denied');
                 }
@@ -77,6 +90,8 @@ exports.login = (req, res) => {
         });
     });
 };
+
+
 // Read all users
 exports.read = (req, res) => {
     db.query('SELECT * FROM users', (error, results) => {
