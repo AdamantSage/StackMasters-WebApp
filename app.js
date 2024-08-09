@@ -48,7 +48,6 @@ app.use((err, req, res, next) => {
 
 //define routes
 app.use('/', require('./routes/pages'));
-app.use('/auth', require('./routes/auth'));
 app.use('/users', require('./routes/users'));
 
 
