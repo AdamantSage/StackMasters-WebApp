@@ -13,7 +13,7 @@ const db = mysql.createConnection({
 //create is same as register in register views. might have to modify that code to use this one
 // Create a new user
 exports.create = async (req, res) => {
-    const { name, email, password, passwordConfirm } = req.body;
+    const { name,role,email, password, passwordConfirm } = req.body;
 
     if (password !== passwordConfirm) {
         return res.status(400).send('Passwords do not match');
@@ -23,7 +23,7 @@ exports.create = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log('Hashed Password:', hashedPassword);
 
-        db.query('INSERT INTO users SET ?', { name, email, password: hashedPassword }, (error, results) => {
+        db.query('INSERT INTO users SET ?', { name,role,email, password: hashedPassword }, (error, results) => {
             if (error) {
                 console.log(error);
                 return res.status(500).send('Error creating user');
@@ -59,12 +59,16 @@ exports.login = (req, res) => {
                 return res.status(500).send('Server error');
             }
             if (isMatch) {
-                // Generate a JWT token
+                // Passwords match, user is logged in
+                return res.render('index', {
+                    message: "You have been logged in"
+                })
+                /*Generate a JWT token cant be reached yet
                 const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
                 return res.json({
                     message: 'Login successful',
                     token: token
-                });
+                });*/
             } else {
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
