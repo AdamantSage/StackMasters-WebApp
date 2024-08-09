@@ -104,17 +104,47 @@ exports.read = (req, res) => {
 };
 
 // Update a user
+// Update a user
+// Update a user
 exports.update = (req, res) => {
     const id = req.params.id;
     const { name, email, password } = req.body;
-    db.query('UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?', [name, email, password, id], (error, results) => {
-        if (error) {
-            console.log(error);
-            return res.status(500).send('Error updating user');
-        }
-        res.send('User updated successfully');
-    });
+
+    // If password is being updated, hash it
+    let query = 'UPDATE users SET name = ?, email = ?' + (password ? ', password = ?' : '') + ' WHERE id = ?';
+    let values = [name, email];
+    
+    if (password) {
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+                console.error(`Error hashing password for user ${id}: ${err}`);
+                return res.status(500).send('Server error');
+            }
+            values.push(hashedPassword);
+            values.push(id);
+
+            db.query(query, values, (error, results) => {
+                if (error) {
+                    console.error(`Error updating user ${id}: ${error}`);
+                    return res.status(500).send('Error updating user');
+                }
+                console.log(`User ${id} updated successfully`);
+                res.send('User updated successfully');
+            });
+        });
+    } else {
+        values.push(id);
+        db.query(query, values, (error, results) => {
+            if (error) {
+                console.error(`Error updating user ${id}: ${error}`);
+                return res.status(500).send('Error updating user');
+            }
+            console.log(`User ${id} updated successfully`);
+            res.send('User updated successfully');
+        });
+    }
 };
+
 
 // Delete a user
 exports.delete = (req, res) => {
