@@ -14,7 +14,7 @@ const db = mysql.createConnection({
 exports.register = (req, res) => {
     console.log(req.body);
 
-    const { name, email, password, passwordConfirm } = req.body;
+    const { name,role,email, password, passwordConfirm } = req.body;
 
     db.query('SELECT email FROM users WHERE email = ?', [email], async (error, results) => {
         if (error) {
@@ -39,7 +39,7 @@ exports.register = (req, res) => {
             console.log(hashedPassword);
 
             // Adding user into database with hashed password
-            db.query("INSERT INTO users SET ?", { name: name, email: email, password: hashedPassword }, (error, results) => {
+            db.query("INSERT INTO users SET ?", { name: name,role: role, email: email, password: hashedPassword }, (error, results) => {
                 if (error) {
                     console.log(error);
                     return res.render('register', {
