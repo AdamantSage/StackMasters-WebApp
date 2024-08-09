@@ -40,7 +40,6 @@ exports.create = async (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
-    // Fetch user by email
     db.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
         if (error) {
             console.log(error);
@@ -52,23 +51,26 @@ exports.login = (req, res) => {
 
         const user = results[0];
 
-        // Compare provided password with hashed password
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
                 console.log(err);
                 return res.status(500).send('Server error');
             }
             if (isMatch) {
-                // Passwords match, user is logged in
-                return res.render('index', {
-                    message: "You have been logged in"
-                })
-                /*Generate a JWT token cant be reached yet
-                const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
-                return res.json({
-                    message: 'Login successful',
-                    token: token
-                });*/
+                const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                
+                // Assuming req.user is populated by your authentication middleware
+                req.user = { id: user.id, role: user.role };
+
+                if (user.role === 'admin') {
+                    res.render('dashboard');
+                } else if (user.role === 'lecturer') {
+                    res.render('index');
+                } else if (user.role === 'student') {
+                    res.render('index');
+                } else {
+                    res.status(403).send('Access denied');
+                }
             } else {
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
