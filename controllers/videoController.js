@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const connection = require('../config/database');
-const compressVideo = require('../utils/videoCompression');
+// In controllers/videoController.js
+const videoCompression = require('../videoCompression'); // Adjust this path if necessary
+
 
 // Upload video function
 const uploadVideo = async (req, res) => {
