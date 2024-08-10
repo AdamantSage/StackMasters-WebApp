@@ -7,18 +7,26 @@ const fs = require('fs');
 // Compress video using FFMPEG
 function compressVideo(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-        ffmpeg(inputPath)
-            .output(outputPath)
+
+         // Use path module to handle paths safely
+         const resolvedInputPath = path.resolve(inputPath);
+         const resolvedOutputPath = path.resolve(outputPath);
+
+        ffmpeg(resolvedInputPath)
+            .output(resolvedOutputPath)
             .videoCodec('libx264')
             .audioCodec('aac')
             .size('1280x720')
             .on('end', () => {
-                fs.unlink(inputPath, (err) => {
+                fs.unlink(resolvedInputPath, (err) => {
                     if (err) reject(err);
-                    resolve(outputPath);
+                    resolve(resolvedOutputPath);
                 });
             })
-            .on('error', (err) => reject(err)) // Handle errors
+            .on('error', (err) => {
+                console.error('Error during compression:', err);
+                reject(err);
+            })
             .run();
     });
 }
