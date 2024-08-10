@@ -1,5 +1,6 @@
 // app.js
 const express = require('express');
+const videoRoutes = require('./routes/videoRoutes');
 require('dotenv').config(); // Load environment variables from .env file
 
 // sets up Express application and define the port number for the server
