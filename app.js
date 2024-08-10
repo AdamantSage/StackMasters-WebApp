@@ -2,6 +2,7 @@
 const express = require('express');
 require('dotenv').config();
 
+// sets up Express application and define the port number for the server
 const app = express();
 const port = process.env.PORT || 5000;
 
