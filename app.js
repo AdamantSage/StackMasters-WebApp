@@ -1,14 +1,17 @@
-const express = require("express");
+// app.js
+const express = require('express');
+require('dotenv').config();
 
 const app = express();
+const port = process.env.PORT || 5000;
 
-//this is a get request
-//req is request. res is respond
-app.get("/", (req, res) => {
-    res.send("<h1>Home Page</h1>")
+// Middleware to handle JSON requests
+app.use(express.json());
 
-});
+// Use video upload routes
+app.use('/api/videos', require('./routes/videoRoutes'));
 
-app.listen(5000, () => {
-    console.log("Server is running on port 5000");
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
