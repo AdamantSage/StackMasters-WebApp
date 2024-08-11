@@ -13,7 +13,7 @@ const db = mysql.createConnection({
 //create is same as register in register views. might have to modify that code to use this one
 // Create a new user
 exports.create = async (req, res) => {
-    const { name,role,email, password, passwordConfirm } = req.body;
+    const { name, role, email, password, passwordConfirm } = req.body;
 
     if (password !== passwordConfirm) {
         return res.status(400).send('Passwords do not match');
@@ -23,18 +23,31 @@ exports.create = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log('Hashed Password:', hashedPassword);
 
-        db.query('INSERT INTO users SET ?', { name,role,email, password: hashedPassword }, (error, results) => {
+        // Insert user into the database
+        db.query('INSERT INTO users SET ?', { name, role, email, password: hashedPassword }, (error, results) => {
             if (error) {
-                console.log(error);
+                console.log('Error inserting user:', error);
                 return res.status(500).send('Error creating user');
             }
-            res.send('User created successfully');
+
+            // Log the details of the newly created user
+            console.log('New User Added: Name:', name, 'Email:', email);
+
+            // Send success response
+            res.status(201).json({
+                message: 'User created successfully',
+                user: {
+                    name,
+                    email
+                }
+            });
         });
     } catch (error) {
         console.log('Hashing error:', error);
         res.status(500).send('Error hashing password');
     }
 };
+
 
 //code used for logging in
 exports.login = (req, res) => {
@@ -110,19 +123,35 @@ exports.update = (req, res) => {
     const id = req.params.id;
     const { name, email, password } = req.body;
 
-    // If password is being updated, hash it
-    let query = 'UPDATE users SET name = ?, email = ?' + (password ? ', password = ?' : '') + ' WHERE id = ?';
-    let values = [name, email];
+    // Initialize the query parts
+    let query = 'UPDATE users SET ';
+    let values = [];
     
+    // Dynamically build the query based on provided fields
+    if (name) {
+        query += 'name = ?, ';
+        values.push(name);
+    }
+    if (email) {
+        query += 'email = ?, ';
+        values.push(email);
+    }
+    if (password) {
+        query += 'password = ?, ';
+    }
+    
+    // Remove the last comma and space, and add the WHERE clause
+    query = query.slice(0, -2) + ' WHERE id = ?';
+    values.push(id);
+
+    // If password is being updated, hash it
     if (password) {
         bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) {
                 console.error(`Error hashing password for user ${id}: ${err}`);
                 return res.status(500).send('Server error');
             }
-            values.push(hashedPassword);
-            values.push(id);
-
+            values.splice(values.length - 1, 0, hashedPassword); // Insert hashed password before the ID
             db.query(query, values, (error, results) => {
                 if (error) {
                     console.error(`Error updating user ${id}: ${error}`);
@@ -133,7 +162,6 @@ exports.update = (req, res) => {
             });
         });
     } else {
-        values.push(id);
         db.query(query, values, (error, results) => {
             if (error) {
                 console.error(`Error updating user ${id}: ${error}`);
@@ -144,6 +172,7 @@ exports.update = (req, res) => {
         });
     }
 };
+
 
 
 // Delete a user
