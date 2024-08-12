@@ -107,5 +107,5 @@ exports.deleteAssignment = (req, res) => {
         }
     });
 };
-//exports the functions
-module.exports = {createAssignment, getAssignment, updateAssignment, deleteAssignment};
+
+  

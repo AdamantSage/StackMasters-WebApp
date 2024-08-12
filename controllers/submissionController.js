@@ -81,5 +81,3 @@ exports.deleteSubmission = (req, res) =>{
         }
     });
 };
-//exports the functions
-module.exports = {createSubmission, getSubmission, deleteSubmission};
