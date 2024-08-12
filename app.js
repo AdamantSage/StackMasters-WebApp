@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   });
 
 // Use video upload routes
-app.use('/api/videos', require('./routes/videoRoutes'));
+app.use('/api/videos', videoRoutes);
 
   //start server and handle errors
   app.listen(port, (err) => {

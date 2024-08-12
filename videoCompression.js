@@ -1,16 +1,19 @@
-// videoCompression.js
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
 const fs = require('fs');
 
-
-// Compress video using FFMPEG
 function compressVideo(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
+        const resolvedInputPath = path.resolve(inputPath);
+        const resolvedOutputPath = path.resolve(outputPath);
 
-         // Use path module to handle paths safely
-         const resolvedInputPath = path.resolve(inputPath);
-         const resolvedOutputPath = path.resolve(outputPath);
+        // Ensure the output directory exists
+        const outputDir = path.dirname(resolvedOutputPath);
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir, { recursive: true });
+        }
+
+        console.log(`Compressing video from ${resolvedInputPath} to ${resolvedOutputPath}`);
 
         ffmpeg(resolvedInputPath)
             .output(resolvedOutputPath)
@@ -18,8 +21,12 @@ function compressVideo(inputPath, outputPath) {
             .audioCodec('aac')
             .size('1280x720')
             .on('end', () => {
+                console.log('Compression finished successfully');
                 fs.unlink(resolvedInputPath, (err) => {
-                    if (err) reject(err);
+                    if (err) {
+                        console.error('Error deleting original file:', err);
+                        reject(err);
+                    }
                     resolve(resolvedOutputPath);
                 });
             })

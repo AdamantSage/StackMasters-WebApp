@@ -1,57 +1,58 @@
 const path = require('path');
 const fs = require('fs');
 const connection = require('../config/database');
-// In controllers/videoController.js
-const videoCompression = require('../videoCompression'); // Adjust this path if necessary
+const compressVideo = require('../videoCompression'); // Adjust this path if necessary
 
-
-// Upload video function
 const uploadVideo = async (req, res) => {
     if (!req.file) {
+        console.error('No file uploaded.');
         return res.status(400).send('No file uploaded.');
     }
 
-    let { filename, path: filePath, mimetype, size } = req.file;
-    filePath = `uploads/${filename}`;
+    let { filename } = req.file;
+    const filePath = `uploads/${filename}`;
 
-    // SQL query to insert video metadata
-    const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
-    const values = [filename, filePath, mimetype, size];
+    console.log('File uploaded:', filename);
+
+    // Insert video metadata
+    const query = 'INSERT INTO videos (original_path, compressed_path, compression_status) VALUES (?, ?, ?)';
+    const values = [filePath, null, 'pending'];
 
     connection.query(query, values, async (err, results) => {
         if (err) {
-            return res.status(500).send({
-                message: 'Error uploading file',
-                error: err.message
-            });
+            console.error('Error saving video metadata:', err);
+            return res.status(500).send({ message: 'Error saving video metadata.', error: err.message });
         }
 
-        // Define input and output paths for compression
         const inputPath = path.join(__dirname, '../uploads', filename);
-        const outputPath = path.join(__dirname, '../uploads/compressed', filename);
+        const outputPath = path.join(__dirname, '../compressed', filename);
 
+        console.log(`Compressing video from ${inputPath} to ${outputPath}`);
         try {
-            // Ensure compressed directory exists
-            const compressedDir = path.join(__dirname, '../uploads/compressed');
-            if (!fs.existsSync(compressedDir)) {
-                fs.mkdirSync(compressedDir, { recursive: true });
-            }
-
-            // Compress the video
             await compressVideo(inputPath, outputPath);
             fs.unlinkSync(inputPath); // Delete original file after compression
 
-            res.status(201).send({
-                message: 'File uploaded and compressed successfully',
-                file: req.file
+            // Update video metadata
+            const updateQuery = 'UPDATE videos SET compressed_path = ?, compression_status = ? WHERE id = ?';
+            const updateValues = [outputPath, 'completed', results.insertId];
+
+            connection.query(updateQuery, updateValues, (updateErr) => {
+                if (updateErr) {
+                    console.error('Error updating video metadata:', updateErr);
+                    return res.status(500).send({ message: 'Error updating video metadata.', error: updateErr.message });
+                }
+
+                console.log('Video processed and metadata updated.');
+                res.status(201).send({ message: 'File uploaded and compressed successfully', file: req.file });
             });
         } catch (error) {
-            res.status(500).send('Error compressing video.');
+            console.error('Error compressing video:', error);
+            res.status(500).send({ message: 'Error compressing video.', error: error.message });
         }
     });
 };
 
-// Retrieve video metadata function
+
 const retrieveVideo = (req, res) => {
     const videoId = req.params.id; // Retrieve video by its ID
 
