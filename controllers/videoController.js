@@ -25,7 +25,7 @@ const uploadVideo = async (req, res) => {
         }
 
         const inputPath = path.join(__dirname, '../uploads', filename);
-        const outputPath = path.join(__dirname, '../compressed', filename);
+        const outputPath = path.join(__dirname, '../uploads/compressed', filename);
 
         console.log(`Compressing video from ${inputPath} to ${outputPath}`);
         try {
