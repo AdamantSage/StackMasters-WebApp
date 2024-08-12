@@ -54,7 +54,7 @@ exports.getAssignment = (req, res) => {
             return res.status(404).json({ message: "Assignment not found." });
         } else {
             console.log(results); // Log the results of the query
-            // Send the assignment data as JSON with status code 200
+            // Sends the assignment data as JSON with status code 200
             return res.status(200).json(results[0]);
         }
     });

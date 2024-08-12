@@ -6,7 +6,7 @@ const{
     createSubmission,
     getSubmission,
     deleteSubmission
-} = require('./controllers/submissionController');
+} = require('../controllers/submissionController');
 const { get } = require("./assignmentsRoutes");
 //This is a request to this route path to executed
 //This is used to create a new submission 
