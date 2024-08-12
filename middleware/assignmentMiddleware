@@ -2,17 +2,17 @@ const validAssignmentInfo = (req, res, next) => {
     console.log(req.body);
     const {
         assignmentID,
-        ModuleCode,
+        moduleCode,
         assignmentName,
         uploadDate,
         dueDate,
         assignmentInfo
     } = req.body;
-    if(!assignmentID || !ModuleCode || !assignmentName || !uploadDate ||
+    if(!assignmentID || !moduleCode || !assignmentName || !uploadDate ||
         !dueDate || !assignmentInfo){
             return res.status(400).json({message: 'Missing required fields'});
         }
     next();
 }
-
+//exports the function
 module.exports = {validAssignmentInfo};
