@@ -30,23 +30,52 @@ exports.create = async (req, res) => {
                 return res.status(500).send('Error creating user');
             }
 
-            // Log the details of the newly created user
+            const userId = results.insertId; // Get the ID of the newly inserted user
             console.log('New User Added: Name:', name, 'Email:', email);
 
-            // Send success response
-            res.status(201).json({
-                message: 'User created successfully',
-                user: {
-                    name,
-                    email
-                }
-            });
+            // Determine the subtype table and insert the user ID
+            let insertQuery;
+
+            switch (role) {
+                case 'student':
+                    insertQuery = 'INSERT INTO student SET ?';
+                    break;
+                case 'lecturer':
+                    insertQuery = 'INSERT INTO lecturer SET ?';
+                    break;
+                case 'admin':
+                    insertQuery = 'INSERT INTO admin SET ?';
+                    break;
+                default:
+                    return res.status(400).send('Invalid role');
+            }
+
+            if (insertQuery) {
+                db.query(insertQuery, { user_id: userId }, (err) => {
+                    if (err) {
+                        console.log('Error inserting into subtype table:', err);
+                        return res.status(500).send('Error creating user subtype');
+                    }
+
+                    // Send success response
+                    res.status(201).json({
+                        message: 'User created successfully',
+                        user: {
+                            name,
+                            email
+                        }
+                    });
+                });
+            } else {
+                res.status(400).send('Invalid role');
+            }
         });
     } catch (error) {
         console.log('Hashing error:', error);
         res.status(500).send('Error hashing password');
     }
 };
+
 
 
 //code used for logging in
