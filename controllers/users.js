@@ -77,6 +77,45 @@ exports.create = async (req, res) => {
 };
 
 
+/* CODE is a more efficient version, will use it when its time for frontend with react
+exports.login = (req, res) => {
+    const { email, password } = req.body;
+
+    db.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
+        if (error) {
+            console.error('Database query error:', error);
+            return res.status(500).send('Server error');
+        }
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const user = results[0];
+
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+                console.error('Bcrypt comparison error:', err);
+                return res.status(500).send('Server error');
+            }
+            if (isMatch) {
+                const token = jwt.sign(
+                    { id: user.id, email: user.email, role: user.role },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '1h' }
+                );
+
+                res.json({
+                    message: 'Login successful',
+                    token,
+                    role: user.role
+                });
+            } else {
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
+        });
+    });
+};
+*/
 
 //code used for logging in
 exports.login = (req, res) => {
@@ -95,7 +134,7 @@ exports.login = (req, res) => {
 
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
-                console.log(err);
+                console.error('Bcrypt comparison error:',err);
                 return res.status(500).send('Server error');
             }
             if (isMatch) {
