@@ -1,14 +1,6 @@
+
 const express = require('express');
-const videoRoutes = require('./routes/videoRoutes');
-require('dotenv').config();
-
 //This code will upload file to a local folder for now 
-const multer = require('multer');
-const path = require('path');
-
-const mysql = require('mysql');
-
-
 const app = express();
 const port = process.env.PORT || 5000;
 
