@@ -1,21 +1,13 @@
 const express = require("express");
 const path = require("path");
-const mysql = require("mysql");
-const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
+const db = require("./db");  // Import the db module
+const dotenv = require("dotenv");
 
-//dotenv is what we will use to store passwords basically, hence .env
-dotenv.config({path: './.env'});
+
+dotenv.config({ path: './.env' });
 
 const app = express();
-
-const db = mysql.createConnection({
-//IMP: i can put ip address of cloud server here when its time to move to cloud
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database:process.env.DATABASE
-});
 
 //we will put files like css/js for frontend we might want to use
 const publicDirectory = path.join(__dirname, './public');
@@ -31,14 +23,6 @@ app.use(express.json());
 app.set('view engine', 'hbs');
 
 
-//connecting to the db
-db.connect ( (error) => {
-    if(error) {
-        console.log(error)
-    } else{
-        console.log("MYSQL DB Connected!")
-    }
-})
 
 // Error handling middleware
 app.use((err, req, res, next) => {
