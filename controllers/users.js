@@ -3,12 +3,9 @@ const mysql = require('mysql');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 
-const db = mysql.createConnection({
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE
-});
+//added this to avoid recreating database connection from scratch
+//need to test if it still works properly
+const db = require("../db");
 
 //create is same as register in register views. might have to modify that code to use this one
 // Create a new user

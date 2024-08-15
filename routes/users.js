@@ -4,6 +4,7 @@ const router = express.Router();
 const usersController = require('../controllers/users');
 const authenticateToken = require('../middleware/auth');
 const checkRole = require('../middleware/role');
+const { exportMarksToExcel } = require('../models/marks'); //for marks
 
 // Create a new user
 router.post('/create', usersController.create);
@@ -34,4 +35,14 @@ router.get('/dashboard', authenticateToken, checkRole(['admin', 'lecturer', 'stu
         res.status(403).send('Access denied');
     }
 });
+// Route to get marks exported
+//only admin and lecturer can export marks
+router.get('/exportMarks', authenticateToken, checkRole(['admin', 'lecturer']), async (req, res) => {
+    try {
+        await exportMarksToExcel(res);
+    } catch (error) {
+        res.status(500).send('Error exporting marks data.');
+    }
+});
+
 module.exports = router;
