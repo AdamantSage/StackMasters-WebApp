@@ -4,8 +4,11 @@
   "description": "Overview\r This project consists of making an HMS T&L System that has a web application and mobile application supported by a unified backend with robust backend to supprt secure user management and data storage.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "jest",  
+    "lint": "eslint .",
+    "build": "echo 'Build step'", 
+    "deploy": "echo 'Deploy step'"
   },
   "keywords": [],
   "author": "",
