@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 //need to test if it still works properly
 const db = require("../db");
 
-//creates is same as register in register views. might have to modify that code to use this one
+//create is same as register in register views. might have to modify that code to use this one
 // Create a new user
 exports.create = async (req, res) => {
     const { name, role, email, password, passwordConfirm } = req.body;
