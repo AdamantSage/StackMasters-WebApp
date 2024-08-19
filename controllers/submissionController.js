@@ -1,33 +1,27 @@
-const mysql = require("mysql");
+const Submission = require('../models/Submission');
 
-const db = mysql.createConnection({
-    //IMP: You can put the IP address of the cloud server here when it's time to move to the cloud
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE
-});
+const db = require('../config/db'); // Assuming you have a db connection file
 // Create a new submission into the db
 exports.createSubmission = (req, res) =>{
     console.log(req.body);// Log the data sent by the client
     // Extract specific fields from the request body
     const{
+        submissionID,
         userID,
         assignmentID,
         moduleCode,
         submissionDate,
-        videoURL,
-        grade
+        videoURL
     } = req.body;
     // Execute the SQL query to insert a new submission into the database
-    db.query('INSERT INTO submission SET ?', {
-        userID : userID,
-        assignmentID : assignmentID,
-        moduleCode : moduleCode,
-        submissionDate : submissionDate,
-        videoURL : videoURL,
-        grade : grade
-    }, (err, results) => {
+    Submission.create({
+        submissionID,
+        userID,
+        assignmentID,
+        moduleCode,
+        submissionDate,
+        videoURL
+        }, (err, results) => {
         if(err){
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500
@@ -60,9 +54,63 @@ exports.getSubmission = (req, res) =>{
         }
     });
 }
+
+//Function to re-submit assignment
+exports.updateSubmissionStudent = (req, res) =>{
+    console.log(req.body);// Log the data sent by the client
+    //Extract specific fields from the request body
+    const{
+        submissionDate,
+        videoURL,
+        submissionID
+    } = req.body;
+    //Execute sql query to update the assignment submission done by the student
+    db.query('UPDATE submissions SET submissionDate = ?, videoURL = ? WHERE submissionID',
+        [submissionDate, videoURL, submissionID], (err, results) => {
+            if(err){
+                console.log(err);//Log the error occured
+                //sends a JSON response with error message and status code 500
+                return res.status(500).json({message: "Error occured while re-submitting"});
+            }else if(results.affectedRows == 0){
+                //sends a JSON response with status code 404 showing no rows were affected
+                return res.status(404).json({message: "Submission not found"});
+            }else{
+                console.log(results);//Logs the results of the updated submission
+                //sends a JSON response that submission was updated 
+                return res.status(200).json({message: "Submission updated"});
+            }
+        });
+}
+//Function to grade submission
+exports.updateSubmissionLecturer = (req, res) =>{
+    console.log(req.body);// Log the data sent by the client
+    // Extract specific fields from the request body
+    const{
+        grade,
+        feedback,
+        submissionID
+    } = req.body;
+    //Execute sql query to update submission
+    db.query('UPDATE  Submission SET grade = ?, feedback = ? WHERE submissionID = ?',
+        [grade, feedback, submissionID], (err, results) => {
+            if(err){
+                console.log(err);// Log any errors
+                // Send a JSON response with error message and status code 500
+                return res.status(500).json({message: "Error occured while grading submission"});
+            }else if(results.affectedRows == 0){
+                // If no rows were affected, send a JSON response with status code 404
+                return res.status(404).json({message: "Submission not found"});
+            }else{
+                console.log(results);// Log the results of the query
+                // Send a JSON response with success message and status code 200
+                return res.status(200).json({message: "Submission updated"});
+            }
+        });
+};
+
 //Deletes a specific submission based on the specific user
 exports.deleteSubmission = (req, res) =>{
-    const {assignmentID, userID} = req.params.id;// Retrieve the assignment ID and user ID from the URL
+    const {assignmentID, userID} = req.params;// Retrieve the assignment ID and user ID from the URL
     console.log(`Deleting submission with ID: ${assignmentID}, ${userID}`);
     // Execute the SQL query to delete the submission with the given IDs
     db.query('DELETE FROM submission WHERE assignmentID = ? && userID = ?', 

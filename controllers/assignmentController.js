@@ -1,12 +1,6 @@
-const mysql = require("mysql");
+const Assignment = require('../models/Assignment');
 
-const db = mysql.createConnection({
-    //IMP: You can put the IP address of the cloud server here when it's time to move to the cloud
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE
-});
+const db = require('../config/db'); // Assuming you have a db connection file
 // Create a new assignment
 exports.createAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
@@ -20,13 +14,13 @@ exports.createAssignment = (req, res) => {
         assignmentInfo
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
-    db.query('INSERT INTO assignments SET ?', {
-        assignmentID: assignmentID,
-        moduleCode: moduleCode,
-        assignmentName: assignmentName,
-        uploadDate: uploadDate,
-        dueDate: dueDate,
-        assignmentInfo: assignmentInfo
+    Assignment.create({
+        assignmentID,
+        moduleCode,
+        assignmentName,
+        uploadDate,
+        dueDate,
+        assignmentInfo
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
