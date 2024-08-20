@@ -1,8 +1,9 @@
 
 const express = require('express');
+const mysql = require('mysql2');
+
 //This code will upload file to a local folder for now 
 const app = express();
-const port = process.env.PORT || 5000;
 
 // Middleware to handle JSON requests
 app.use(express.json());
@@ -19,8 +20,11 @@ app.use('/routes', require('./routes/videoRoutes'));
     }
 });
 const upload = multer({ storage: videoStorage });*/
+app.get('/', function(req, res){
+    res.send("hey there, it works atm");
+});
 
 // Start the server
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(5000, function(){
+    console.log("Server running on port 5000");
 });
