@@ -39,44 +39,63 @@ const streamVideo = (req, res) => {
             const videoSize = fs.statSync(videoPath).size;
             const range = req.headers.range;
 
-            // Check for Range header
             if (!range) {
-                console.error('Range header not found');
-                return res.status(416).send('Requires Range header');
-            }
+                // No Range header, send entire video
+                const headers = {
+                    "Content-Length": videoSize,
+                    "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
+                };
 
-            // Parse range header
-            const parts = range.replace(/bytes=/, "").split("-");
-            const start = parseInt(parts[0], 10);
-            const end = Math.min(videoSize - 1, parts[1] ? parseInt(parts[1], 10) : videoSize - 1);
+                res.writeHead(200, headers);
 
-            if (start >= videoSize) {
-                return res.status(416).send('Requested range not satisfiable');
-            }
+                const videoStream = fs.createReadStream(videoPath);
 
-            const contentLength = end - start + 1;
-            const headers = {
-                "Content-Range": `bytes ${start}-${end}/${videoSize}`,
-                "Accept-Ranges": "bytes",
-                "Content-Length": contentLength,
-                "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
-            };
-
-            res.writeHead(206, headers);
-
-            const videoStream = fs.createReadStream(videoPath, { start, end });
-
-            videoStream.on('open', () => {
-                videoStream.pipe(res);
-            });
-
-            videoStream.on('error', (streamErr) => {
-                console.error(`Error streaming video: ${streamErr.message}`);
-                res.status(500).send({
-                    message: 'Error streaming video',
-                    error: streamErr.message
+                videoStream.on('open', () => {
+                    videoStream.pipe(res);
                 });
-            });
+
+                videoStream.on('error', (streamErr) => {
+                    console.error(`Error streaming video: ${streamErr.message}`);
+                    res.status(500).send({
+                        message: 'Error streaming video',
+                        error: streamErr.message
+                    });
+                });
+
+            } else {
+                // Handle Range request
+                const parts = range.replace(/bytes=/, "").split("-");
+                const start = parseInt(parts[0], 10);
+                const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
+
+                if (start >= videoSize || start < 0 || end >= videoSize) {
+                    return res.status(416).send('Requested range not satisfiable');
+                }
+
+                const contentLength = end - start + 1;
+                const headers = {
+                    "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": contentLength,
+                    "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
+                };
+
+                res.writeHead(206, headers);
+
+                const videoStream = fs.createReadStream(videoPath, { start, end });
+
+                videoStream.on('open', () => {
+                    videoStream.pipe(res);
+                });
+
+                videoStream.on('error', (streamErr) => {
+                    console.error(`Error streaming video: ${streamErr.message}`);
+                    res.status(500).send({
+                        message: 'Error streaming video',
+                        error: streamErr.message
+                    });
+                });
+            }
 
         } catch (fileErr) {
             console.error(`Error accessing video file: ${fileErr.message}`);
@@ -133,7 +152,10 @@ console.log("file uploaded successfuly, locally.");
 };
 
 // Catch possible multer errors (like file size limits)
-/*Multer Error Handling: The multerErrorHandler middleware captures specific errors related to file uploads, such as exceeding file size limits or invalid file types. It logs these errors and sends a clear response back to the client.*/
+/*Multer Error Handling: The multerErrorHandler middleware captures specific errors related 
+to file uploads, such as exceeding file size limits or invalid file types. It logs these errors
+ and sends a clear response back 
+to the client.*/
 
 const multerErrorHandler = (err, req, res, next) => {
     if (err instanceof multer.MulterError) {
