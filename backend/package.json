@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon app.js",
-    "test": "jest",  
+    "test": "jest",
     "lint": "eslint .",
-    "build": "echo 'Build step'", 
+    "build": "echo 'Build step'",
     "deploy": "echo 'Deploy step'"
   },
   "keywords": [],
@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "login": "^0.8.0",
     "mysql": "^2.18.1",
+    "mysql2": "^3.11.0",
     "nodemon": "^3.1.4"
   }
 }
