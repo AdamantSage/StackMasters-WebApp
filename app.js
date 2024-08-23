@@ -1,20 +1,13 @@
 const express = require("express");
 const path = require("path");
-const mysql = require("mysql");
+const bodyParser = require("body-parser");
+const db = require("./config/db");  // Import the db module
 const dotenv = require("dotenv");
 
 //dotenv is what we will use to store passwords basically, hence .env
 dotenv.config({path: './.env'});
 
 const app = express();
-
-const db = mysql.createConnection({
-    //IMP: i can put ip address of cloud server here when its time to move to cloud
-        host: process.env.DATABASE_HOST,
-        user: process.env.DATABASE_USER,
-        password: process.env.DATABASE_PASSWORD,
-        database:process.env.DATABASE
-    });
 
 //this is a get request
 //req is request. res is respond
@@ -31,10 +24,15 @@ const publicDirectory = path.join(__dirname, './public');
 app.use(express.static(publicDirectory));
 //will help with views
 
-app.use(express.urlencoded({ extended: false}));
+app.use(express.urlencoded({ extended: true}));
 app.use(express.json());
 
 app.set('view engine', 'hbs');
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
 
 //connecting to the db
 db.connect ( (error) => {
@@ -45,7 +43,9 @@ db.connect ( (error) => {
     }
 });
 
+//routes
 app.use('/', require('./routes/assignmentsRoutes'));
+app.use('/', require('./routes/submissionRoutes'));
 
 app.listen(5000, (err) => {
     if(err){
