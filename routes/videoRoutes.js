@@ -8,12 +8,4 @@ router.post('/controllers', upload.single('file'), videoController.uploadVideo, 
 router.get('/controllers/:id', videoController.retrieveVideo);
 
 router.get('/stream/:id', videoController.streamVideo);
-
-/*
-router.post('/controllers', videoController.uploadVideo);
-router.get('/videos/:id', videoController.retrieveVideo);*/
-//router.post('/videos', videoController.createVideo);
-//router.put('/videos/:id', videoController.updateVideo);
-//router.delete('/videos/:id', videoController.deleteVideo);
-
 module.exports = router;
