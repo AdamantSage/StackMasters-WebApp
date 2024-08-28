@@ -1,8 +1,9 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-const db = require("./db");  // Import the db module
+const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
+require('dotenv').config();
 
 dotenv.config({ path: './.env' });
 

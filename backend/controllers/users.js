@@ -1,11 +1,11 @@
 // controllers/users.js
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 
 //added this to avoid recreating database connection from scratch
 //need to test if it still works properly
-const db = require("../db");
+const db = require("../config/database");
 
 //create is same as register in register views. might have to modify that code to use this one
 // Create a new user

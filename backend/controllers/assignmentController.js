@@ -1,6 +1,6 @@
 const Assignment = require('../models/Assignment');
 
-const db = require('../config/db'); // Assuming you have a db connection file
+const db = require('../config/database'); // Assuming you have a db connection file
 // Create a new assignment
 exports.createAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
