@@ -38,8 +38,7 @@ exports.getSubmission = (req, res) =>{
     const {assignmentID, userID} = req.params; // Retrieve the assignment ID and user ID from the URL
     console.log(`Fetching submission with ID: ${assignmentID}, ${userID}`);
     // Execute the SQL query to fetch the submission with the given ID's
-    db.query('SELECT * FROM submission WHERE assignmentID = ? && userID = ?',
-    [assignmentID, userID], (err, results) => {
+    Submission.select(assignmentID, userID, (err, results) => {
         if(err){
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -66,8 +65,7 @@ exports.updateSubmissionStudent = (req, res) =>{
         submissionID
     } = req.body;
     //Execute sql query to update the assignment submission done by the student
-    db.query('UPDATE submissions SET submissionDate = ?, videoURL = ? WHERE submissionID',
-        [submissionDate, videoURL, submissionID], (err, results) => {
+    Submission.updateStudent({submissionDate, videoURL, submissionID}, (err, results) => {
             if(err){
                 console.log(err);//Log the error occured
                 //sends a JSON response with error message and status code 500 which is a server error
@@ -93,8 +91,7 @@ exports.updateSubmissionLecturer = (req, res) =>{
         submissionID
     } = req.body;
     //Execute sql query to update submission
-    db.query('UPDATE  Submission SET grade = ?, feedback = ? WHERE submissionID = ?',
-        [grade, feedback, submissionID], (err, results) => {
+    Submission.updateLecture({grade, feedback, submissionID}, (err, results) => {
             if(err){
                 console.log(err);// Log any errors
                 // Send a JSON response with error message and status code 500 which is a server error

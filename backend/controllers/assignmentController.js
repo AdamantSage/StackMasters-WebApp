@@ -37,8 +37,8 @@ exports.createAssignment = (req, res) => {
 exports.getAssignment = (req, res) => {
     const assignmentID = req.params; // Retrieve the assignment ID from the URL
     console.log(`Fetching assignment with ID: ${assignmentID}`);
-    // Execute the SQL query to fetch the assignment with the given ID
-    db.query('SELECT * FROM assignments WHERE assignmentID = ?', [assignmentID], (err, results) => {
+    // Execute the SQL query to fetch the assignment with the given ID from the model
+    Assignment.select(assignmentID, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -64,9 +64,12 @@ exports.updateAssignment = (req, res) => {
         dueDate,
         assignmentInfo
     } = req.body;
-    // Execute the SQL query to update the assignment with the given ID
-    db.query('UPDATE assignments SET assignmentName = ?, dueDate = ?, assignmentInfo = ? WHERE assignmentID = ?',
-       [assignmentName, dueDate, assignmentInfo, assignmentID], (err, results) => {
+    Assignment.update({
+        assignmentID,
+        assignmentName,
+        dueDate,
+        assignmentInfo
+    }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -87,8 +90,8 @@ exports.deleteAssignment = (req, res) => {
     const assignmentID = req.params; // Retrieve the assignment ID from the URL
     console.log(`Deleting assignment with ID: ${assignmentID}`);
 
-    // Execute the SQL query to delete the assignment with the given ID
-    db.query('DELETE FROM assignments WHERE assignmentID = ?', [assignmentID], (err, results) => {
+    // Execute the SQL query to delete the assignment with the given ID from the model
+    Assignment.delete([assignmentID], (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
