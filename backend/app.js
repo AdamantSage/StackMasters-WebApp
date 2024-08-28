@@ -3,9 +3,8 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
-require('dotenv').config();
 
-dotenv.config({ path: './.env' });
+dotenv.config();
 
 const app = express();
 

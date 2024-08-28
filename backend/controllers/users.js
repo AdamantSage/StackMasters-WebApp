@@ -10,6 +10,9 @@ const db = require("../config/database");
 //create is same as register in register views. might have to modify that code to use this one
 // Create a new user
 exports.create = async (req, res) => {
+
+    console.log('Request body:', req.body);
+    
     const { name, role, email, password, passwordConfirm } = req.body;
 
     if (password !== passwordConfirm) {
