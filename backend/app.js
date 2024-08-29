@@ -1,7 +1,8 @@
 const express = require("express");
 const path = require("path");
+const http = require('http');
 //const bodyParser = require("body-parser");
-const db = require("./db");  // Import the db module
+const db = require("./config/db");  // Import the db module
 const dotenv = require("dotenv");
 const { Server } = require('socket.io')
 const socketHandler = require('./NotificationWebSocket');
@@ -34,21 +35,20 @@ app.use((err, req, res, next) => {
 });
 
 //define routes
-app.use('/', require('./routes/pages'));
-app.use('/users', require('./routes/users'));
+//app.use('/', require('./routes/pages'));
+//app.use('/users', require('./routes/users'));
 app.use('/', require('./routes/assignmentsRoutes'));
 app.use('/', require('./routes/submissionRoutes'));
 
 
-app.listen(5000, () => {
+app.listen(5001, () => {
     console.log("Server is running on port 5000");
+});
 //connecting to the db
-db.connect ( (error) => {
+/*db.connect ( (error) => {
     if(error) {
         console.log(error)
     } else{
         console.log("MYSQL DB Connected!")
     }
-    });
-});
-
+    });*/

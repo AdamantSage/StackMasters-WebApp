@@ -1,4 +1,4 @@
-const Submission = require('../models/Submission');
+const Submission = require('../models/submission');
 
 const db = require('../config/db'); // Assuming you have a db connection file
 // Create a new submission into the db

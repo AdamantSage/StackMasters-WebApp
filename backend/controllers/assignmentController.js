@@ -1,4 +1,4 @@
-const Assignment = require('../models/Assignment');
+const Assignment = require('../models/assignment');
 
 const db = require('../config/db'); // Assuming you have a db connection file
 // Create a new assignment
