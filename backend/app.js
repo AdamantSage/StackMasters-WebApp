@@ -44,11 +44,4 @@ app.use('/', require('./routes/submissionRoutes'));
 app.listen(5001, () => {
     console.log("Server is running on port 5000");
 });
-//connecting to the db
-/*db.connect ( (error) => {
-    if(error) {
-        console.log(error)
-    } else{
-        console.log("MYSQL DB Connected!")
-    }
-    });*/
+
