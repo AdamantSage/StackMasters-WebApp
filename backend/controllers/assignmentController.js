@@ -6,21 +6,23 @@ exports.createAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {
-        assignmentID,
-        moduleCode,
-        assignmentName,
-        uploadDate,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        module_code,
+        assign_name,
+        upload_date,
+        due_date,
+        assign_desc,
+        user_id
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.create({
-        assignmentID,
-        moduleCode,
-        assignmentName,
-        uploadDate,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        module_code,
+        assign_name,
+        upload_date,
+        due_date,
+        assign_desc,
+        user_id
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
@@ -35,10 +37,10 @@ exports.createAssignment = (req, res) => {
 };
 // Retrieve a specific assignment based on ID
 exports.getAssignment = (req, res) => {
-    const assignmentID = req.params; // Retrieve the assignment ID from the URL
-    console.log(`Fetching assignment with ID: ${assignmentID}`);
+    const assignment_id = req.params; // Retrieve the assignment ID from the URL
+    console.log(`Fetching assignment with ID: ${assignment_id}`);
     // Execute the SQL query to fetch the assignment with the given ID from the model
-    Assignment.select(assignmentID, (err, results) => {
+    Assignment.select(assignment_id, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -59,16 +61,16 @@ exports.updateAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {
-        assignmentID,
-        assignmentName,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        assign_name,
+        due_date,
+        assign_desc
     } = req.body;
     Assignment.update({
-        assignmentID,
-        assignmentName,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        assign_name,
+        due_date,
+        assign_desc
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
@@ -87,11 +89,11 @@ exports.updateAssignment = (req, res) => {
 };
 //Defines the function which is exported and used as a route handler
 exports.deleteAssignment = (req, res) => {
-    const assignmentID = req.params; // Retrieve the assignment ID from the URL
-    console.log(`Deleting assignment with ID: ${assignmentID}`);
+    const assignment_id = req.params; // Retrieve the assignment ID from the URL
+    console.log(`Deleting assignment with ID: ${assignment_id}`);
 
     // Execute the SQL query to delete the assignment with the given ID from the model
-    Assignment.delete([assignmentID], (err, results) => {
+    Assignment.delete([assignment_id], (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
