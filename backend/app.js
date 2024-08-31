@@ -3,10 +3,16 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const db = require("./db");  // Import the db module
 const dotenv = require("dotenv");
+const { Server } = require('socket.io')
+const socketHandler = require('./NotificationWebSocket');
 
 dotenv.config({ path: './.env' });
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+socketHandler(io);
 
 //we will put files like css/js for frontend we might want to use
 const publicDirectory = path.join(__dirname, './public');

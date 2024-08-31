@@ -1,4 +1,4 @@
-const Assignment = require('../models/Assignment');
+const Assignment = require('../models/assignment');
 
 const db = require('../config/db'); // Assuming you have a db connection file
 // Create a new assignment
@@ -6,21 +6,49 @@ exports.createAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {
-        assignmentID,
-        moduleCode,
-        assignmentName,
-        uploadDate,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        module_code,
+        assign_name,
+        upload_date,
+        due_date,
+        assign_desc,
+        user_id
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.create({
-        assignmentID,
-        moduleCode,
-        assignmentName,
-        uploadDate,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        module_code,
+        assign_name,
+        upload_date,
+        due_date,
+        assign_desc,
+        user_id
+    }, (err, results) => {
+        if (err) {
+            console.log(err); // Log any errors
+            // Send a JSON response with error message and status code 500 which is a server error
+            return res.status(500).json({ message: "Error occurred while creating assignment." });
+        } else {
+            console.log(results); // Log the results of the query
+            // Send a JSON response with success message and status code 201 which means it create the assignment
+            return res.status(201).json({ message: "Assignment created successfully." });
+        }
+    });
+};
+
+exports.createUserAssignment = (req, res) => {
+    console.log(req.body); // Log the data sent by the client
+    // Extract specific fields from the request body
+    const {
+        user_id,
+        assignment_id,
+        module_code
+    } = req.body;
+    // Execute the SQL query to insert a new assignment into the database
+    Assignment.createUserAssignment({
+        user_id,
+        assignment_id,
+        module_code
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
@@ -35,10 +63,10 @@ exports.createAssignment = (req, res) => {
 };
 // Retrieve a specific assignment based on ID
 exports.getAssignment = (req, res) => {
-    const assignmentID = req.params; // Retrieve the assignment ID from the URL
-    console.log(`Fetching assignment with ID: ${assignmentID}`);
-    // Execute the SQL query to fetch the assignment with the given ID
-    db.query('SELECT * FROM assignments WHERE assignmentID = ?', [assignmentID], (err, results) => {
+    const assignment_id = req.params; // Retrieve the assignment ID from the URL
+    console.log(`Fetching assignment with ID: ${assignment_id}`);
+    // Execute the SQL query to fetch the assignment with the given ID from the model
+    Assignment.select(assignment_id, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -59,14 +87,46 @@ exports.updateAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {
-        assignmentID,
-        assignmentName,
-        dueDate,
-        assignmentInfo
+        assignment_id,
+        assign_name,
+        due_date,
+        assign_desc
     } = req.body;
-    // Execute the SQL query to update the assignment with the given ID
-    db.query('UPDATE assignments SET assignmentName = ?, dueDate = ?, assignmentInfo = ? WHERE assignmentID = ?',
-       [assignmentName, dueDate, assignmentInfo, assignmentID], (err, results) => {
+    Assignment.update({
+        assignment_id,
+        assign_name,
+        due_date,
+        assign_desc
+    }, (err, results) => {
+        if (err) {
+            console.log(err); // Log any errors
+            // Send a JSON response with error message and status code 500 which is a server error
+            return res.status(500).json({ message: "Error occurred while updating assignment." });
+        } else if (results.affectedRows === 0) {
+            // If no rows were affected, send a JSON response with status code 404 which means it could not find
+            //the given data in the server
+            return res.status(404).json({ message: "Assignment not found." });
+        } else {
+            console.log(results); // Log the results of the query
+            // Send a JSON response with success message and status code 200 which means the request is successful
+            return res.status(200).json({ message: "Assignment updated successfully." });
+        }
+    });
+};
+
+exports.updateUserAssignment = (req, res) => {
+    console.log(req.body); // Log the data sent by the client
+    // Extract specific fields from the request body
+    const {
+        user_id,
+        assignment_id,
+        module_code
+    } = req.body;
+    Assignment.updateUserAssignment({
+        assignment_id,
+        user_id,
+        module_code
+    }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -84,11 +144,11 @@ exports.updateAssignment = (req, res) => {
 };
 //Defines the function which is exported and used as a route handler
 exports.deleteAssignment = (req, res) => {
-    const assignmentID = req.params; // Retrieve the assignment ID from the URL
-    console.log(`Deleting assignment with ID: ${assignmentID}`);
+    const assignment_id = req.params; // Retrieve the assignment ID from the URL
+    console.log(`Deleting assignment with ID: ${assignment_id}`);
 
-    // Execute the SQL query to delete the assignment with the given ID
-    db.query('DELETE FROM assignments WHERE assignmentID = ?', [assignmentID], (err, results) => {
+    // Execute the SQL query to delete the assignment with the given ID from the model
+    Assignment.delete([assignment_id], (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -104,5 +164,25 @@ exports.deleteAssignment = (req, res) => {
         }
     });
 };
+exports.deleteUserAssignment = (req, res) => {
+    const {user_id, assignment_id} = req.params; // Retrieve the IDs from the URL
+    console.log(`Deleting assignment with IDs: ${user_id}, ${assignment_id}`);
 
+    // Execute the SQL query to delete the assignment with the given ID from the model
+    Assignment.deleteUserAssignment([user_id,assignment_id], (err, results) => {
+        if (err) {
+            console.log(err); // Log any errors
+            // Send a JSON response with error message and status code 500 which is a server error
+            return res.status(500).json({ message: "Error occurred while deleting assignment." });
+        } else if (results.affectedRows === 0) {
+            // If no rows were affected, send a JSON response with status code 404 which means it could not find
+            //the given data in the server
+            return res.status(404).json({ message: "Assignment not found." });
+        } else {
+            console.log(results); // Log the results of the query
+            // Send a JSON response with success message and status code 200 which means the request is successful
+            return res.status(200).json({ message: "Assignment deleted successfully." });
+        }
+    });
+};
   
