@@ -1,12 +1,12 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-const db = require("./db");  // Import the db module
+const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
 const { Server } = require('socket.io')
 const socketHandler = require('./NotificationWebSocket');
 
-dotenv.config({ path: './.env' });
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -40,7 +40,7 @@ app.use('/', require('./routes/pages'));
 app.use('/users', require('./routes/users'));
 app.use('/', require('./routes/assignmentsRoutes'));
 app.use('/', require('./routes/submissionRoutes'));
-
+app.use('/routes', require('./routes/videoRoutes'));
 
 app.listen(5000, () => {
     console.log("Server is running on port 5000");

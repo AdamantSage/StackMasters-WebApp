@@ -1,6 +1,6 @@
 const Submission = require('../models/submission');
 
-const db = require('../config/db'); // Assuming you have a db connection file
+const db = require('../config/database'); // Assuming you have a db connection file
 // Create a new submission into the db
 exports.createSubmission = (req, res) =>{
     console.log(req.body);// Log the data sent by the client

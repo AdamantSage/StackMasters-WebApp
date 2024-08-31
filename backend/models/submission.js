@@ -1,4 +1,4 @@
-const db = require('../config/db'); // Assuming you have a db connection file
+const db = require('../config/database'); // Assuming you have a db connection file
 
 class Submission{
     static create(submissionData, callback){

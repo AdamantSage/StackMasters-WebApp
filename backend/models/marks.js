@@ -1,4 +1,4 @@
-const db = require("../db");  // Import the db module
+const db = require("../config/database");  // Import the db module
 const Excel = require("exceljs");
 const { PassThrough } = require('stream');
 
