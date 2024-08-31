@@ -2,6 +2,7 @@
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const { emitNotification } = require('../NotificationWebSocket.js');
 
 //added this to avoid recreating database connection from scratch
 //need to test if it still works properly
@@ -56,7 +57,7 @@ exports.create = async (req, res) => {
                         console.log('Error inserting into subtype table:', err);
                         return res.status(500).send('Error creating user subtype');
                     }
-
+                    emitNotification('user_created', { id: userId, name, email });
                     // Send success response
                     res.status(201).json({
                         message: 'User created successfully',
@@ -134,44 +135,36 @@ exports.login = (req, res) => {
 
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
-                console.error('Bcrypt comparison error:',err);
+                console.error('Bcrypt comparison error:', err);
                 return res.status(500).send('Server error');
             }
             if (isMatch) {
-                const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const token = jwt.sign(
+                    { id: user.id, email: user.email, role: user.role },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '1h' }
+                );
                 
                 // Log the token to the console
                 console.log('Generated JWT:', token);
 
                 // Send token as part of the response
-                if (user.role === 'admin') {
-                    res.json({
-                        message: 'Login successful',
-                        token: token,
-                        role: user.role // Optional: You can also send the user's role
-                    });
-                } else if (user.role === 'lecturer') {
-                    res.json({
-                        message: 'Login successful',
-                        token: token,
-                        role: user.role
-                    });
-                } else if (user.role === 'student') {
-                    res.json({
-                        message: 'Login successful',
-                        token: token,
-                        role: user.role
-                    });
-                } else {
-                    res.status(403).send('Access denied');
-                }
+                const response = {
+                    message: 'Login successful',
+                    token: token,
+                    role: user.role
+                };
+                
+                // Emit notification for successful login
+                emitNotification('user_logged_in', { email: user.email, role: user.role });
+
+                res.json(response);
             } else {
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
         });
     });
 };
-
 
 // Read all users
 exports.read = (req, res) => {
@@ -209,7 +202,7 @@ exports.update = (req, res) => {
     }
     
     // Remove the last comma and space, and add the WHERE clause
-    query = query.slice(0, -2) + ' WHERE id = ?';
+    query = query.slice(0, -2) + ' WHERE user_id = ?';
     values.push(id);
 
     // If password is being updated, hash it
@@ -226,7 +219,10 @@ exports.update = (req, res) => {
                     return res.status(500).send('Error updating user');
                 }
                 console.log(`User ${id} updated successfully`);
-                res.send('User updated successfully');
+                 // Notify clients of user update
+                 emitNotification('user_updated', { id, name, email });
+
+                 res.send('User updated successfully');
             });
         });
     } else {
@@ -236,6 +232,9 @@ exports.update = (req, res) => {
                 return res.status(500).send('Error updating user');
             }
             console.log(`User ${id} updated successfully`);
+            // Notify clients of user update
+            emitNotification('user_updated', { id, name, email });
+
             res.send('User updated successfully');
         });
     }
@@ -246,11 +245,14 @@ exports.update = (req, res) => {
 // Delete a user
 exports.delete = (req, res) => {
     const id = req.params.id;
-    db.query('DELETE FROM users WHERE id = ?', [id], (error, results) => {
+    db.query('DELETE FROM users WHERE user_id = ?', [id], (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).send('Error deleting user');
         }
-        res.send('User deleted successfully');
+         // Notify clients of user update
+         emitNotification('user_deleted', { id, name, email });
+
+         res.send('User updated successfully');
     });
 };
