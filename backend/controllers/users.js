@@ -2,7 +2,7 @@
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
-const { emitNotification } = require('../NotificationWebSocket2.js');
+const { emitNotification } = require('../NotificationWebSocket.js');
 
 //added this to avoid recreating database connection from scratch
 //need to test if it still works properly
