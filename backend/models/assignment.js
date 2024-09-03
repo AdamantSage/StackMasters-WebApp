@@ -4,7 +4,7 @@ class Assignment {
     static create(assignmentData, callback) {
         db.query('INSERT INTO assignment SET ?', {
             assignment_id: assignmentData.assignment_id,
-            module_code: assignmentData.module_code,
+            module_code: assignmentData.module_code, 
             assign_name: assignmentData.assign_name,
             upload_date: assignmentData.upload_date,
             due_date: assignmentData.due_date,

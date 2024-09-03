@@ -40,7 +40,7 @@ app.use((err, req, res, next) => {
 app.use('/', require('./routes/assignmentsRoutes'));
 app.use('/', require('./routes/submissionRoutes'));
 
-app.listen(5001, () => {
+app.listen(5000, () => {
     console.log("Server is running on port 5000");
 });
 
