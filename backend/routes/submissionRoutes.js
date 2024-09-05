@@ -11,9 +11,9 @@ router.post('/submission', validSubmission, SubmissionController.createSubmissio
 router.post('/submission/feedback', SubmissionController.createFeedback);
 router.post('/userSubmission', SubmissionController.createUserSubmission);
 //This is used to retrieve submission
-router.get('/submission/:assignmentId/:userId', SubmissionController.getSubmission);
+router.get('/submission/:sub_id', SubmissionController.getSubmission);
 //This is used to grade and update submission done by the lecturer and student
-router.put('/submission/:assignmentId/:userId', SubmissionController.updateSubmissionStudent);
+router.put('/submission/:sub_id', SubmissionController.updateSubmissionStudent);
 //this is used to remove data
 router.delete('/submission/:id', SubmissionController.deleteSubmission);
 router.delete('/submission/:user_id/:sub_id', SubmissionController.deleteUserSubmission);

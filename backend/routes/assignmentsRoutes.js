@@ -13,7 +13,7 @@ router.post('/userAssignment', AssignmentController.createUserAssignment);
 router.get('/assignment/:id', AssignmentController.getAssignment);
 //this is used to replace data
 router.put('/assignment/:id', AssignmentController.updateAssignment);
-router.put('/userAssignment/:user_id/:assignment_id', AssignmentController.updateUserAssignment);
+//router.put('/userAssignment/:user_id/:assignment_id', AssignmentController.updateUserAssignment);
 //this is used to remove data
 router.delete('/assignment/:id', AssignmentController.deleteAssignment);
 router.delete('/userAssignment/:user_id/:assignment_id', AssignmentController.deleteUserAssignment);

@@ -8,15 +8,13 @@ exports.createSubmission = (req, res) =>{
     const{
         sub_id,
         sub_date,
-        assignment_id,
-        feed_id
+        assignment_id
     } = req.body;
     // Execute the SQL query to insert a new submission into the database
     Submission.create({
         sub_id,
         sub_date,
-        assignment_id,
-        feed_id
+        assignment_id
         }, (err, results) => {
         if(err){
             console.log(err); // Log any errors
@@ -35,13 +33,15 @@ exports.createUserSubmission = (req, res) =>{
     const{
         user_id,
         sub_id,
-        module_code
+        module_code,
+        feed_id
     } = req.body;
     // Execute the SQL query to insert a new submission into the database
     Submission.createUserSubmission({
         user_id,
         sub_id,
-        module_code
+        module_code,
+        feed_id
         }, (err, results) => {
         if(err){
             console.log(err); // Log any errors
@@ -56,10 +56,10 @@ exports.createUserSubmission = (req, res) =>{
 };
 // Retrieve a specific submission based on ID for user and assignment
 exports.getSubmission = (req, res) =>{
-    const {sub_id} = req.params.id; // Retrieve the assignment ID and user ID from the URL
+    const {sub_id} = req.params; // Retrieve the assignment ID and user ID from the URL
     console.log(`Fetching submission with ID: ${sub_id}`);
     // Execute the SQL query to fetch the submission with the given ID's
-    Submission.select(assignmentID, userID, (err, results) => {
+    Submission.select(sub_id, assignment_id, (err, results) => {
         if(err){
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -80,11 +80,12 @@ exports.getSubmission = (req, res) =>{
 exports.updateSubmissionStudent = (req, res) =>{
     console.log(req.body);// Log the data sent by the client
     //Extract specific fields from the request body
+    const sub_id = req.params.id;
     const{
         sub_date,
     } = req.body;
     //Execute sql query to update the assignment submission done by the student
-    Submission.updateStudent({sub_date, sub_id}, (err, results) => {
+    Submission.updateStudent(sub_id, {sub_date}, (err, results) => {
             if(err){
                 console.log(err);//Log the error occured
                 //sends a JSON response with error message and status code 500 which is a server error
@@ -126,11 +127,11 @@ exports.createFeedback = (req, res) =>{
             }else if(results.affectedRows == 0){
                 // If no rows were affected, send a JSON response with status code 404 which means it could not find
                 //the given data in the server
-                return res.status(404).json({message: "Submission not found"});
+                return res.status(404).json({message: "Feedback could not be found"});
             }else{
                 console.log(results);// Log the results of the query
                 // Send a JSON response with success message and status code 200 which means the request is successful
-                return res.status(200).json({message: "Submission updated"});
+                return res.status(200).json({message: "Feedback created"});
             }
         });
 };

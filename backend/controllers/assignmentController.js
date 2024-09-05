@@ -114,7 +114,7 @@ exports.updateAssignment = (req, res) => {
     });
 };
 
-exports.updateUserAssignment = (req, res) => {
+/*exports.updateUserAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {user_id, assignment_id} = req.params;
@@ -139,6 +139,7 @@ exports.updateUserAssignment = (req, res) => {
         }
     });
 };
+*/
 //Defines the function which is exported and used as a route handler
 exports.deleteAssignment = (req, res) => {
     const assignment_id = req.params.id; // Retrieve the assignment ID from the URL
