@@ -56,7 +56,7 @@ exports.createUserSubmission = (req, res) =>{
 };
 // Retrieve a specific submission based on ID for user and assignment
 exports.getSubmission = (req, res) =>{
-    const {sub_id} = req.params; // Retrieve the assignment ID and user ID from the URL
+    const {sub_id} = req.params.id; // Retrieve the assignment ID and user ID from the URL
     console.log(`Fetching submission with ID: ${sub_id}`);
     // Execute the SQL query to fetch the submission with the given ID's
     Submission.select(assignmentID, userID, (err, results) => {
@@ -137,7 +137,7 @@ exports.createFeedback = (req, res) =>{
 
 //Deletes a specific submission based on the specific user
 exports.deleteSubmission = (req, res) =>{
-    const {sub_id} = req.params;// Retrieve the assignment ID and user ID from the URL
+    const sub_id = req.params.id;// Retrieve the assignment ID and user ID from the URL
     console.log(`Deleting submission with ID: ${sub_id}`);
     // Execute the SQL query to delete the submission with the given IDs
     Submission.deleteSubmission(
@@ -159,7 +159,7 @@ exports.deleteSubmission = (req, res) =>{
 };
 
 exports.deleteUserSubmission = (req, res) =>{
-    const {user_id, sub_id} = req.params;// Retrieve the assignment ID and user ID from the URL
+    const {user_id, sub_id} = req.params.id;// Retrieve the assignment ID and user ID from the URL
     console.log(`Deleting submission with ID: ${user_id}, ${sub_id}`);
     // Execute the SQL query to delete the submission with the given IDs
     Submission.deleteUserSubmission(
@@ -181,7 +181,7 @@ exports.deleteUserSubmission = (req, res) =>{
 };
 
 exports.deleteFeedback = (req, res) =>{
-    const {feed_id} = req.params;// Retrieve the assignment ID and user ID from the URL
+    const feed_id = req.params.id;// Retrieve the assignment ID and user ID from the URL
     console.log(`Deleting submission with ID: ${feed_id}`);
     // Execute the SQL query to delete the submission with the given IDs
     Submission.deleteFeedback(

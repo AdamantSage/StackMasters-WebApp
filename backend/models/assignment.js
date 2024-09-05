@@ -33,9 +33,9 @@ class Assignment {
         );
     }
 
-    static updateUserAssignment(assignment_id, updateData, callback){
-        db.query('UPDATE user_on_assignment SET user_id = ?, assignment_id = ?, module_code = ? WHERE assignment_id = ?, user_id =?',
-            [updateData.user_id, updateData.assignment_id, updateData.module_code], callback
+    static updateUserAssignment(user_id, assignment_id, updateData, callback){
+        db.query('UPDATE user_on_assignment SET module_code = ? WHERE assignment_id = ? AND user_id =?',
+            [updateData.module_code, user_id, assignment_id], callback
         );
     }
 

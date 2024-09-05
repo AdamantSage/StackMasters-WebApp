@@ -63,7 +63,7 @@ exports.createUserAssignment = (req, res) => {
 };
 // Retrieve a specific assignment based on ID
 exports.getAssignment = (req, res) => {
-    const assignment_id = req.params; // Retrieve the assignment ID from the URL
+    const assignment_id = req.params.id; // Retrieve the assignment ID from the URL
     console.log(`Fetching assignment with ID: ${assignment_id}`);
     // Execute the SQL query to fetch the assignment with the given ID from the model
     Assignment.select(assignment_id, (err, results) => {
@@ -85,15 +85,15 @@ exports.getAssignment = (req, res) => {
 // Update an existing assignment
 exports.updateAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
+    const assignment_id = req.params.id;
     // Extract specific fields from the request body
     const {
-        assignment_id,
         assign_name,
         due_date,
         assign_desc
     } = req.body;
-    Assignment.update({
-        assignment_id,
+    Assignment.update(assignment_id,
+        {
         assign_name,
         due_date,
         assign_desc
@@ -117,14 +117,11 @@ exports.updateAssignment = (req, res) => {
 exports.updateUserAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
+    const {user_id, assignment_id} = req.params;
     const {
-        user_id,
-        assignment_id,
         module_code
     } = req.body;
-    Assignment.updateUserAssignment({
-        assignment_id,
-        user_id,
+    Assignment.updateUserAssignment(user_id, assignment_id,{
         module_code
     }, (err, results) => {
         if (err) {
@@ -144,7 +141,7 @@ exports.updateUserAssignment = (req, res) => {
 };
 //Defines the function which is exported and used as a route handler
 exports.deleteAssignment = (req, res) => {
-    const assignment_id = req.params; // Retrieve the assignment ID from the URL
+    const assignment_id = req.params.id; // Retrieve the assignment ID from the URL
     console.log(`Deleting assignment with ID: ${assignment_id}`);
 
     // Execute the SQL query to delete the assignment with the given ID from the model
@@ -165,7 +162,7 @@ exports.deleteAssignment = (req, res) => {
     });
 };
 exports.deleteUserAssignment = (req, res) => {
-    const {user_id, assignment_id} = req.params; // Retrieve the IDs from the URL
+    const {user_id, assignment_id} = req.params.id; // Retrieve the IDs from the URL
     console.log(`Deleting assignment with IDs: ${user_id}, ${assignment_id}`);
 
     // Execute the SQL query to delete the assignment with the given ID from the model

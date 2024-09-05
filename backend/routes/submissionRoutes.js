@@ -8,15 +8,15 @@ const { get } = require("./assignmentsRoutes");
 //This is a request to this route path to executed
 //This is used to create a new submission 
 router.post('/submission', validSubmission, SubmissionController.createSubmission);
-router.post('/submission', SubmissionController.createFeedback);
-router.post('/submission', SubmissionController.createUserSubmission);
+router.post('/submission/feedback', SubmissionController.createFeedback);
+router.post('/userSubmission', SubmissionController.createUserSubmission);
 //This is used to retrieve submission
 router.get('/submission/:assignmentId/:userId', SubmissionController.getSubmission);
 //This is used to grade and update submission done by the lecturer and student
 router.put('/submission/:assignmentId/:userId', SubmissionController.updateSubmissionStudent);
 //this is used to remove data
-router.delete('/submission/:assignmentId/:sub_id', SubmissionController.deleteSubmission);
-router.delete('/submission/:assignmentId/:user_id/:sub_id', SubmissionController.deleteUserSubmission);
+router.delete('/submission/:id', SubmissionController.deleteSubmission);
+router.delete('/submission/:user_id/:sub_id', SubmissionController.deleteUserSubmission);
 router.delete('/submission/:assignmentId/:feed_id', SubmissionController.deleteFeedback);
 //This is to export the router
 module.exports = router;
