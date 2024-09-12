@@ -33,12 +33,6 @@ class Assignment {
         );
     }
 
-    /*static updateUserAssignment(user_id, assignment_id, updateData, callback){
-        db.query('UPDATE user_on_assignment SET module_code = ? WHERE assignment_id = ? AND user_id =?',
-            [updateData.module_code, user_id, assignment_id], callback
-        );
-    }*/
-
     static delete(assignment_id, callback){
         db.query('DELETE FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
     }

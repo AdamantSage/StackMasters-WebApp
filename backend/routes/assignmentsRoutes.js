@@ -15,7 +15,7 @@ router.get('/assignment/:id', AssignmentController.getAssignment);
 router.put('/assignment/:id', AssignmentController.updateAssignment);
 //router.put('/userAssignment/:user_id/:assignment_id', AssignmentController.updateUserAssignment);
 //this is used to remove data
-router.delete('/assignment/:id', AssignmentController.deleteAssignment);
+router.delete('/assignment/:assignment_id', AssignmentController.deleteAssignment);
 router.delete('/userAssignment/:user_id/:assignment_id', AssignmentController.deleteUserAssignment);
 //This is to export the router
 module.exports = router;

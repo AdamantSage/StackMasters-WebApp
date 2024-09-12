@@ -15,8 +15,8 @@ router.get('/submission/:sub_id', SubmissionController.getSubmission);
 //This is used to grade and update submission done by the lecturer and student
 router.put('/submission/:sub_id', SubmissionController.updateSubmissionStudent);
 //this is used to remove data
-router.delete('/submission/:id', SubmissionController.deleteSubmission);
-router.delete('/submission/:user_id/:sub_id', SubmissionController.deleteUserSubmission);
-router.delete('/submission/:assignmentId/:feed_id', SubmissionController.deleteFeedback);
+router.delete('/submission/:sub_id', SubmissionController.deleteSubmission);
+router.delete('/userSubmission/:user_id/:sub_id', SubmissionController.deleteUserSubmission);
+router.delete('/feedSubmission/:feed_id', SubmissionController.deleteFeedback);
 //This is to export the router
 module.exports = router;
