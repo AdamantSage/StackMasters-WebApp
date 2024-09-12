@@ -6,7 +6,6 @@ class Submission{
             sub_id: submissionData.sub_id,
             sub_date: submissionData.sub_date,
             assignment_id: submissionData.assignment_id,
-            feed_id: submissionData.feed_id
         }, callback);
     }
 
@@ -14,7 +13,7 @@ class Submission{
         db.query('INSERT INTO user_on_submission SET ?', {
             user_id: submissionData.user_id,
             sub_id: submissionData.sub_id,
-            module_code: submissionData.module_code
+            module_code: submissionData.module_code,
         })
 
     }
@@ -36,7 +35,8 @@ class Submission{
                 user_id: feedbackData.user_id,
                 assignment_id: feedbackData.assignment_id,
                 description: feedbackData.description,
-                grade: feedbackData.grade
+                grade: feedbackData.grade,
+                sub_id: feedbackData.sub_id
             }, callback);
     }
 
