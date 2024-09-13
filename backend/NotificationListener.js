@@ -9,6 +9,16 @@ socket.on('connect', () => {
     console.log('Connected to WebSocket server');
 });
 
+//listener for the videoUploadSuccess event.
+socket.on('videoUploadSuccess', (data) => {
+    console.log('Video upload success:', data);
+});
+
+//listener for the videoRetrieveSuccess event.
+socket.on('videoRetrieveSuccess', (data) => {
+    console.log('Video retrieve success:', data);
+});
+
 // Log when the connection is disconnected
 socket.on('disconnect', () => {
     console.log('Disconnected from WebSocket server');
