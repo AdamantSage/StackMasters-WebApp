@@ -6,7 +6,7 @@ const { PassThrough } = require('stream');
 //marks eill have to be moved to feedback
 function fetchData() {
   return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM Feedback', (error, results) => {
+    db.query('SELECT * FROM feedback', (error, results) => {
       if (error) return reject(error);
       resolve(results);
     });
