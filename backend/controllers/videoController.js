@@ -1,9 +1,7 @@
 
 const fs = require('fs');
 const path = require('path');
-//const fs = require('fs');//file stream
-//might not need what is above
-
+const { emitNotification } = require('../NotificationWebSocket.js');
 //code for videoSrtreaming
 
 
@@ -138,11 +136,15 @@ const uploadVideo = (req, res) => {
         }
 
         // Log the upload details to the console
-        console.log(`Uploaded file: ${filename}`);
+        /*console.log(`Uploaded file: ${filename}`);
         console.log(`File path: ${path}`);
         console.log(`MIME type: ${mimetype}`);
         console.log(`File size: ${size} bytes`);
-console.log("file uploaded successfuly, locally.");
+        console.log("file uploaded successfuly, locally.");*/
+
+         // Emit success event
+        emitNotification('videoUploadSuccess', { filename, path, mimetype, size});
+
         // Send a response back to the client
         res.status(201).send({
             message: 'File uploaded successfully',
@@ -201,6 +203,9 @@ const retrieveVideo = (req, res) => {
 
         const video = results[0];
         console.log(`Video with ID ${videoId} retrieved successfully.`);
+
+        emitNotification('videoRetrieveSuccess', { videoId, video });
+    
         res.status(200).send({
             message: 'Video retrieved successfully',
             video
