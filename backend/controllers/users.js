@@ -25,7 +25,7 @@ exports.create = async (req, res) => {
         console.log('Hashed Password:', hashedPassword);
 
         // Insert user into the database
-        db.query('INSERT INTO users SET ?', { name, role, email, password: hashedPassword }, (error, results) => {
+        db.query('INSERT INTO Users SET ?', { name, role, email, password: hashedPassword }, (error, results) => {
             if (error) {
                 console.log('Error inserting user:', error);
                 return res.status(500).send('Error creating user');
@@ -39,13 +39,13 @@ exports.create = async (req, res) => {
 
             switch (role) {
                 case 'student':
-                    insertQuery = 'INSERT INTO student SET ?';
+                    insertQuery = 'INSERT INTO Student SET ?';
                     break;
                 case 'lecturer':
-                    insertQuery = 'INSERT INTO lecturer SET ?';
+                    insertQuery = 'INSERT INTO Lecturer SET ?';
                     break;
                 case 'admin':
-                    insertQuery = 'INSERT INTO admin SET ?';
+                    insertQuery = 'INSERT INTO Admin SET ?';
                     break;
                 default:
                     return res.status(400).send('Invalid role');
@@ -122,7 +122,7 @@ exports.login = (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
-    db.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
+    db.query('SELECT * FROM Users WHERE email = ?', [email], (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).send('Server error');
@@ -168,7 +168,7 @@ exports.login = (req, res) => {
 
 // Read all users
 exports.read = (req, res) => {
-    db.query('SELECT * FROM users', (error, results) => {
+    db.query('SELECT * FROM Users', (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).send('Error fetching users');
@@ -185,7 +185,7 @@ exports.update = (req, res) => {
     const { name, email, password } = req.body;
 
     // Initialize the query parts
-    let query = 'UPDATE users SET ';
+    let query = 'UPDATE Users SET ';
     let values = [];
     
     // Dynamically build the query based on provided fields
@@ -245,7 +245,7 @@ exports.update = (req, res) => {
 // Delete a user
 exports.delete = (req, res) => {
     const id = req.params.id;
-    db.query('DELETE FROM users WHERE user_id = ?', [id], (error, results) => {
+    db.query('DELETE FROM Users WHERE user_id = ?', [id], (error, results) => {
         if (error) {
             console.log(error);
             return res.status(500).send('Error deleting user');

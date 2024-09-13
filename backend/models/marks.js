@@ -6,7 +6,7 @@ const { PassThrough } = require('stream');
 //marks eill have to be moved to feedback
 function fetchData() {
   return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM marks', (error, results) => {
+    db.query('SELECT * FROM Feedback', (error, results) => {
       if (error) return reject(error);
       resolve(results);
     });
@@ -18,15 +18,19 @@ async function createExcelStream(data) {
   const worksheet = workbook.addWorksheet('Marks');
 
   worksheet.columns = [
+    { header: 'feedback ID', key: 'feed_id', width: 15 },
     { header: 'User ID', key: 'user_id', width: 15 },
     { header: 'Assignment ID', key: 'assignment_id', width: 20 },
-    { header: 'Grade', key: 'grade', width: 10 }
+    { header: 'Description', key: 'description', width: 35 },
+    { header: 'Grade', key: 'grade', width: 5 }
   ];
 
   data.forEach(row => {
     worksheet.addRow({
+      feed_id: row.feed_id, // Add this line
       user_id: row.user_id,
       assignment_id: row.assignment_id,
+      description: row.description, // Add this line
       grade: row.grade
     });
   });
