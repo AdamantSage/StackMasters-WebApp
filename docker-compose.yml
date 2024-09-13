@@ -1,0 +1,78 @@
+#This file will Create a network.
+#Set up a MySQL database container.
+#Set up a web application container.
+
+version: '3.9'
+
+services:
+  database:
+    image: mysql:latest
+    container_name: database1
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: stackmasters_login
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - my_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: database1
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ""
+    ports:
+      - "8081:80"
+    depends_on:
+      - database
+    networks:
+      - my_network
+
+  webapp:
+    build:
+      context: .  # Path to Dockerfile
+      dockerfile: Dockerfile  # Ensure this matches the name of your Dockerfile
+    container_name: stackmasters-webapp
+    environment:
+      DATABASE: stackmasters_login
+      DATABASE_HOST: database1
+      DATABASE_USER: root
+      DATABASE_PASSWORD: ""
+      JWT_SECRET: JWT_SECRET
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    networks:
+      - my_network
+    env_file:
+      - ./backend/.env
+
+volumes:
+  db_data:
+
+networks:
+  my_network:
+    driver: bridge
+
+
+
+
+
+    #running it is: docker-compose up -d
+    #to stop and remove containers: docker-compose down
+
+#only to stop wihtout removing containers: docker-compose stop
+# Remove Containers, Networks, and Volumes:docker-compose down -v
+
