@@ -18,5 +18,23 @@ const validAssignmentInfo = (req, res, next) => {
         }
     next();
 }
+
+const authorizeAssignmentAccess = (req, res, next) => {
+    const assignment_id = req.params.id; // Get assignment ID from request parameters
+    const user_id = req.user.id; // Get user ID from authenticated user
+
+    Assignment.select(assignment_id, user_id, (err, results) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ message: 'Error occurred while checking assignment access.' });
+        } else if (results.length === 0) {
+            return res.status(404).json({ message: 'Assignment not found or access denied.' });
+        } else {
+            // Assignment belongs to the user, proceed to next middleware/controller
+            next();
+        }
+    });
+};
+
 //exports the function
-module.exports = {validAssignmentInfo};
+module.exports = {validAssignmentInfo, authorizeAssignmentAccess};

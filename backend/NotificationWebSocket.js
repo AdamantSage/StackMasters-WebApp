@@ -95,4 +95,4 @@ const emitNotification = (event, data) => {
 module.exports = { io, emitNotification };
 
 // Start the server
-server.listen(8000, () => console.log("listening on http://localhost:8000"));
+server.listen(8000, '0.0.0.0', () => {console.log("listening on http://localhost:8000")});

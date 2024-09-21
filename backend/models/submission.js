@@ -18,9 +18,9 @@ class Submission{
 
     }
 
-    static select(sub_id, callback){
-        db.query('SELECT * FROM submission WHERE sub_id = ?',
-            [sub_id], callback);
+    static select(sub_id, user_id, callback){
+        db.query('SELECT * FROM user_on_submission WHERE sub_id = ? AND user_id = ?',
+            [sub_id, user_id], callback);
     }
 
     static updateStudent(sub_id, updateData, callback){
@@ -38,6 +38,11 @@ class Submission{
                 grade: feedbackData.grade,
                 sub_id: feedbackData.sub_id
             }, callback);
+    }
+
+    static selectFeed(sub_id, user_id, callback){
+        db.query('SELECT * FROM feedback WHERE feed_id = ? AND user_id = ?',
+            [sub_id, user_id], callback);
     }
 
     static deleteSubmission(sub_id, callback){
