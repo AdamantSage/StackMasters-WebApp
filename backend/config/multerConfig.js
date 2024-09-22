@@ -8,16 +8,6 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // Storage configuration
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir); // Use the ensured directory
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        const fileName = `${Date.now()}${ext}`;
-        cb(null, fileName); // Use a unique filename
-    }
-});
 
 // File filter
 const fileFilter = (req, file, cb) => {
@@ -31,6 +21,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Multer instance
+const storage = multer.memoryStorage();
+
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,

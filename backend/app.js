@@ -13,27 +13,6 @@ const dotenv = require("dotenv");
 //const { Server } = require('socket.io')
 //const socketHandler = require('./NotificationWebSocket');
 
-import http from 'http';
-import { BlobServiceClient} from '@azure/storage-blob';
-import 'dotenv/config'
-
-
-//setup environment variables
-const accountName =process.env.ACCOUNT_NAME;
-const sasToken = process.env.SAS_TOKEN;
-const containerName =process.env.CONTAINER_NAME;
-
-//estabilishing connection with azure blob storage
-const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
-const conatinerClient = blobServiceClient.getContainerClass(containerName);
-
-
-const server = http.createServer(handleImagesUpload)
-const port =3000;
-server.listen(port, () => {
-    console.log("Server listening: ${port}");
-});
-
 
 
 

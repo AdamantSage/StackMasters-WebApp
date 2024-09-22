@@ -3,6 +3,21 @@ const fs = require('fs');
 const path = require('path');
 const { emitNotification } = require('../NotificationWebSocket.js');
 //code for videoSrtreaming
+const multer = require('multer');
+const http = require('http');
+const { BlobServiceClient } = require('@azure/storage-blob');
+require('dotenv/config');
+
+
+
+//setup environment variables
+const accountName =process.env.ACCOUNT_NAME;
+const sasToken = process.env.SAS_TOKEN;
+const containerName =process.env.CONTAINER_NAME;
+
+//estabilishing connection with azure blob storage
+const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
+const containerClient = blobServiceClient.getContainerClient(containerName);
 
 
 // Function to stream video
@@ -110,71 +125,50 @@ const connection = require('../config/database');
 
 // Upload video function
 //Post request to hanndle file upload and metadata insertion
-const uploadVideo = (req, res) => {
-    if (!req.file) {
-        console.error('No file uploaded.');
-        return res.status(400).send('No file uploaded.');
-    }
-
-    // Extract file details
-    let { filename, path, mimetype, size } = req.file;
-
-    // Adjust the path variable to reflect the actual upload location
-    path = `videos/${filename}`;
-
-    // SQL query to insert video metadata into the database
-    const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
-    const values = [filename, path, mimetype, size];
-
-    connection.query(query, values, (err, results) => {
-        if (err) {
-            console.error('Error inserting video metadata:', err);
-            return res.status(500).send({
-                message: 'Error uploading file',
-                error: err.message
-            });
-        }
-
-        // Log the upload details to the console
-        /*console.log(`Uploaded file: ${filename}`);
-        console.log(`File path: ${path}`);
-        console.log(`MIME type: ${mimetype}`);
-        console.log(`File size: ${size} bytes`);
-        console.log("file uploaded successfuly, locally.");*/
-
-         // Emit success event
-        emitNotification('videoUploadSuccess', { filename, path, mimetype, size});
-
-        // Send a response back to the client
-        res.status(201).send({
-            message: 'File uploaded successfully',
-            file: req.file
-        });
-    });
-};
-
 // Upload video function
 // Post request to handle file upload and metadata insertion
+// Upload video function
 const handleVideoUpload = (req, res) => {
+    console.log('Request body:', req.body); // Log the entire request body
+
+    // Check if file was uploaded
     if (!req.file) {
         console.error('No file uploaded.');
         return res.status(400).send('No file uploaded.');
     }
 
-    // Extract file details
-    let { filename, mimetype, size } = req.file;
+    const { filename, mimetype, size } = req.file;
 
-    // Adjust the path variable to reflect the actual upload location
-    const path = `videos/${filename}`; // This will be the path used for the database
+    // Check and log the variable you're trying to split
+    const someVariableToSplit = req.body.someProperty; // Ensure this is sent from Postman
+    console.log('someVariableToSplit:', someVariableToSplit); // Log its value
 
-    // Upload the video to Azure Blob Storage
+    // Validate the variable before splitting
+    if (typeof someVariableToSplit === 'string' && someVariableToSplit.includes('-')) {
+        try {
+            const parts = someVariableToSplit.split('-');
+            console.log('Split parts:', parts);
+        } catch (error) {
+            console.error('Error splitting someVariableToSplit:', error);
+            return res.status(500).send({
+                message: 'Error processing the variable',
+                error: error.message
+            });
+        }
+    } else {
+        console.error('someVariableToSplit is either undefined or does not contain a valid string to split');
+    }
+
+    const path = `videos/${filename}`;
     const blobClient = containerClient.getBlockBlobClient(filename);
+    
+    // Upload to Azure Blob Storage
     blobClient.uploadData(req.file.buffer)
         .then(() => {
-            // SQL query to insert video metadata into the database
             const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
             const values = [filename, path, mimetype, size];
 
+            // Insert metadata into the database
             connection.query(query, values, (err, results) => {
                 if (err) {
                     console.error('Error inserting video metadata:', err);
@@ -184,10 +178,8 @@ const handleVideoUpload = (req, res) => {
                     });
                 }
 
-                // Emit success event
                 emitNotification('videoUploadSuccess', { filename, path, mimetype, size });
 
-                // Send a response back to the client
                 res.status(201).send({
                     message: 'Video uploaded successfully',
                     file: req.file
@@ -200,8 +192,8 @@ const handleVideoUpload = (req, res) => {
         });
 };
 
-// Use multer middleware for handling multipart/form-data
-app.post("/upload/video", upload.single("video"), handleVideoUpload);
+
+
 
 // Catch possible multer errors (like file size limits)
 /*Multer Error Handling: The multerErrorHandler middleware captures specific errors related 
@@ -265,6 +257,6 @@ const retrieveVideo = (req, res) => {
 
 
 
-module.exports = { uploadVideo, retrieveVideo, streamVideo,multerErrorHandler,  };
+module.exports = {retrieveVideo, streamVideo,multerErrorHandler, handleVideoUpload ,containerClient };
 
  
