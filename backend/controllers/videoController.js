@@ -153,6 +153,56 @@ const uploadVideo = (req, res) => {
     });
 };
 
+// Upload video function
+// Post request to handle file upload and metadata insertion
+const handleVideoUpload = (req, res) => {
+    if (!req.file) {
+        console.error('No file uploaded.');
+        return res.status(400).send('No file uploaded.');
+    }
+
+    // Extract file details
+    let { filename, mimetype, size } = req.file;
+
+    // Adjust the path variable to reflect the actual upload location
+    const path = `videos/${filename}`; // This will be the path used for the database
+
+    // Upload the video to Azure Blob Storage
+    const blobClient = containerClient.getBlockBlobClient(filename);
+    blobClient.uploadData(req.file.buffer)
+        .then(() => {
+            // SQL query to insert video metadata into the database
+            const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
+            const values = [filename, path, mimetype, size];
+
+            connection.query(query, values, (err, results) => {
+                if (err) {
+                    console.error('Error inserting video metadata:', err);
+                    return res.status(500).send({
+                        message: 'Error uploading video',
+                        error: err.message
+                    });
+                }
+
+                // Emit success event
+                emitNotification('videoUploadSuccess', { filename, path, mimetype, size });
+
+                // Send a response back to the client
+                res.status(201).send({
+                    message: 'Video uploaded successfully',
+                    file: req.file
+                });
+            });
+        })
+        .catch((error) => {
+            console.error('Error uploading video to Azure Blob Storage:', error);
+            res.status(500).send('Error uploading video to storage.');
+        });
+};
+
+// Use multer middleware for handling multipart/form-data
+app.post("/upload/video", upload.single("video"), handleVideoUpload);
+
 // Catch possible multer errors (like file size limits)
 /*Multer Error Handling: The multerErrorHandler middleware captures specific errors related 
 to file uploads, such as exceeding file size limits or invalid file types. It logs these errors
@@ -215,6 +265,6 @@ const retrieveVideo = (req, res) => {
 
 
 
-module.exports = { uploadVideo, retrieveVideo, streamVideo,multerErrorHandler  };
+module.exports = { uploadVideo, retrieveVideo, streamVideo,multerErrorHandler,  };
 
  

@@ -3,8 +3,39 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
+//const { AzureMediaServicesClient } = require('@azure/arm-mediaservices');
+//const { DefaultAzureCredential } = require('@azure/identity');
+
+// Use DefaultAzureCredential to authenticate
+//const credentials = new DefaultAzureCredential();
+//const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
+
 //const { Server } = require('socket.io')
 //const socketHandler = require('./NotificationWebSocket');
+
+import http from 'http';
+import { BlobServiceClient} from '@azure/storage-blob';
+import 'dotenv/config'
+
+
+//setup environment variables
+const accountName =process.env.ACCOUNT_NAME;
+const sasToken = process.env.SAS_TOKEN;
+const containerName =process.env.CONTAINER_NAME;
+
+//estabilishing connection with azure blob storage
+const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
+const conatinerClient = blobServiceClient.getContainerClass(containerName);
+
+
+const server = http.createServer(handleImagesUpload)
+const port =3000;
+server.listen(port, () => {
+    console.log("Server listening: ${port}");
+});
+
+
+
 
 dotenv.config();
 
@@ -53,5 +84,10 @@ db.connect ( (error) => {
     }
     });
 });
+
+// Azure Media Services setup 
+//const mediaClient = new AzureMediaServicesClient(credentials, subscriptionId);
+//const resourceGroup = 'VideoStorage';
+//const accountName = 'videos';
 
 module.exports = db;
