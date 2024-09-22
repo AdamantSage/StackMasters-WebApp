@@ -3,26 +3,11 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
-//const { AzureMediaServicesClient } = require('@azure/arm-mediaservices');
-//const { DefaultAzureCredential } = require('@azure/identity');
-
-// Use DefaultAzureCredential to authenticate
-//const credentials = new DefaultAzureCredential();
-//const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
-
-//const { Server } = require('socket.io')
-//const socketHandler = require('./NotificationWebSocket');
-
-
-
 
 dotenv.config();
 
 const app = express();
-//const server = http.createServer(app);
-//const io = new Server(server);
 
-//socketHandler(io);
 
 //we will put files like css/js for frontend we might want to use
 const publicDirectory = path.join(__dirname, './public');
