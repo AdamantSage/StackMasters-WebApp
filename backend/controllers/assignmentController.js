@@ -63,10 +63,10 @@ exports.createUserAssignment = (req, res) => {
 };
 // Retrieve a specific assignment based on ID
 exports.getAssignment = (req, res) => {
-    const assignment_id = req.params.id; // Retrieve the assignment ID from the URL
-    console.log(`Fetching assignment with ID: ${assignment_id}`);
+    const {user_id, assignment_id} = req.params; // Retrieve the assignment ID from the URL
+    console.log(`Fetching assignment with ID: ${assignment_id}, ${user_id}`);
     // Execute the SQL query to fetch the assignment with the given ID from the model
-    Assignment.select(assignment_id, (err, results) => {
+    Assignment.select([assignment_id, user_id], (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error

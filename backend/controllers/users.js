@@ -251,8 +251,8 @@ exports.delete = (req, res) => {
             return res.status(500).send('Error deleting user');
         }
          // Notify clients of user update
-         emitNotification('user_deleted', { id, name, email });
+         emitNotification('user_deleted', { id });
 
-         res.send('User updated successfully');
+         res.send('User deleted successfully');
     });
 };
