@@ -10,17 +10,17 @@ const connection = require('../config/database');
 require('dotenv/config');
 
 
+const getVideoMetadata = (videoId) => {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT filename, videoUrl FROM videos WHERE vid_id = ?';
+        connection.query(query, [videoId], (err, results) => {
+            if (err) return reject(err);
+            if (results.length === 0) return reject(new Error('Video not found'));
+            resolve(results[0]);
+        });
+    });
+};
 
-//setup environment variables
-/*
-const accountName =process.env.ACCOUNT_NAME;
-const sasToken = process.env.SAS_TOKEN;
-const containerName =process.env.CONTAINER_NAME;
-
-//estabilishing connection with azure blob storage
-const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
-const containerClient = blobServiceClient.getContainerClient(containerName);
-*/
 
 // Function to stream video
 const streamVideo = async (req, res) => {
@@ -67,8 +67,9 @@ const streamVideo = async (req, res) => {
 // Upload video function
 // Post request to handle file upload and metadata insertion
 // Upload video function
+// Upload video function
 const handleVideoUpload = async (req, res) => {
-    console.log('Request body:', req.body); // Log the entire request body
+    console.log('Request body:', req.body);
 
     if (!req.file) {
         console.error('No file uploaded.');
@@ -78,13 +79,14 @@ const handleVideoUpload = async (req, res) => {
     const { originalname, mimetype, size, buffer } = req.file;
     const path = `videos/${originalname}`;
     const blobClient = req.containerClient.getBlockBlobClient(originalname);
+    const videoUrl = blobClient.url; // Get the URL for the uploaded video
 
     try {
         // Upload to Azure Blob Storage
         await blobClient.uploadData(buffer);
         
-        const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
-        const values = [originalname, path, mimetype, size];
+        const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
+        const values = [originalname, path, mimetype, size, videoUrl];
 
         connection.query(query, values, (err) => {
             if (err) {
@@ -95,11 +97,12 @@ const handleVideoUpload = async (req, res) => {
                 });
             }
 
-            emitNotification('videoUploadSuccess', { filename: originalname, path, mimetype, size });
+            emitNotification('videoUploadSuccess', { filename: originalname, path, mimetype, size, videoUrl });
 
             res.status(201).send({
                 message: 'Video uploaded successfully',
-                file: req.file
+                file: req.file,
+                videoUrl // Return the URL in the response
             });
         });
     } catch (error) {
@@ -137,40 +140,42 @@ const multerErrorHandler = (err, req, res, next) => {
 };
 
 
-// Upload video function
-const retrieveVideo = (req, res) => {
-    const videoId = req.params.id; // Assuming you retrieve the video by its ID
+// Retrieve video function
+const retrieveVideo = async (req, res) => {
+    try {
+        const videoId = req.params.id;
+        const video = await getVideoMetadata(videoId);
+        
+        // Now retrieve the video URL directly from the metadata
+        const videoUrl = video.videoUrl; // Assuming videoUrl is stored in the database
 
-    // SQL query to fetch video metadata by ID
-    const query = 'SELECT * FROM videos WHERE vid_id = ?';
-    const values = [videoId];
-
-    connection.query(query, values, (err, results) => {
-        if (err) {
-            console.error(`Error retrieving video with ID ${videoId}:`, err.message);
-            return res.status(500).send({
-                message: 'Error retrieving video',
-                error: err.message
-            });
-        }
-
-        if (results.length === 0) {
-            console.log(`Video with ID ${videoId} not found.`);
+        // Check if the video exists in Azure Blob Storage
+        const blobClient = req.containerClient.getBlockBlobClient(video.filename);
+        const exists = await blobClient.exists();
+        if (!exists) {
+            console.log(`Video ${video.filename} not found in Blob Storage.`);
             return res.status(404).send({
-                message: 'Video not found'
+                message: 'Video not found in Blob Storage'
             });
         }
 
-        const video = results[0];
         console.log(`Video with ID ${videoId} retrieved successfully.`);
-
         emitNotification('videoRetrieveSuccess', { videoId, video });
-    
+
         res.status(200).send({
             message: 'Video retrieved successfully',
-            video
+            video: {
+                id: videoId,
+                filename: video.filename,
+                url: videoUrl // Include the URL in the response
+            }
         });
-    });
+    } catch (error) {
+        console.error(`Error retrieving video: ${error.message}`);
+        res.status(error.message === 'Video not found' ? 404 : 500).send({
+            message: error.message
+        });
+    }
 };
 
 
