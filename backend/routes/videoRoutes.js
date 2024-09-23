@@ -3,8 +3,8 @@ const router = express.Router();
 const videoController = require('../controllers/videoController');
 const upload = require('../config/multerConfig'); // Import the multer configuration
 
-
-router.post('/controllers', upload.single('file'), videoController.handleVideoUpload, videoController.multerErrorHandler);
+router.post('/uploads', upload.single('file'), videoController.handleVideoUpload);
+//router.post('/controllers', upload.single('file'), videoController.handleVideoUpload, videoController.multerErrorHandler);
 router.get('/controllers/:id', videoController.retrieveVideo);
 
 router.get('/stream/:id', videoController.streamVideo);

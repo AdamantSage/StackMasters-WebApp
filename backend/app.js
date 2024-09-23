@@ -3,11 +3,17 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
+const { BlobServiceClient } = require('@azure/storage-blob');
 
 dotenv.config();
 
 const app = express();
 
+// Initialize Azure Blob Storage client
+const containerName =process.env.CONTAINER_NAME;
+const azureConString = process.env.AZURE_STORAGE_CONSTR;
+const blobServiceClient = BlobServiceClient.fromConnectionString(azureConString);
+const containerClient = blobServiceClient.getContainerClient(containerName);
 
 //we will put files like css/js for frontend we might want to use
 const publicDirectory = path.join(__dirname, './public');
@@ -30,12 +36,19 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
+app.use((req, res, next) => {
+    req.containerClient = containerClient;
+    next();
+});
 //define routes
 app.use('/', require('./routes/pages'));
 app.use('/users', require('./routes/users'));
 app.use('/', require('./routes/assignmentsRoutes'));
 app.use('/', require('./routes/submissionRoutes'));
 app.use('/routes', require('./routes/videoRoutes'));
+// Add the containerClient to the request object if needed
+
+
 
 app.listen(5000, () => {
     console.log("Server is running on port 5000");

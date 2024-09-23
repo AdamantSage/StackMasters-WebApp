@@ -5,12 +5,14 @@ const { emitNotification } = require('../NotificationWebSocket.js');
 //code for videoSrtreaming
 const multer = require('multer');
 const http = require('http');
-const { BlobServiceClient } = require('@azure/storage-blob');
+//const { BlobServiceClient } = require('@azure/storage-blob');
+const connection = require('../config/database');
 require('dotenv/config');
 
 
 
 //setup environment variables
+/*
 const accountName =process.env.ACCOUNT_NAME;
 const sasToken = process.env.SAS_TOKEN;
 const containerName =process.env.CONTAINER_NAME;
@@ -18,17 +20,16 @@ const containerName =process.env.CONTAINER_NAME;
 //estabilishing connection with azure blob storage
 const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
 const containerClient = blobServiceClient.getContainerClient(containerName);
-
+*/
 
 // Function to stream video
-const streamVideo = (req, res) => {
+const streamVideo = async (req, res) => {
     const videoId = req.params.id;
 
-    // SQL query to fetch video metadata by vid_id
-    const query = 'SELECT filename, path FROM videos WHERE vid_id = ?';
+    const query = 'SELECT filename FROM videos WHERE vid_id = ?';
     const values = [videoId];
 
-    connection.query(query, values, (err, results) => {
+    connection.query(query, values, async (err, results) => {
         if (err) {
             console.error(`Error retrieving video from database: ${err.message}`);
             return res.status(500).send({
@@ -45,152 +46,69 @@ const streamVideo = (req, res) => {
         }
 
         const video = results[0];
-        const videoPath = path.join(__dirname, '../uploads', video.filename); // Adjust to your storage directory
-        console.log(`Streaming video from path: ${videoPath}`);
+        const blobClient = req.containerClient.getBlockBlobClient(video.filename);
 
-        try {
-            const videoSize = fs.statSync(videoPath).size;
-            const range = req.headers.range;
-
-            if (!range) {
-                // No Range header, send entire video
-                const headers = {
-                    "Content-Length": videoSize,
-                    "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
-                };
-
-                res.writeHead(200, headers);
-
-                const videoStream = fs.createReadStream(videoPath);
-
-                videoStream.on('open', () => {
-                    videoStream.pipe(res);
-                });
-
-                videoStream.on('error', (streamErr) => {
-                    console.error(`Error streaming video: ${streamErr.message}`);
-                    res.status(500).send({
-                        message: 'Error streaming video',
-                        error: streamErr.message
-                    });
-                });
-
-            } else {
-                // Handle Range request
-                const parts = range.replace(/bytes=/, "").split("-");
-                const start = parseInt(parts[0], 10);
-                const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
-
-                if (start >= videoSize || start < 0 || end >= videoSize) {
-                    return res.status(416).send('Requested range not satisfiable');
-                }
-
-                const contentLength = end - start + 1;
-                const headers = {
-                    "Content-Range": `bytes ${start}-${end}/${videoSize}`,
-                    "Accept-Ranges": "bytes",
-                    "Content-Length": contentLength,
-                    "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
-                };
-
-                res.writeHead(206, headers);
-
-                const videoStream = fs.createReadStream(videoPath, { start, end });
-
-                videoStream.on('open', () => {
-                    videoStream.pipe(res);
-                });
-
-                videoStream.on('error', (streamErr) => {
-                    console.error(`Error streaming video: ${streamErr.message}`);
-                    res.status(500).send({
-                        message: 'Error streaming video',
-                        error: streamErr.message
-                    });
-                });
-            }
-
-        } catch (fileErr) {
-            console.error(`Error accessing video file: ${fileErr.message}`);
-            return res.status(500).send({
-                message: 'Error accessing video file',
-                error: fileErr.message
-            });
-        }
+        const downloadBlockBlobResponse = await blobClient.download(0);
+        
+        res.set({
+            'Content-Type': 'video/mp4',
+            'Content-Length': downloadBlockBlobResponse.contentLength
+        });
+        
+        downloadBlockBlobResponse.readableStreamBody.pipe(res);
     });
 };
 
 
-const connection = require('../config/database');
+
 
 // Upload video function
 //Post request to hanndle file upload and metadata insertion
 // Upload video function
 // Post request to handle file upload and metadata insertion
 // Upload video function
-const handleVideoUpload = (req, res) => {
+const handleVideoUpload = async (req, res) => {
     console.log('Request body:', req.body); // Log the entire request body
 
-    // Check if file was uploaded
     if (!req.file) {
         console.error('No file uploaded.');
         return res.status(400).send('No file uploaded.');
     }
 
-    const { filename, mimetype, size } = req.file;
+    const { originalname, mimetype, size, buffer } = req.file;
+    const path = `videos/${originalname}`;
+    const blobClient = req.containerClient.getBlockBlobClient(originalname);
 
-    // Check and log the variable you're trying to split
-    const someVariableToSplit = req.body.someProperty; // Ensure this is sent from Postman
-    console.log('someVariableToSplit:', someVariableToSplit); // Log its value
+    try {
+        // Upload to Azure Blob Storage
+        await blobClient.uploadData(buffer);
+        
+        const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
+        const values = [originalname, path, mimetype, size];
 
-    // Validate the variable before splitting
-    if (typeof someVariableToSplit === 'string' && someVariableToSplit.includes('-')) {
-        try {
-            const parts = someVariableToSplit.split('-');
-            console.log('Split parts:', parts);
-        } catch (error) {
-            console.error('Error splitting someVariableToSplit:', error);
-            return res.status(500).send({
-                message: 'Error processing the variable',
-                error: error.message
-            });
-        }
-    } else {
-        console.error('someVariableToSplit is either undefined or does not contain a valid string to split');
-    }
-
-    const path = `videos/${filename}`;
-    const blobClient = containerClient.getBlockBlobClient(filename);
-    
-    // Upload to Azure Blob Storage
-    blobClient.uploadData(req.file.buffer)
-        .then(() => {
-            const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt) VALUES (?, ?, ?, ?, NOW())';
-            const values = [filename, path, mimetype, size];
-
-            // Insert metadata into the database
-            connection.query(query, values, (err, results) => {
-                if (err) {
-                    console.error('Error inserting video metadata:', err);
-                    return res.status(500).send({
-                        message: 'Error uploading video',
-                        error: err.message
-                    });
-                }
-
-                emitNotification('videoUploadSuccess', { filename, path, mimetype, size });
-
-                res.status(201).send({
-                    message: 'Video uploaded successfully',
-                    file: req.file
+        connection.query(query, values, (err) => {
+            if (err) {
+                console.error('Error inserting video metadata:', err);
+                return res.status(500).send({
+                    message: 'Error uploading video',
+                    error: err.message
                 });
+            }
+
+            emitNotification('videoUploadSuccess', { filename: originalname, path, mimetype, size });
+
+            res.status(201).send({
+                message: 'Video uploaded successfully',
+                file: req.file
             });
-        })
-        .catch((error) => {
-            console.error('Error uploading video to Azure Blob Storage:', error);
-            res.status(500).send('Error uploading video to storage.');
         });
+    } catch (error) {
+        console.error('Error uploading video to Azure Blob Storage:', error);
+        res.status(500).send('Error uploading video to storage.');
+    }
 };
+
+
 
 
 
@@ -257,6 +175,6 @@ const retrieveVideo = (req, res) => {
 
 
 
-module.exports = {retrieveVideo, streamVideo,multerErrorHandler, handleVideoUpload ,containerClient };
+module.exports = {retrieveVideo, streamVideo,multerErrorHandler, handleVideoUpload };
 
  
