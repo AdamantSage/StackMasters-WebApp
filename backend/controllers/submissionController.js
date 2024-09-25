@@ -57,7 +57,7 @@ exports.getSubmission = (req, res) =>{
     const {sub_id} = req.params; // Retrieve the assignment ID and user ID from the URL
     console.log(`Fetching submission with ID: ${sub_id}`);
     // Execute the SQL query to fetch the submission with the given ID's
-    Submission.select(sub_id, assignment_id, (err, results) => {
+    Submission.selectSubmission(sub_id, (err, results) => {
         if(err){
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
