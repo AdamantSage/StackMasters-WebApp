@@ -41,6 +41,24 @@ socket.on('user_deleted', (data) => {
     console.log('User Deleted:', data);
 });
 
+// Listen for video compression success
+socket.on('videoCompressionSuccess', (data) => {
+    console.log('Video compression successful:', data);
+});
+
+
+// Trigger video compression
+function compressVideo(videoData) {
+    socket.emit('compressVideo', videoData);
+}
+
+// Trigger video download submission
+function submitVideoDownload(videoId) {
+    console.log(`Requesting download for video with ID: ${videoId}`);
+    // Emit the 'submitVideoDownload' event with the provided videoId
+    socket.emit('submitVideoDownload', videoId);
+}
+
 // Optionally, handle errors
 socket.on('connect_error', (error) => {
     console.error('Connection Error:', error.message);
@@ -49,3 +67,9 @@ socket.on('connect_error', (error) => {
 socket.on('error', (error) => {
     console.error('WebSocket Error:', error.message);
 });
+
+
+
+
+
+

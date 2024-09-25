@@ -255,8 +255,68 @@ const retrieveVideo = (req, res) => {
     });
 };
 
+const uploadVideo = async (req, res) => {
+    // Check if a file was uploaded
+    if (!req.file) {
+        console.error('No file uploaded.');
+        return res.status(400).send('No file uploaded.');
+    }
+
+    let { filename } = req.file;
+    const filePath = `uploads/${filename}`; // Ensure this is a valid path
+
+    console.log('File uploaded:', filename);
+
+    // Insert video metadata with "pending" status for compression
+    const query = 'INSERT INTO videos (original_path, compressed_path, compression_status) VALUES (?, ?, ?)';
+    const values = [filePath, null, 'pending'];
+
+    connection.query(query, values, async (err, results) => {
+        if (err) {
+            console.error('Error saving video metadata:', err);
+            return res.status(500).send({ message: 'Error saving video metadata.', error: err.message });
+        }
+
+        const inputPath = path.join(__dirname, '../uploads', filename);
+        const outputPath = path.join(__dirname, '../uploads/compressed', filename);
+
+        console.log(`Compressing video from ${inputPath} to ${outputPath}`);
+        try {
+            // Compress the video
+            await compressVideo(inputPath, outputPath);
+            fs.unlinkSync(inputPath); // Delete original file after compression
+
+            // Upload the compressed video to Azure Blob Storage
+            const blobClient = containerClient.getBlockBlobClient(filename);
+            await blobClient.uploadFile(outputPath); // Upload compressed file to Azure
+
+            const azureBlobUrl = blobClient.url; // Get URL of the uploaded compressed video
+
+            // Delete the local compressed file after uploading to Azure
+            fs.unlinkSync(outputPath);
+
+            // Update video metadata in the database with Azure URL
+            const updateQuery = 'UPDATE videos SET compressed_path = ?, compression_status = ? WHERE id = ?';
+            const updateValues = [azureBlobUrl, 'completed', results.insertId];
+
+            connection.query(updateQuery, updateValues, (updateErr) => {
+                if (updateErr) {
+                    console.error('Error updating video metadata:', updateErr);
+                    return res.status(500).send({ message: 'Error updating video metadata.', error: updateErr.message });
+                }
+
+                console.log('Video processed, uploaded to Azure, and metadata updated.');
+                res.status(201).send({ message: 'File uploaded, compressed, and stored successfully', file: req.file });
+            });
+        } catch (error) {
+            console.error('Error compressing or uploading video:', error);
+            res.status(500).send({ message: 'Error processing video.', error: error.message });
+        }
+    });
+};
 
 
-module.exports = {retrieveVideo, streamVideo,multerErrorHandler, handleVideoUpload ,containerClient };
+
+module.exports = {retrieveVideo, streamVideo,multerErrorHandler, handleVideoUpload ,uploadVideo, containerClient };
 
  

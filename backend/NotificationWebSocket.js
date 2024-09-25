@@ -1,4 +1,5 @@
 const Assignment = require('./models/assignment');
+const videoController = require('./controllers/videoController');
 //const User = require('../controllers/user');
 
 module.exports = (io) => {
@@ -63,6 +64,36 @@ module.exports = (io) => {
 
         socket.on('disconnect', () => {
             console.log('user disconnected');
+        });
+    });
+
+    socket.on('submitVideoDownload', (videoId) => {
+        Video.findById(videoId, (err, video) => {
+            if (err) {
+                console.log('Error retrieving video:', err);
+                io.emit('Error', 'Failed to retrieve video for download');
+                return;
+            } else {
+                console.log('Video found', video);
+                io.emit('videoRetrieveSuccess', video);
+                return;
+            }
+        });
+    });
+
+     
+    socket.on('compressVideo', (videoData) => {
+       
+        compressVideo(videoData, (err, compressedVideo) => {
+            if (err) {
+                console.log('Error compressing video:', err);
+                io.to('adminRoom').emit('Error', 'Failed to compress video');
+                return;
+            } else {
+                console.log('Video compressed', compressedVideo);
+                io.to('adminRoom').emit('videoCompressionSuccess', compressedVideo);
+                return;
+            }
         });
     });
 }
