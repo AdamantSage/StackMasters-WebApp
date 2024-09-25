@@ -201,7 +201,6 @@ const getVideoMetadata = (videoId) => {
     });
 };
 
-// Stream Video
 /*const streamVideo = (req, res) => {
     const videoId = req.params.id;
 
