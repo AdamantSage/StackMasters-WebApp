@@ -5,7 +5,10 @@ const connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'test'
+    database: process.env.DB_NAME || 'test',
+    ssl: {
+        rejectUnauthorized: true // This is necessary for Azure MySQL
+    }
 
     
 });
