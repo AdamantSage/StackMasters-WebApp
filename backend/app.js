@@ -44,6 +44,5 @@ app.use('/routes', require('./routes/videoRoutes'));
 
 app.listen(5000, () => {
     console.log("Server is running on port 5000");
-//connecting to the db
 
 });
