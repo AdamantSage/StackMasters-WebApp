@@ -23,6 +23,11 @@ class Submission{
             [sub_id, user_id], callback);
     }
 
+    static selectSubmission(sub_id, user_id, callback){
+        db.query('SELECT * FROM submission WHERE sub_id = ?',
+            [sub_id], callback);
+    }
+
     static updateStudent(sub_id, updateData, callback){
         db.query('UPDATE submission SET sub_date = ? WHERE sub_id',
             [updateData.sub_date, sub_id], callback);

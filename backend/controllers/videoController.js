@@ -1,27 +1,35 @@
-
 const fs = require('fs');
 const path = require('path');
 const { emitNotification } = require('../NotificationWebSocket.js');
-//code for videoSrtreaming
 const multer = require('multer');
 const http = require('http');
-//const { BlobServiceClient } = require('@azure/storage-blob');
-const connection = require('../config/database');
-require('dotenv/config');
+const { BlobServiceClient } = require('@azure/storage-blob');
+require('dotenv').config(); 
+const connection = require('../config/database'); // Adjust the path as needed
 
+// Setup environment variables
+const accountName = process.env.ACCOUNT_NAME;
+const sasToken = process.env.SAS_TOKEN;
+const containerName = process.env.CONTAINER_NAME;
 
-const getVideoMetadata = (videoId) => {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT filename, videoUrl FROM videos WHERE vid_id = ?';
-        connection.query(query, [videoId], (err, results) => {
-            if (err) return reject(err);
-            if (results.length === 0) return reject(new Error('Video not found'));
-            resolve(results[0]);
+// Establishing connection with Azure Blob Storage
+const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
+const containerClient = blobServiceClient.getContainerClient('stackblob');
+
+// Middleware to set containerClient
+const setContainerClient = (req, res, next) => {
+    try {
+        console.log('Setting container client...');
+        req.containerClient = containerClient; // Attach the container client
+        console.log('Container client set successfully');
+        next(); // Proceed to the next middleware or route handler
+    } catch (error) {
+        console.error('Error setting container client:', error);
+        res.status(500).send({
+            message: 'Failed to set container client'
         });
-    });
+    }
 };
-
-
 // Function to stream video
 const streamVideo = async (req, res) => {
     const videoId = req.params.id;
@@ -59,15 +67,7 @@ const streamVideo = async (req, res) => {
     });
 };
 
-
-
-
-// Upload video function
-//Post request to hanndle file upload and metadata insertion
-// Upload video function
-// Post request to handle file upload and metadata insertion
-// Upload video function
-// Upload video function
+// Handle Video Upload
 const handleVideoUpload = async (req, res) => {
     console.log('Request body:', req.body);
 
@@ -77,16 +77,17 @@ const handleVideoUpload = async (req, res) => {
     }
 
     const { originalname, mimetype, size, buffer } = req.file;
-    const path = `videos/${originalname}`;
+    const filePath = `videos/${originalname}`;
     const blobClient = req.containerClient.getBlockBlobClient(originalname);
     const videoUrl = blobClient.url; // Get the URL for the uploaded video
 
     try {
         // Upload to Azure Blob Storage
         await blobClient.uploadData(buffer);
-        
+
+        // SQL query to insert video metadata into the database
         const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
-        const values = [originalname, path, mimetype, size, videoUrl];
+        const values = [originalname, filePath, mimetype, size, videoUrl];
 
         connection.query(query, values, (err) => {
             if (err) {
@@ -97,7 +98,7 @@ const handleVideoUpload = async (req, res) => {
                 });
             }
 
-            emitNotification('videoUploadSuccess', { filename: originalname, path, mimetype, size, videoUrl });
+            emitNotification('videoUploadSuccess', { filename: originalname, path: filePath, mimetype, size, videoUrl });
 
             res.status(201).send({
                 message: 'Video uploaded successfully',
@@ -112,42 +113,52 @@ const handleVideoUpload = async (req, res) => {
 };
 
 
+const downloadVideo = async (req, res) => {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, '../compressed', filename); // Adjust path as needed
 
+    try {
+        // Check if the file exists using promises and async/await
+        await fs.access(filePath, constants.F_OK);
 
+        // Set headers to trigger download
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', 'video/mp4'); // Adjust Content-Type based on your video format
 
-
-// Catch possible multer errors (like file size limits)
-/*Multer Error Handling: The multerErrorHandler middleware captures specific errors related 
-to file uploads, such as exceeding file size limits or invalid file types. It logs these errors
- and sends a clear response back 
-to the client.*/
-
-const multerErrorHandler = (err, req, res, next) => {
-    if (err instanceof multer.MulterError) {
-        console.error(`Multer error: ${err.message}`);
-        return res.status(400).send({
-            message: 'Multer error occurred during file upload',
-            error: err.message
+        // Stream the file to the response
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res).on('error', (err) => {
+            console.error(`Error streaming file: ${filename}`, err);
+            res.status(500).send({
+                message: 'Error streaming file',
+                error: err.message
+            });
         });
-    } else if (err) {
-        console.error(`Unknown error: ${err.message}`);
-        return res.status(500).send({
-            message: 'An unknown error occurred during file upload',
+
+    } catch (err) {
+        console.error(`File not found: ${filePath}`, err);
+        res.status(404).send({
+            message: 'File not found',
             error: err.message
         });
     }
-    next();
 };
-
-
-// Retrieve video function
+// Retrieve Video
 const retrieveVideo = async (req, res) => {
     try {
         const videoId = req.params.id;
         const video = await getVideoMetadata(videoId);
-        
-        // Now retrieve the video URL directly from the metadata
-        const videoUrl = video.videoUrl; // Assuming videoUrl is stored in the database
+
+        // Check if the containerClient is available
+        if (!req.containerClient) {
+            console.error('Container client is not set in the request.');
+            return res.status(500).send({
+                message: 'Internal Server Error: Container client not set.'
+            });
+        } 
+
+        // Retrieve the video URL directly from the metadata
+        const videoUrl = video.videoUrl;
 
         // Check if the video exists in Azure Blob Storage
         const blobClient = req.containerClient.getBlockBlobClient(video.filename);
@@ -178,8 +189,133 @@ const retrieveVideo = async (req, res) => {
     }
 };
 
+// Get video metadata
+const getVideoMetadata = (videoId) => {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT filename, videoUrl FROM videos WHERE vid_id = ?';
+        connection.query(query, [videoId], (err, results) => {
+            if (err) return reject(err);
+            if (results.length === 0) return reject(new Error('Video not found'));
+            resolve(results[0]);
+        });
+    });
+};
 
+/*const streamVideo = (req, res) => {
+    const videoId = req.params.id;
 
-module.exports = {retrieveVideo, streamVideo,multerErrorHandler, handleVideoUpload };
+    // SQL query to fetch video metadata by vid_id
+    const query = 'SELECT filename, path FROM videos WHERE videoUrl= ?';
+    const values = [videoId];
 
- 
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error(`Error retrieving video from database: ${err.message}`);
+            return res.status(500).send({
+                message: 'Error retrieving video',
+                error: err.message
+            });
+        }
+
+        if (results.length === 0) {
+            console.error(`Video not found for ID: ${videoId}`);
+            return res.status(404).send({
+                message: 'Video not found'
+            });
+        }
+
+        const video = results[0];
+        const videoPath = path.join(__dirname, '../uploads', video.filename); // Adjust to your storage directory
+        console.log(`Streaming video from path: ${videoPath}`);
+
+        try {
+            const videoSize = fs.statSync(videoPath).size;
+            const range = req.headers.range;
+
+            if (!range) {
+                // No Range header, send entire video
+                const headers = {
+                    "Content-Length": videoSize,
+                    "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
+                };
+
+                res.writeHead(200, headers);
+
+                const videoStream = fs.createReadStream(videoPath);
+
+                videoStream.on('open', () => {
+                    videoStream.pipe(res);
+                });
+
+                videoStream.on('error', (streamErr) => {
+                    console.error(`Error streaming video: ${streamErr.message}`);
+                    res.status(500).send({
+                        message: 'Error streaming video',
+                        error: streamErr.message
+                    });
+                });
+
+            } else {
+                // Handle Range request
+                const parts = range.replace(/bytes=/, "").split("-");
+                const start = parseInt(parts[0], 10);
+                const end = parts[1] ? parseInt(parts[1], 10) : videoSize - 1;
+
+                if (start >= videoSize || start < 0 || end >= videoSize) {
+                    return res.status(416).send('Requested range not satisfiable');
+                }
+
+                const contentLength = end - start + 1;
+                const headers = {
+                    "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": contentLength,
+                    "Content-Type": 'video/mp4' // Update to video.mimetype if dynamic types are needed
+                };
+
+                res.writeHead(206, headers);
+
+                const videoStream = fs.createReadStream(videoPath, { start, end });
+
+                videoStream.on('open', () => {
+                    videoStream.pipe(res);
+                });
+
+                videoStream.on('error', (streamErr) => {
+                    console.error(`Error streaming video: ${streamErr.message}`);
+                    res.status(500).send({
+                        message: 'Error streaming video',
+                        error: streamErr.message
+                    });
+                });
+            }
+
+        } catch (fileErr) {
+            console.error(`Error accessing video file: ${fileErr.message}`);
+            return res.status(500).send({
+                message: 'Error accessing video file',
+                error: fileErr.message
+            });
+        }
+    });
+};*/
+
+// Multer error handling middleware
+const multerErrorHandler = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        console.error(`Multer error: ${err.message}`);
+        return res.status(400).send({
+            message: 'Multer error occurred during file upload',
+            error: err.message
+        });
+    } else if (err) {
+        console.error(`Unknown error: ${err.message}`);
+        return res.status(500).send({
+            message: 'An unknown error occurred during file upload',
+            error: err.message
+        });
+    }
+    next();
+};
+
+module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,downloadVideo,containerClient,setContainerClient};

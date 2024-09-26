@@ -3,17 +3,12 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
-const { BlobServiceClient } = require('@azure/storage-blob');
-
+const { setContainerClient } = require('./controllers/videoController'); // Import the middleware
 dotenv.config();
 
 const app = express();
 
-// Initialize Azure Blob Storage client
-const containerName =process.env.CONTAINER_NAME;
-const azureConString = process.env.AZURE_STORAGE_CONSTR;
-const blobServiceClient = BlobServiceClient.fromConnectionString(azureConString);
-const containerClient = blobServiceClient.getContainerClient(containerName);
+
 
 //we will put files like css/js for frontend we might want to use
 const publicDirectory = path.join(__dirname, './public');
@@ -29,17 +24,14 @@ app.use(express.json());
 app.set('view engine', 'hbs');
 
 
-
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke!');
 });
 
-app.use((req, res, next) => {
-    req.containerClient = containerClient;
-    next();
-});
+app.use(setContainerClient); // This should be called before defining routes
+
 //define routes
 app.use('/', require('./routes/pages'));
 app.use('/users', require('./routes/users'));
@@ -55,9 +47,3 @@ app.listen(5000, () => {
 //connecting to the db
 
 });
-
-// Azure Media Services setup 
-//const mediaClient = new AzureMediaServicesClient(credentials, subscriptionId);
-//const resourceGroup = 'VideoStorage';
-//const accountName = 'videos';
-
