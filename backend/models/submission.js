@@ -51,7 +51,7 @@ class Submission{
     }
 
     static deleteUserSubmission(user_id, sub_id, callback){
-        db.query('DELETE FROM user_on_submission WHERE user_id = ?, sub_id = ?',
+        db.query('DELETE FROM user_on_submission WHERE user_id = ? AND sub_id = ?',
             [user_id, sub_id], callback
         );
     }

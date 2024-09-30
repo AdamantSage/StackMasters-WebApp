@@ -21,8 +21,8 @@ class Assignment {
         }, callback);
     }
 
-    static select(assignment_id, callback){
-        db.query('SELECT * FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
+    static select(assignment_id, user_id, callback){
+        db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id, user_id], callback);
     }
 
     static update(assignment_id, updateData, callback) {
@@ -38,7 +38,7 @@ class Assignment {
     }
 
     static deleteUserAssignment(user_id, assignment_id, callback){
-        db.query('DELETE FROM user_on_assignment WHERE user_id = ?, assignment_id = ?',
+        db.query('DELETE FROM user_on_assignment WHERE user_id = ? AND assignment_id = ?',
             [user_id, assignment_id], callback
         );
     }
