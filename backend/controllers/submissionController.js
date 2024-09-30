@@ -162,7 +162,7 @@ exports.deleteUserSubmission = (req, res) =>{
     console.log(`Deleting submission with ID: ${user_id}, ${sub_id}`);
     // Execute the SQL query to delete the submission with the given IDs
     Submission.deleteUserSubmission(
-    [user_id, sub_id], (err, results) => {
+    user_id, sub_id, (err, results) => {
         if(err){
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
