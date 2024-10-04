@@ -1,25 +1,29 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import UserAdminPage from './pages/UserAdminPage';
+import ListAssignments from './pages/ListAssignments';
+import CreateAssignment from './pages/CreateAssignment';
+import ListVideos from './pages/ListVideos';
+import VideoFeedback from './pages/VideoFeedback';
 import logo from './logo.svg';
 import './App.css';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/user-admin" element={<UserAdminPage />} />
+        <Route path="/list-assignments" element={<ListAssignments />} />
+        <Route path="/create-assignment" element={<CreateAssignment />} />
+        <Route path="/list-videos" element={<ListVideos />} />
+        <Route path="/watch-feedback/:id" element={<VideoFeedback />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
