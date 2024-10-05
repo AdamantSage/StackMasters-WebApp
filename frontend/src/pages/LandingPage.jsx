@@ -1,16 +1,56 @@
 // src/components/LandingPage.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
+  const navigate = useNavigate(); // Initialize the useNavigate hook
+
+  const handleGetStarted = () => {
+    navigate('/login');
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold mb-4">Welcome to the Application</h1>
-      <div className="flex flex-col space-y-2">
-        <Link to="/login" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Login</Link>
-        <Link to="/user-admin" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">User Administration</Link>
-        <Link to="/list-assignments" className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-700">List Assignments</Link>
-        <Link to="/create-assignment" className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Create Assignment</Link>
+    <div className="landing-page">
+      <header>
+        <div className="container">
+          <a href="#" className="logo">Stack <b>Masters</b></a>
+          <ul className="links">
+            <li>
+              <Link to="/login">Login</Link>
+            </li>
+            <li>
+              <Link to="/user-admin">User Administration</Link>
+            </li>
+            <li>
+              <Link to="/list-assignments">List Assignments</Link>
+            </li>
+            <li>
+              <Link to="/create-assignment">Create Assignment</Link>
+            </li>
+            
+            <li>
+              <Link to="/about">About Us</Link>
+            </li>
+            
+            <li>
+              <Link to="/info">Info</Link>
+            </li>
+            
+          </ul>
+        </div>
+      </header>
+      <div className="content">
+        <div className="container">
+          <div className="info">
+            <h1>Welcome</h1>
+            <p>Just an overview maybe</p>
+            <button onClick={handleGetStarted} className="get-started-button">Get Started</button>
+          </div>
+          <div className="image">
+            /* Add image here */
+          </div>
+        </div>
       </div>
     </div>
   );
