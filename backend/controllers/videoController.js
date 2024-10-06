@@ -3,7 +3,9 @@ const path = require('path');
 const { emitNotification } = require('../NotificationWebSocket.js');
 const multer = require('multer');
 const http = require('http');
-const { BlobServiceClient } = require('@azure/storage-blob');
+
+const { BlobServiceClient, AzureSASCredential } = require('@azure/storage-blob');
+//const { BlobServiceClient, AzureSASCredential } = require('@azure/storage-blob');
 require('dotenv').config(); 
 const connection = require('../config/database'); // Adjust the path as needed
 
@@ -13,8 +15,14 @@ const sasToken = process.env.SAS_TOKEN;
 const containerName = process.env.CONTAINER_NAME;
 
 // Establishing connection with Azure Blob Storage
-const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
-const containerClient = blobServiceClient.getContainerClient('stackblob');
+//const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
+//const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, new AzureSASCredential(sasToken));
+
+const connectionString = process.env.AZURE_STORAGE_CONSTR;
+const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+
+
+const containerClient = blobServiceClient.getContainerClient(containerName);
 
 // Middleware to set containerClient
 const setContainerClient = (req, res, next) => {
@@ -83,8 +91,14 @@ const handleVideoUpload = async (req, res) => {
 
     try {
         // Upload to Azure Blob Storage
-        await blobClient.uploadData(buffer);
-
+        //await blobClient.uploadData(buffer);
+        try {
+            await blobClient.uploadData(buffer);
+        } catch (error) {
+            console.error('Azure Blob Storage upload error:', error);
+            res.status(500).send('Error uploading video to storage.');
+        }
+        
         // SQL query to insert video metadata into the database
         const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
         const values = [originalname, filePath, mimetype, size, videoUrl];
