@@ -21,8 +21,8 @@ const Register = () => {
       return;
     }
 
-    try {
-      const response = await fetch('https://your-backend-url.com/register', {
+    try {//locally
+      const response = await fetch('https://localhost:5000/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
