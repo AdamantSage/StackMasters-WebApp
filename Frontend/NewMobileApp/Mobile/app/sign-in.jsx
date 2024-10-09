@@ -6,8 +6,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 const SignIn = () => {
-    const [username, setUsername] = React.useState('Username');
-    const [password, setPassword] = React.useState('Password');
+    const [username, setUsername] = useState('Username');
+    const [password, setPassword] = useState('Password');
     const router = useRouter();
 
     const handleSignIn = async () => {
@@ -62,10 +62,9 @@ const SignIn = () => {
             </TouchableOpacity>
 
             <TouchableOpacity 
-                    style={styles.quickNavButton} 
-                    onPress={() => router.push('/(Screens)/home')} // Directly navigate to the home screen
-                >
-                    <Text style={styles.buttonText}>Go to Home (Quick Nav)</Text>
+                style={styles.quickNavButton} 
+                onPress={() => router.push('/(Screens)/home')}>
+                <Text style={styles.buttonText}>Go to Home (Quick Nav)</Text>
                 </TouchableOpacity>
         </ScrollView>
     </SafeAreaView>
