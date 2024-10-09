@@ -217,7 +217,7 @@ button {
   font-weight: 600;
   text-transform:  uppercase;
   font-size: 1em;
-  color: #fff;
+  color: #ffffff;
   line-height: 1em;
   letter-spacing: 0.6px;
   border-radius: 3px;
@@ -281,7 +281,7 @@ button:focus, button:active, button:hover {
 .links-container {
   display: flex;
   flex-direction: column; /* Stack links vertically */
-  
+  text-decoration: none;
   margin-top: 20px; /* Space above links */
 }
 
@@ -314,6 +314,7 @@ ul {
   margin: 0;
 }
 .container {
+  position: sticky;
   padding-left: 15px;
   padding-right: 15px;
   margin-left: auto;
@@ -473,6 +474,80 @@ ul {
 
 .get-started-button:hover {
   background-color: #673AB7; /* Darker shade on hover */
+}
+
+.page header{
+  position: fixed;
+  top:0;
+  width: 100%;
+  background-color:rgb(186, 204, 50);
+}
+
+.page-heading {
+  text-align: center; /* Center the heading text */
+  margin-bottom: 20px; /* Space below the heading */
+}
+
+.page-Container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the content horizontally */
+  justify-content: center; /* Center the content vertically */
+  height: 50vh; /* Full height of the viewport */
+  padding-top: 120px; 
+   padding-left: 20px;
+  padding-right: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+ 
+}
+.container {
+  max-width: 800px; /* Maximum width for the container */
+  width: 100%; /* Full width of the container */
+  margin: 0 auto; /* Center the container */
+}
+
+.linksList {
+  list-style: none; /* Remove list styles */
+  padding: 0; /* Remove padding */
+  text-align: center; /* Center the links */
+  margin-bottom: 20px; /* Space below the links */
+}
+
+.linksList li {
+  display: inline; /* Display links inline */
+  margin: 0 10px; /* Margin between links */
+}
+
+.displayBox {
+  width: 100%; /* Full width for display box */
+  margin-bottom: 20px; /* Space below the display box */
+}
+
+.list {
+  list-style: none; /* Remove list styles */
+  padding: 0; /* Remove padding */
+}
+
+.record {
+  margin: 10px 0; /* Space between assignment records */
+  padding: 10px; /* Padding around each record */
+  background-color: #f8f9fa; /* Light background color for records */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+/* Textarea specific styling */
+.form-label{
+  display: flex;
+  padding-right: 200px;
+}
+
+.assign-Input{
+  padding-right: 200px;
+  padding-bottom: 200px;
+  padding-block-end: 5%;
+  border: 20px;
+  
 }
 
 /* End Landing Page */

@@ -24,41 +24,44 @@ const ListAssignments = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-200">
-      {/* Container to center content */}
-      <div className="container mx-auto flex flex-col items-center p-6 bg-white shadow-md rounded-lg">
-        <header className="flex justify-between items-center w-full mb-6">
-          <h1 className="text-4xl font-bold">List of Assignments</h1>
-          <nav>
-            <ul className="flex space-x-4">
-              <li>
-                <Link to="/" className="text-purple-700 hover:underline">Landing Page</Link>
-              </li>
-              <li>
-              <Link to="/watch-feedback/:id" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Watch Feedback</Link>
-              </li>
-            </ul>
-          </nav>
-        </header>
-
-        {/* List of Assignments */}
-        <ul className="list-disc w-1/2 p-4 border rounded mb-6">
-          {assignments.slice(0, visibleCount).map(assignment => (
-            <li key={assignment.id} className="mb-2">
-              <strong>{assignment.title}</strong> - Submitted by {assignment.userName} on {assignment.timeSubmitted}
+    <div className="page">
+      <header>
+        <div className="container">
+          <h1 className="page-heading">List of Assignments</h1>
+          <ul className="linksList">
+            <li>
+              <Link to="/" className="link">Landing Page</Link>
             </li>
-          ))}
-        </ul>
-
+            <li>
+            <Link to="/user-admin" className="link">User Administration</Link>
+            </li>
+            <li>
+            <Link to="/create-assignment" className="link">Create Assignment</Link>
+            </li>
+          </ul>
+        </div>
+      </header>
+      <div className="page-Container">
+        {/* List of Assignments */}
+        <div class="displayBox">
+          <ul className="list">
+            {assignments.slice(0, visibleCount).map(assignment => (
+              <li key={assignment.id} className="record">
+                <strong>{assignment.title}</strong> - Submitted by {assignment.userName} on {assignment.timeSubmitted}
+              </li>
+            ))}
+          </ul>
+        </div>
         {/* Button to toggle show more/less */}
         <button
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 mb-6"
+          className="get-started-button"
           onClick={toggleShowMore}
         >
           {showMore ? 'Show Less' : 'Show More'}
         </button>
       </div>
     </div>
+    
   );
 };
 
