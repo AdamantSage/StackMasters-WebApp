@@ -64,7 +64,7 @@ exports.createUserAssignment = (req, res) => {
 // Retrieve a specific assignment based on module_code
 exports.getAssignment = (req, res) => {
     const {module_code} = req.params; // Retrieve the module_code from the URL
-    console.log(`Fetching assignment with ID: ${module_code}`);
+    console.log(`Fetching assignment with module_code: ${module_code}`);
     // Execute the SQL query to fetch the assignment with the given module_code from the model
     Assignment.newSelect(module_code, (err, results) => {
         if (err) {
