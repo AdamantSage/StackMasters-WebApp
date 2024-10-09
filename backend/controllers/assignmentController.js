@@ -61,12 +61,12 @@ exports.createUserAssignment = (req, res) => {
         }
     });
 };
-// Retrieve a specific assignment based on ID
+// Retrieve a specific assignment based on module_code
 exports.getAssignment = (req, res) => {
-    const {user_id, assignment_id} = req.params; // Retrieve the assignment ID from the URL
-    console.log(`Fetching assignment with ID: ${assignment_id}, ${user_id}`);
-    // Execute the SQL query to fetch the assignment with the given ID from the model
-    Assignment.select(assignment_id, user_id, (err, results) => {
+    const {module_code} = req.params; // Retrieve the module_code from the URL
+    console.log(`Fetching assignment with module_code: ${module_code}`);
+    // Execute the SQL query to fetch the assignment with the given moduel_code from the model
+    Assignment.newSelect(module_code, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -78,7 +78,7 @@ exports.getAssignment = (req, res) => {
         } else {
             console.log(results); // Log the results of the query
             // Sends the assignment data as JSON with status code 200 which means the request is successful
-            return res.status(200).json(results[0]);
+            return res.status(200).json(results);
         }
     });
 };
