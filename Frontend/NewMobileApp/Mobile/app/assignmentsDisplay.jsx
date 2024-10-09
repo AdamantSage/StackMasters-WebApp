@@ -2,7 +2,7 @@ import { View, Text, Button, Alert } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { RNCamera } from 'react-native-camera';
-//import DocumentPicker from 'react-native-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
 
 const assignmentsDisplay = () => {
   const router = useRouter();
@@ -14,6 +14,7 @@ const assignmentsDisplay = () => {
 
   const uploadVideoApi = 'https://yourapi.com/upload-video'; 
   const createSubmissionApi = 'https://yourapi.com/create-submission';
+  const createuserOnSubmission ='https://your-backend-url.com/userSubmission';
 
   const handleRecordVideo = async () => {
     if (cameraRef.current) {
@@ -69,6 +70,23 @@ const assignmentsDisplay = () => {
     }
   };
 
+  const handleChooseVideo = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'video/*',
+      });
+      if (result.type === 'success') {
+        console.log('Video selected:', result.uri);
+        setVideoUri(result.uri); // Set selected video URI
+      } else {
+        console.log('User canceled video picker');
+      }
+    } catch (error) {
+      console.error('Error picking video:', error);
+      Alert.alert('Error picking video');
+    }
+  };  
+
   const handleSubmit = async () => {
     const uploadResponse = await uploadVideo();
     if (!uploadResponse) return; // Stop if the upload failed
@@ -81,7 +99,7 @@ const assignmentsDisplay = () => {
     };
 
     try {
-      const response = await fetch(createSubmissionApi, {
+      const response = await fetch(createSubmissionApi, createuserOnSubmission, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,6 +143,11 @@ const assignmentsDisplay = () => {
           setIsRecording(true);
           handleRecordVideo();
         }}
+      />
+
+      <Button
+        title="Choose Video from Gallery"
+        onPress={handleChooseVideo}
       />
 
       <Button
