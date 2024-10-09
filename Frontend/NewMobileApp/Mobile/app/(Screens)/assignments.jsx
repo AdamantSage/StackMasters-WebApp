@@ -22,7 +22,7 @@ const Assignments = () => {
 
   useEffect(() => {
     if(selectedModule){
-      fetch('https://your-backend-url.com/assignment').then(response => response.json()).then((data) =>{
+      fetch('https://your-backend-url.com/assignment/${selectedModule}').then(response => response.json()).then((data) =>{
         setAssignments(data);
       }).catch((error) => {
         console.error('Error finding assignments', error);

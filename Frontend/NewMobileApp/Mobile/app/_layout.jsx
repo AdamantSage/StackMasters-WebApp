@@ -6,6 +6,10 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: true }}/>
       <Stack.Screen name="sign-in" options={{headerShown: true}}/>
       <Stack.Screen name="(Screens)" options={{headerShown: false}}/>
+      <Stack.Screen name="register" options={{headerShown: true}}/>
+      <Stack.Screen name="exportMarks" options={{headerShown: true}}/>
+
+
     </Stack>
   );
 }

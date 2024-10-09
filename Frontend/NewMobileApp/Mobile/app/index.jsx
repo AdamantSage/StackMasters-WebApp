@@ -18,6 +18,17 @@ export default function Index() {
             Go to sign in screen
           </Text>
         </Link>
+
+        <Link href="/register" style={styles.button}>
+          <Text style={styles.buttonText}>
+            New User? Register
+          </Text>
+        </Link>
+        <Link href="/exportMarks" style={styles.button}>
+          <Text style={styles.buttonText}>
+              exportMarks     
+          </Text>
+        </Link>
       </ScrollView>
     </SafeAreaView>
   );
