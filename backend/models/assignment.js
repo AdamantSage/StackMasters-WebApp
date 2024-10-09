@@ -25,6 +25,10 @@ class Assignment {
         db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id, user_id], callback);
     }
 
+    static newSelect(module_code, callback){
+        db.query('SELECT * FROM assignment WHERE module_code =?',[module_code], callback);
+    }
+
     static update(assignment_id, updateData, callback) {
         db.query(
             'UPDATE assignment SET assign_name = ?, due_date = ?, assign_desc = ? WHERE assignment_id = ?',
