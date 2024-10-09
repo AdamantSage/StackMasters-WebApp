@@ -10,8 +10,9 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false); // State for password visibility
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // State for confirm password visibility
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [responseMessage, setResponseMessage] = useState('');
 
   const router = useRouter();
 
@@ -21,29 +22,41 @@ const Register = () => {
       return;
     }
 
-    try {//locally
-      const response = await fetch('https://localhost:5000/create', {
+    try {
+      const response = await fetch('http://192.168.57.168:5000/users/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username,
+          name: username,
           email,
           password,
+          passwordConfirm: confirmPassword,
           role,
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log('Response Text:', text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (error) {
+        console.error('JSON Parse Error:', error);
+        Alert.alert('Error', 'Failed to parse server response');
+        return;
+      }
 
       if (response.ok) {
-        Alert.alert('Success', 'Registration successful');
-        router.push('/(Screens)/home');
+        setResponseMessage('Registration successful');
+        router.push('/sign-in');
       } else {
-        Alert.alert('Error', data.message || 'Registration failed');
+        setResponseMessage(data.message || 'Registration failed');
       }
     } catch (error) {
+      console.error('Fetch error:', error);
       Alert.alert('Error', 'Unable to register, please try again');
     }
   };
@@ -70,28 +83,24 @@ const Register = () => {
           <TextInput
             style={styles.passwordInput}
             placeholder="Password"
-            secureTextEntry={!passwordVisible} // Toggle password visibility
+            secureTextEntry={!passwordVisible}
             onChangeText={setPassword}
             value={password}
           />
           <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-            <Text style={styles.toggleText}>
-              {passwordVisible ? 'Hide' : 'Show'}
-            </Text>
+            <Text style={styles.toggleText}>{passwordVisible ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
             placeholder="Confirm Password"
-            secureTextEntry={!confirmPasswordVisible} // Toggle confirm password visibility
+            secureTextEntry={!confirmPasswordVisible}
             onChangeText={setConfirmPassword}
             value={confirmPassword}
           />
           <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
-            <Text style={styles.toggleText}>
-              {confirmPasswordVisible ? 'Hide' : 'Show'}
-            </Text>
+            <Text style={styles.toggleText}>{confirmPasswordVisible ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -110,6 +119,9 @@ const Register = () => {
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
+
+        {/* Display the response message */}
+        {responseMessage ? <Text style={styles.responseText}>{responseMessage}</Text> : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -138,7 +150,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     padding: 10,
-    color: '#000', // Change to fit your design
+    color: '#000',
   },
   toggleText: {
     color: '#663399',
@@ -167,6 +179,12 @@ const styles = StyleSheet.create({
     color: '#f8f8ff',
     fontSize: 16,
     textAlign: 'center',
+  },
+  responseText: {
+    margin: 12,
+    fontSize: 16,
+    textAlign: 'center',
+    color: 'green', // or red based on success or error
   },
 });
 

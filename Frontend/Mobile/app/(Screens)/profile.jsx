@@ -1,96 +1,129 @@
+// Frontend/Mobile/app/(Screens)/profile.jsx
 import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Ensure you import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserId } from '../utils'; // Adjusted import path
 
-const profile = ({ userId }) => {
-  const [username, setUsername] = useState('');
+const profile = () => {
+  const router = useRouter();
+  const [userId, setUserId] = useState(null);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false); 
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
-  // Fetch user data when component mounts
+  // Fetch user ID on mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      setIsLoading(true);
-      try {
-        const token = await AsyncStorage.getItem('jwt'); // Retrieve the JWT
-        console.log('Token retrieved from AsyncStorage:', token); // Log the token
-
-        if (!token) {
-          Alert.alert('Error', 'No token found. Please log in again.');
-          return; // Exit if no token
-        }
-
-        const response = await fetch(`https://your-backend-url.com/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the JWT in the headers
-          },
-        });
-        const data = await response.json();
-        console.log('User data:', data); // Log user data
-
-        if (response.ok) {
-          setUsername(data.username);
-          setEmail(data.email);
-          setRole(data.role);
-        } else {
-          Alert.alert('Error', data.message || 'Failed to fetch user data');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error); // Log the error
-        Alert.alert('Error', 'Unable to fetch user data, please try again');
-      } finally {
-        setIsLoading(false);
+    const fetchUserId = async () => {
+      const id = await getUserId();
+      if (id) {
+        setUserId(id);
+        fetchUserData(id);
+      } else {
+        Alert.alert('Error', 'User ID is missing. Please log in again.');
+        router.push('/(Screens)/login');
       }
     };
+    
+    fetchUserId();
+  }, []);
 
-    fetchUserData();
-  }, [userId]);
+  // Fetch user data when userId is available
+  const fetchUserData = async (userId) => {
+    console.log('Fetching user data for User ID:', userId);
+    setIsLoading(true);
+    
+    try {
+      const token = await AsyncStorage.getItem('jwt');
+      if (!token) {
+        Alert.alert('Error', 'No token found. Please log in again.');
+        router.push('/(Screens)/login');
+        return;
+      }
+
+      const response = await fetch(`http://192.168.57.168:5000/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setName(data.name);
+        setEmail(data.email);
+        setRole(data.role);
+      } else {
+        const data = await response.json();
+        Alert.alert('Error', data.message || 'Failed to fetch user data');
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      Alert.alert('Error', 'Unable to fetch user data, please try again');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('jwt'); // Remove the JWT token
+      await AsyncStorage.removeItem('userId'); // Remove the user ID
+
+      // Navigate the user to the login screen
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'Unable to log out, please try again.');
+    }
+  };
 
   // Handle profile update
   const handleUpdateProfile = async () => {
+    const token = await AsyncStorage.getItem('jwt');
+    if (!userId || !token) {
+      Alert.alert('Error', 'User ID or token not found. Please log in again.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     try {
-      const token = await AsyncStorage.getItem('jwt'); // Retrieve the JWT
-      const response = await fetch(`https://your-backend-url.com/users/${userId}`, {
+      const response = await fetch(`http://192.168.57.168:5000/users/update/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // Include the JWT in the headers
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          username,
-          email,
-          password, // Include new password if provided
-          role, // Allow role update
-        }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         Alert.alert('Success', 'Profile updated successfully');
-        router.push('/(Screens)/home'); // Redirect to home after update
+        // Reset fields
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        router.push('/(Screens)/home');
       } else {
         Alert.alert('Error', data.message || 'Update failed');
       }
     } catch (error) {
-      console.error('Error updating profile:', error); // Log the error
+      console.error('Error updating profile:', error);
       Alert.alert('Error', 'Unable to update profile, please try again');
     }
   };
-
+  
   // Handle user deletion
   const handleDeleteUser = async () => {
     Alert.alert(
@@ -106,23 +139,23 @@ const profile = ({ userId }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('jwt'); // Retrieve the JWT
-              const response = await fetch(`https://your-backend-url.com/users/${userId}`, {
+              const token = await AsyncStorage.getItem('jwt');
+              const response = await fetch(`http://192.168.57.168:5000/users/update/${userId}`, {
                 method: 'DELETE',
                 headers: {
-                  Authorization: `Bearer ${token}`, // Include the JWT in the headers
+                  Authorization: `Bearer ${token}`,
                 },
               });
 
               if (response.ok) {
                 Alert.alert('Success', 'User deleted successfully');
-                router.push('/(Screens)/login'); // Redirect to login screen after deletion
+                router.push('/(Screens)/login');
               } else {
                 const data = await response.json();
                 Alert.alert('Error', data.message || 'Failed to delete user');
               }
             } catch (error) {
-              console.error('Error deleting user:', error); // Log the error
+              console.error('Error deleting user:', error);
               Alert.alert('Error', 'Unable to delete user, please try again');
             }
           },
@@ -152,9 +185,9 @@ const profile = ({ userId }) => {
 
         <TextInput
           style={styles.input}
-          placeholder="Username"
-          onChangeText={setUsername}
-          value={username}
+          placeholder="Name"
+          onChangeText={setName}
+          value={name}
         />
         <TextInput
           style={styles.input}
@@ -197,6 +230,11 @@ const profile = ({ userId }) => {
         <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteUser}>
           <Text style={styles.buttonText}>Delete User</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+    <Text style={styles.buttonText}>Logout</Text>
+</TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -264,6 +302,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginHorizontal: 12,
   },
+  logoutButton: {
+    backgroundColor: 'red',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 20,
+    marginHorizontal: 12,
+},
 });
 
 export default profile;
