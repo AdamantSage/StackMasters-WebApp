@@ -46,7 +46,7 @@ const Profile = () => {
         return;
       }
 
-      const response = await fetch(`http://192.168.58.28:5000/users/users/${userId}`, {
+      const response = await fetch(`http://192.168.48.58:5000/users/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -104,7 +104,7 @@ const Profile = () => {
     }
 
     try {
-        const response = await fetch(`http://192.168.58.28:5000/users/update/${userId}`, {
+        const response = await fetch(`http://192.168.48.58:5000/users/update/${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ const Profile = () => {
                 return;
               }
   
-              const response = await fetch(`http://192.168.58.28:5000/users/delete/${userId}`, {
+              const response = await fetch(`http://192.168.48.58:5000/users/delete/${userId}`, {
                 method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json', // Ensure content type is set

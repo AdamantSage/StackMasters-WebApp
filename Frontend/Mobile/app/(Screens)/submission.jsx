@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import Video from 'react-native-video';
+import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/Ionicons'; // Importing Ionicons
 
-const VideoUploadDownloadPage = () => {
+const Submission = () => {
   const [assignments, setAssignments] = useState([]);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
   const [videoUri, setVideoUri] = useState('');
   const [recordedVideoUri, setRecordedVideoUri] = useState('');
+  const [showAssignments, setShowAssignments] = useState(false);
+  const [streamingVideoUri, setStreamingVideoUri] = useState(''); // New state for streaming
 
   // Fetch assignments from backend on component mount
   useEffect(() => {
-    axios.get('/api/assignments')
-      .then(response => setAssignments(response.data))
-      .catch(error => console.error('Error fetching assignments', error));
-  }, []);
+    if (showAssignments) {
+      axios.get('/api/assignments')
+        .then(response => setAssignments(response.data))
+        .catch(error => console.error('Error fetching assignments', error));
+    }
+  }, [showAssignments]);
 
   const handleAssignmentSelection = (id) => {
     setSelectedAssignmentId(id);
+    // Set the streaming video URI when an assignment is selected
+    setStreamingVideoUri(`YOUR_VIDEO_STREAMING_URL/${id}`); // Replace with your actual streaming URL
   };
 
   const handleUpload = () => {
@@ -28,11 +35,11 @@ const VideoUploadDownloadPage = () => {
       formData.append('assignmentId', selectedAssignmentId);
       formData.append('video', {
         uri: videoUri,
-        type: 'video/mp4', // Adjust the MIME type based on the actual file type
+        type: 'video/mp4',
         name: `assignment_${selectedAssignmentId}.mp4`,
       });
 
-      axios.post('/api/uploadVideo', formData)
+      axios.post(`/api/assignments/${selectedAssignmentId}/videos`, formData)
         .then(response => Alert.alert('Success', 'Video uploaded successfully'))
         .catch(error => console.error('Error uploading video', error));
     } else {
@@ -43,7 +50,7 @@ const VideoUploadDownloadPage = () => {
   const handleDownload = async () => {
     if (selectedAssignmentId) {
       try {
-        const res = await axios.get(`/api/downloadVideo/${selectedAssignmentId}`, { responseType: 'blob' });
+        const res = await axios.get(`/api/assignments/${selectedAssignmentId}/videos`, { responseType: 'blob' });
         const videoPath = `${FileSystem.documentDirectory}assignment_${selectedAssignmentId}.mp4`;
 
         await FileSystem.writeAsStringAsync(videoPath, res.data, { encoding: FileSystem.EncodingType.Base64 });
@@ -92,45 +99,35 @@ const VideoUploadDownloadPage = () => {
     );
   };
 
+  const handleShowAssignments = () => {
+    setShowAssignments((prev) => !prev);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Video Upload & Download</Text>
 
+      {/* Button to show/hide assignments */}
+      <Button title="Show Assignments" onPress={handleShowAssignments} />
+
       {/* Assignment selection */}
-      <FlatList
-        data={assignments}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.assignmentButton,
-              selectedAssignmentId === item.id && styles.selectedAssignment,
-            ]}
-            onPress={() => handleAssignmentSelection(item.id)}
-          >
-            <Text style={styles.assignmentText}>Assignment {item.id}</Text>
-          </TouchableOpacity>
-        )}
-      />
-
-      {/* Video Upload */}
-      <TouchableOpacity style={styles.button} onPress={handlePickVideo}>
-        <Text style={styles.buttonText}>Pick Video</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={handleUpload}>
-        <Text style={styles.buttonText}>Upload Video</Text>
-      </TouchableOpacity>
-
-      {/* Video Download */}
-      <TouchableOpacity style={styles.button} onPress={handleDownload}>
-        <Text style={styles.buttonText}>Download Video</Text>
-      </TouchableOpacity>
-
-      {/* Video Recording */}
-      <TouchableOpacity style={styles.button} onPress={handleRecordVideo}>
-        <Text style={styles.buttonText}>Record Video</Text>
-      </TouchableOpacity>
+      {showAssignments && (
+        <FlatList
+          data={assignments}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.assignmentButton,
+                selectedAssignmentId === item.id && styles.selectedAssignment,
+              ]}
+              onPress={() => handleAssignmentSelection(item.id)}
+            >
+              <Text style={styles.assignmentText}>Assignment {item.id}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
 
       {/* Display recorded video */}
       {recordedVideoUri ? (
@@ -139,10 +136,49 @@ const VideoUploadDownloadPage = () => {
           <Video
             source={{ uri: recordedVideoUri }}
             style={styles.video}
-            controls
+            useNativeControls
+            resizeMode="contain"
+            isLooping
           />
         </View>
       ) : null}
+
+      {/* Display streaming video */}
+      {streamingVideoUri ? (
+        <View>
+          <Text style={styles.subtitle}>Streaming Video:</Text>
+          <Video
+            source={{ uri: streamingVideoUri }}
+            style={styles.video}
+            useNativeControls
+            resizeMode="contain"
+            isLooping
+          />
+        </View>
+      ) : null}
+
+      {/* Footer with action icons */}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.iconButton} onPress={handlePickVideo}>
+          <Icon name="image" size={30} color="#007AFF" />
+          <Text style={styles.iconLabel}>Pick</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconButton} onPress={handleUpload}>
+          <Icon name="cloud-upload" size={30} color="#007AFF" />
+          <Text style={styles.iconLabel}>Upload</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconButton} onPress={handleDownload}>
+          <Icon name="cloud-download" size={30} color="#007AFF" />
+          <Text style={styles.iconLabel}>Download</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconButton} onPress={handleRecordVideo}>
+          <Icon name="videocam" size={30} color="#007AFF" />
+          <Text style={styles.iconLabel}>Record</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -156,17 +192,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    textAlign: 'center',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
     textAlign: 'center',
   },
   assignmentButton: {
@@ -191,6 +216,19 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: 'black',
   },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  iconButton: {
+    alignItems: 'center',
+  },
+  iconLabel: {
+    fontSize: 12,
+    marginTop: 5,
+  },
 });
 
-export default VideoUploadDownloadPage;
+export default Submission;
