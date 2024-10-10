@@ -1,17 +1,19 @@
 const mysql = require('mysql2');
 require('dotenv').config();
 
+
 const connection = mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'test',
     ssl: {
-        rejectUnauthorized: true // This is necessary for Azure MySQL
+        rejectUnauthorized: true
     }
-
-    
+ 
 });
+
+
 console.log('DB_HOST:', process.env.DB_HOST);
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_PASSWORD:', process.env.DB_PASSWORD);

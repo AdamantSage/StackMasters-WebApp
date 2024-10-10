@@ -10,8 +10,8 @@ const AssignmentController = require('../controllers/assignmentController');
 router.post('/assignment', authorizeAssignmentAccess, validAssignmentInfo, AssignmentController.createAssignment);
 router.post('/userAssignment', authorizeAssignmentAccess, AssignmentController.createUserAssignment);
 //This is used to retrieve assignment
-router.get('/assignment/:module_code', authorizeAssignmentAccess, AssignmentController.getAssignment);
-router.get('/module/:module_code', AssignmentController.getModule);
+router.get('/assignment/:module_code', AssignmentController.getAssignment);
+router.get('/module', AssignmentController.getModule);
 //this is used to replace data
 router.put('/assignment/:id', authorizeAssignmentAccess, AssignmentController.updateAssignment);
 //router.put('/userAssignment/:user_id/:assignment_id', AssignmentController.updateUserAssignment);

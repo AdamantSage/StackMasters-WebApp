@@ -29,8 +29,8 @@ class Assignment {
         db.query('SELECT * FROM assignment WHERE module_code = ?', [module_code], callback);
     }
 
-    static selectModule(module_code, callback){
-        db.query('SELECT * FROM module WHERE module_code = ?', [module_code],callback);
+    static selectModule(callback){
+        db.query('SELECT * FROM module',callback);
     }
 
     static update(assignment_id, updateData, callback) {

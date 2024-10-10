@@ -83,20 +83,16 @@ exports.getAssignment = (req, res) => {
     });
 };
 exports.getModule = (req, res) => {
-    const {module_code} = req.params; // Retrieve the module_code from the URL
-    console.log(`Fetching assignment with module_code: ${module_code}`);
-    Assignment.selectModule(module_code, (err, results) => {
+    console.log(`Fetching all modules`);
+    
+    Assignment.selectModule((err, results) => {
         if (err) {
-            console.log(err); // Log any errors
-            // Send a JSON response with error message and status code 500 which is a server error
+            console.error('Error fetching modules:', err);
             return res.status(500).json({ message: "Error occurred while fetching modules." });
         } else if (results.length === 0) {
-            // If no assignment is found, send a JSON response with status code 404 which means it could not find
-            //the given data in the server
-            return res.status(404).json({ message: "modules not found." });
+            return res.status(404).json({ message: "No modules found." });
         } else {
-            console.log(results); // Log the results of the query
-            // Sends the assignment data as JSON with status code 200 which means the request is successful
+            console.log('Modules fetched:', results);
             return res.status(200).json(results);
         }
     });
