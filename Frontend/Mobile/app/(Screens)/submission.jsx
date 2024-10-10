@@ -1,265 +1,196 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Ensure you import AsyncStorage
+import { View, Text, Button, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import Video from 'react-native-video';
+import * as FileSystem from 'expo-file-system';
+import axios from 'axios';
 
-const submission = () => {
-  const [sub_id, setSubId] = useState('');
-  const [sub_date, setSubDate] = useState('');
-  const [assignment_id, setAssignmentId] = useState('');
-  const [user_id, setUserId] = useState('');
-  const [submissions, setSubmissions] = useState([]);
-  const [feed_id, setFeedId] = useState('');
-  const [grade, setGrade] = useState('');
-  const [description, setDescription] = useState('');
-  const [videoId, setVideoId] = useState(''); // For video streaming and downloading
+const VideoUploadDownloadPage = () => {
+  const [assignments, setAssignments] = useState([]);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
+  const [videoUri, setVideoUri] = useState('');
+  const [recordedVideoUri, setRecordedVideoUri] = useState('');
 
-  // Fetch all submissions on component mount
+  // Fetch assignments from backend on component mount
   useEffect(() => {
-    fetchSubmissions();
+    axios.get('/api/assignments')
+      .then(response => setAssignments(response.data))
+      .catch(error => console.error('Error fetching assignments', error));
   }, []);
 
-  const fetchSubmissions = async () => {
-    try {
-      const response = await fetch('https://your-backend-url.com/submissions'); // Adjust the URL
-      const data = await response.json();
-      if (response.ok) {
-        setSubmissions(data);
-      } else {
-        Alert.alert('Error', 'Failed to fetch submissions');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to fetch submissions, please try again');
-    }
+  const handleAssignmentSelection = (id) => {
+    setSelectedAssignmentId(id);
   };
 
-  const handleCreateSubmission = async () => {
-    try {
-      const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch('https://your-backend-url.com/submissions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ sub_id, sub_date, assignment_id }),
+  const handleUpload = () => {
+    if (videoUri && selectedAssignmentId) {
+      const formData = new FormData();
+      formData.append('assignmentId', selectedAssignmentId);
+      formData.append('video', {
+        uri: videoUri,
+        type: 'video/mp4', // Adjust the MIME type based on the actual file type
+        name: `assignment_${selectedAssignmentId}.mp4`,
       });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', 'Submission created successfully');
-        fetchSubmissions(); // Refresh the submissions list
-      } else {
-        Alert.alert('Error', data.message || 'Failed to create submission');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to create submission, please try again');
-    }
-  };
 
-  const handleUpdateSubmission = async (id) => {
-    try {
-      const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch(`https://your-backend-url.com/submissions/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ sub_date }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', 'Submission updated successfully');
-        fetchSubmissions(); // Refresh the submissions list
-      } else {
-        Alert.alert('Error', data.message || 'Failed to update submission');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to update submission, please try again');
-    }
-  };
-
-  const handleDeleteSubmission = async (id) => {
-    Alert.alert('Confirm Deletion', 'Are you sure you want to delete this submission?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        onPress: async () => {
-          try {
-            const token = await AsyncStorage.getItem('jwt');
-            const response = await fetch(`https://your-backend-url.com/submissions/${id}`, {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            if (response.ok) {
-              Alert.alert('Success', 'Submission deleted successfully');
-              fetchSubmissions(); // Refresh the submissions list
-            } else {
-              Alert.alert('Error', 'Failed to delete submission');
-            }
-          } catch (error) {
-            Alert.alert('Error', 'Unable to delete submission, please try again');
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleViewFeedback = async (id) => {
-    try {
-      const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch(`https://your-backend-url.com/feedback/${id}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Feedback', data.feedback || 'No feedback available');
-      } else {
-        Alert.alert('Error', data.message || 'Failed to fetch feedback');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to fetch feedback, please try again');
-    }
-  };
-
-  const handleStreamVideo = async (id) => {
-    // Placeholder URL, replace with your video stream URL logic
-    const videoUrl = `https://your-backend-url.com/videos/stream/${id}`;
-    // Open the video stream in a browser or video player
-    Alert.alert('Streaming Video', `Video will stream from: ${videoUrl}`);
-    // Implement video streaming logic, e.g., using React Native Video player
-  };
-
-  const handleDownloadVideo = async (id) => {
-    // Placeholder URL, replace with your video download URL logic
-    const videoUrl = `https://your-backend-url.com/videos/download/${id}`;
-    const response = await fetch(videoUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `submission_${id}.mp4`; // Assuming video format is mp4
-      a.click();
-      Alert.alert('Success', 'Video downloading...');
+      axios.post('/api/uploadVideo', formData)
+        .then(response => Alert.alert('Success', 'Video uploaded successfully'))
+        .catch(error => console.error('Error uploading video', error));
     } else {
-      Alert.alert('Error', 'Failed to download video');
+      Alert.alert('Error', 'Please select an assignment and a video file.');
     }
   };
 
-  const handleCreateFeedback = async () => {
-    try {
-      const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch('https://your-backend-url.com/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ feed_id, user_id, assignment_id, description, grade }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', 'Feedback created successfully');
-      } else {
-        Alert.alert('Error', data.message || 'Failed to create feedback');
+  const handleDownload = async () => {
+    if (selectedAssignmentId) {
+      try {
+        const res = await axios.get(`/api/downloadVideo/${selectedAssignmentId}`, { responseType: 'blob' });
+        const videoPath = `${FileSystem.documentDirectory}assignment_${selectedAssignmentId}.mp4`;
+
+        await FileSystem.writeAsStringAsync(videoPath, res.data, { encoding: FileSystem.EncodingType.Base64 });
+        Alert.alert('Success', 'Video downloaded successfully');
+      } catch (error) {
+        console.error('Error downloading video', error);
+        Alert.alert('Error', 'Failed to download the video.');
       }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to create feedback, please try again');
+    } else {
+      Alert.alert('Error', 'Please select an assignment.');
     }
+  };
+
+  const handleRecordVideo = () => {
+    launchCamera(
+      {
+        mediaType: 'video',
+        videoQuality: 'high',
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled video recording');
+        } else if (response.errorCode) {
+          console.log('Video recording error:', response.errorMessage);
+        } else {
+          setRecordedVideoUri(response.assets[0].uri);
+        }
+      },
+    );
+  };
+
+  const handlePickVideo = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'video',
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled video picker');
+        } else if (response.errorCode) {
+          console.log('Video picker error:', response.errorMessage);
+        } else {
+          setVideoUri(response.assets[0].uri);
+        }
+      },
+    );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Submission Management</Text>
+      <Text style={styles.title}>Video Upload & Download</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Submission ID"
-        value={sub_id}
-        onChangeText={setSubId}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Submission Date"
-        value={sub_date}
-        onChangeText={setSubDate}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Assignment ID"
-        value={assignment_id}
-        onChangeText={setAssignmentId}
-      />
-      <Button title="Create Submission" onPress={handleCreateSubmission} />
-
+      {/* Assignment selection */}
       <FlatList
-        data={submissions}
-        keyExtractor={(item) => item.sub_id.toString()}
+        data={assignments}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.submissionItem}>
-            <Text>ID: {item.sub_id}</Text>
-            <Text>Date: {item.sub_date}</Text>
-            <Text>Assignment ID: {item.assignment_id}</Text>
-            <Button title="Update" onPress={() => handleUpdateSubmission(item.sub_id)} />
-            <Button title="Delete" onPress={() => handleDeleteSubmission(item.sub_id)} />
-            <Button title="View Feedback" onPress={() => handleViewFeedback(item.sub_id)} />
-            <Button title="Stream Video" onPress={() => handleStreamVideo(item.sub_id)} />
-            <Button title="Download Video" onPress={() => handleDownloadVideo(item.sub_id)} />
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.assignmentButton,
+              selectedAssignmentId === item.id && styles.selectedAssignment,
+            ]}
+            onPress={() => handleAssignmentSelection(item.id)}
+          >
+            <Text style={styles.assignmentText}>Assignment {item.id}</Text>
+          </TouchableOpacity>
         )}
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Feedback ID"
-        value={feed_id}
-        onChangeText={setFeedId}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Grade"
-        value={grade}
-        onChangeText={setGrade}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <Button title="Create Feedback" onPress={handleCreateFeedback} />
+      {/* Video Upload */}
+      <TouchableOpacity style={styles.button} onPress={handlePickVideo}>
+        <Text style={styles.buttonText}>Pick Video</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={handleUpload}>
+        <Text style={styles.buttonText}>Upload Video</Text>
+      </TouchableOpacity>
+
+      {/* Video Download */}
+      <TouchableOpacity style={styles.button} onPress={handleDownload}>
+        <Text style={styles.buttonText}>Download Video</Text>
+      </TouchableOpacity>
+
+      {/* Video Recording */}
+      <TouchableOpacity style={styles.button} onPress={handleRecordVideo}>
+        <Text style={styles.buttonText}>Record Video</Text>
+      </TouchableOpacity>
+
+      {/* Display recorded video */}
+      {recordedVideoUri ? (
+        <View>
+          <Text style={styles.subtitle}>Recorded Video:</Text>
+          <Video
+            source={{ uri: recordedVideoUri }}
+            style={styles.video}
+            controls
+          />
+        </View>
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
   },
-  header: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 10,
   },
-  submissionItem: {
-    marginBottom: 10,
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  assignmentButton: {
     padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius
-    : 5,
+    marginBottom: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+  },
+  selectedAssignment: {
+    backgroundColor: '#007AFF',
+  },
+  assignmentText: {
+    fontSize: 16,
+  },
+  subtitle: {
+    fontSize: 18,
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  video: {
+    width: '100%',
+    height: 200,
+    backgroundColor: 'black',
   },
 });
 
-export default submission;
+export default VideoUploadDownloadPage;
