@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
@@ -10,17 +10,29 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('');
+  const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [responseMessage, setResponseMessage] = useState('');
 
   const router = useRouter();
 
   const handleRegister = async () => {
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Check if the email is valid
+    if (!emailRegex.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    // Check if passwords match
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await fetch('http://192.168.58.28:5000/users/create', {
@@ -46,18 +58,21 @@ const Register = () => {
       } catch (error) {
         console.error('JSON Parse Error:', error);
         Alert.alert('Error', 'Failed to parse server response');
+        setLoading(false);
         return;
       }
 
       if (response.ok) {
-        setResponseMessage('Registration successful');
+        Alert.alert('Success', 'Registration successful');
         router.push('/sign-in');
       } else {
-        setResponseMessage(data.message || 'Registration failed');
+        Alert.alert('Error', data.message || 'Registration failed');
       }
     } catch (error) {
       console.error('Fetch error:', error);
-      Alert.alert('Error', 'Unable to register, please try again');
+      Alert.alert('Error', 'Unable to register, please try again later');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,12 +131,16 @@ const Register = () => {
           <Picker.Item label="Student" value="student" />
         </Picker>
 
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Register</Text>
+        <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#f8f8ff" />
+          ) : (
+            <Text style={styles.buttonText}>Register</Text>
+          )}
         </TouchableOpacity>
-
-        {/* Display the response message */}
-        {responseMessage ? <Text style={styles.responseText}>{responseMessage}</Text> : null}
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/sign-in')}>
+          <Text style={styles.buttonText}>Log-In</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -179,12 +198,6 @@ const styles = StyleSheet.create({
     color: '#f8f8ff',
     fontSize: 16,
     textAlign: 'center',
-  },
-  responseText: {
-    margin: 12,
-    fontSize: 16,
-    textAlign: 'center',
-    color: 'green', // or red based on success or error
   },
 });
 

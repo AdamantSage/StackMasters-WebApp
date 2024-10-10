@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [signInLoading, setSignInLoading] = useState(false);
+    const [registerLoading, setRegisterLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
@@ -17,14 +18,13 @@ const SignIn = () => {
             return;
         }
     
-        // Basic email format validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             Alert.alert('Error', 'Please enter a valid email address!');
             return;
         }
     
-        setLoading(true);
+        setSignInLoading(true);
     
         try {
             const response = await fetch('http://192.168.58.28:5000/users/login', {
@@ -38,12 +38,11 @@ const SignIn = () => {
             const data = await response.json();
     
             if (response.ok) {
-                // Store JWT and User ID
                 if (data.userId) {
-                    await AsyncStorage.setItem('jwt', data.token); // Store JWT
-                    await AsyncStorage.setItem('userId', JSON.stringify(data.userId)); // Convert userId to string
+                    await AsyncStorage.setItem('jwt', data.token); 
+                    await AsyncStorage.setItem('userId', JSON.stringify(data.userId));
                     console.log('Stored userId:', data.userId);
-                    router.push('/(Screens)/home'); // Navigate to home
+                    router.push('/(Screens)/home');
                 } else {
                     Alert.alert('Error', 'User ID is not available.');
                 }
@@ -54,11 +53,17 @@ const SignIn = () => {
             console.error('SignIn error:', error);
             Alert.alert('Error', 'Unable to log in. Please check your connection and try again.');
         } finally {
-            setLoading(false);
+            setSignInLoading(false);
         }
     };
     
-    
+    const handleRegisterPress = () => {
+        setRegisterLoading(true);
+        router.push('/register');
+        setTimeout(() => {
+            setRegisterLoading(false);
+        }, 500);
+    };
 
     return (
         <SafeAreaView>
@@ -69,7 +74,7 @@ const SignIn = () => {
                     placeholder="Email"
                     onChangeText={setEmail}
                     value={email}
-                    editable={!loading} // Disable input when loading
+                    editable={!signInLoading && !registerLoading}
                 />
                 <View style={styles.passwordContainer}>
                     <TextInput
@@ -78,7 +83,7 @@ const SignIn = () => {
                         onChangeText={setPassword}
                         value={password}
                         secureTextEntry={!showPassword}
-                        editable={!loading} // Disable input when loading
+                        editable={!signInLoading && !registerLoading}
                     />
                     <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                         <Text style={styles.togglePassword}>
@@ -86,17 +91,34 @@ const SignIn = () => {
                         </Text>
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.button} onPress={handleSignIn} disabled={loading}>
-                    {loading ? (
+                <TouchableOpacity 
+                    style={styles.button} 
+                    onPress={handleSignIn} 
+                    disabled={signInLoading || registerLoading}
+                >
+                    {signInLoading ? (
                         <ActivityIndicator color="#f8f8ff" />
                     ) : (
                         <Text style={styles.buttonText}>Sign In</Text>
                     )}
                 </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={styles.button} 
+                    onPress={handleRegisterPress} 
+                    disabled={signInLoading || registerLoading}
+                >
+                    {registerLoading ? (
+                        <ActivityIndicator color="#f8f8ff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Register</Text>
+                    )}
+                </TouchableOpacity>
+
                 <TouchableOpacity 
                     style={styles.quickNavButton} 
                     onPress={() => router.push('/(Screens)/home')}
-                    disabled={loading} // Disable when loading
+                    disabled={signInLoading || registerLoading}
                 >
                     <Text style={styles.buttonText}>Go to Home (Quick Nav)</Text>
                 </TouchableOpacity>
@@ -116,7 +138,7 @@ const styles = StyleSheet.create({
         margin: 12,
         borderWidth: 1,
         padding: 10,
-        borderRadius: 5, // Added borderRadius for consistency
+        borderRadius: 5,
     },
     passwordContainer: {
         flexDirection: 'row',
