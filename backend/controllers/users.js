@@ -206,7 +206,7 @@ exports.update = (req, res) => {
     const { name, email, password } = req.body;
 
     if (!id) {
-        return res.status(400).send('User ID is required'); // Ensure user ID is provided
+        return res.status(400).json({ message: 'User ID is required' }); // Ensure user ID is provided
     }
 
     // Initialize the query parts
@@ -235,49 +235,86 @@ exports.update = (req, res) => {
         bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) {
                 console.error(`Error hashing password for user ${id}: ${err}`);
-                return res.status(500).send('Server error');
+                return res.status(500).json({ message: 'Server error' });
             }
             values.splice(values.length - 1, 0, hashedPassword); // Insert hashed password before the ID
             db.query(query, values, (error, results) => {
                 if (error) {
                     console.error(`Error updating user ${id}: ${error}`);
-                    return res.status(500).send('Error updating user');
+                    return res.status(500).json({ message: 'Error updating user' });
                 }
                 console.log(`User ${id} updated successfully`);
                 // Notify clients of user update
                 emitNotification('user_updated', { id, name, email });
 
-                res.send('User updated successfully');
+                // Return a JSON response
+                res.status(200).json({ message: 'User updated successfully' });
             });
         });
     } else {
         db.query(query, values, (error, results) => {
             if (error) {
                 console.error(`Error updating user ${id}: ${error}`);
-                return res.status(500).send('Error updating user');
+                return res.status(500).json({ message: 'Error updating user' });
             }
             console.log(`User ${id} updated successfully`);
             // Notify clients of user update
             emitNotification('user_updated', { id, name, email });
 
-            res.send('User updated successfully');
+            // Return a JSON response
+            res.status(200).json({ message: 'User updated successfully' });
         });
     }
 };
 
 
 
+
 // Delete a user
 exports.delete = (req, res) => {
     const id = req.params.id;
-    db.query('DELETE FROM users WHERE user_id = ?', [id], (error, results) => {
-        if (error) {
-            console.log(error);
-            return res.status(500).send('Error deleting user');
-        }
-         // Notify clients of user update
-         emitNotification('user_deleted', { id });
 
-         res.send('User deleted successfully');
+    if (!id) {
+        return res.status(400).send('User ID is required'); // Ensure user ID is provided
+    }
+
+    // Start a transaction
+    db.beginTransaction((err) => {
+        if (err) throw err;
+
+        // First, delete the related records in the student table
+        db.query('DELETE FROM student WHERE user_id = ?', [id], (error) => {
+            if (error) {
+                return db.rollback(() => {
+                    console.error(`Error deleting student records for user ${id}:`, error);
+                    return res.status(500).send('Error deleting user');
+                });
+            }
+
+            // Now delete the user from the users table
+            db.query('DELETE FROM users WHERE user_id = ?', [id], (error, results) => {
+                if (error) {
+                    return db.rollback(() => {
+                        console.error(`Error deleting user ${id}:`, error);
+                        return res.status(500).send('Error deleting user');
+                    });
+                }
+
+                // Commit the transaction
+                db.commit((err) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            console.error(`Error committing transaction for user ${id}:`, err);
+                            return res.status(500).send('Error deleting user');
+                        });
+                    }
+
+                    // Notify clients of user deletion
+                    emitNotification('user_deleted', { id });
+
+                    res.send('User deleted successfully');
+                });
+            });
+        });
     });
 };
