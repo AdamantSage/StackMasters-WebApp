@@ -10,13 +10,13 @@ const { exportMarksToExcel } = require('../models/marks'); //for marks
 router.post('/create', usersController.create);
 
 // Read all users
-router.get('/users', authenticateToken, checkRole(['admin']), usersController.read);
+router.get('/users/:id?', authenticateToken, checkRole(['admin', 'lecturer', 'student']), usersController.read);
 
 // Update a user
-router.put('/update/:id', authenticateToken, checkRole(['admin']), usersController.update);
+router.put('/update/:id', authenticateToken, checkRole(['admin','lecturer', 'student']), usersController.update);
 
 // Delete a user
-router.delete('/delete/:id', authenticateToken, checkRole(['admin']), usersController.delete);
+router.delete('/delete/:id', authenticateToken, checkRole(['admin','lecturer', 'student']), usersController.delete);
 
 // Login
 router.post('/login', usersController.login);

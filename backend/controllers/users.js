@@ -122,6 +122,7 @@ exports.login = (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
 
+    // Query to find the user by email
     db.query('SELECT * FROM users WHERE email = ?', [email], (error, results) => {
         if (error) {
             console.log(error);
@@ -133,31 +134,35 @@ exports.login = (req, res) => {
 
         const user = results[0];
 
+        // Compare the provided password with the stored hashed password
         bcrypt.compare(password, user.password, (err, isMatch) => {
             if (err) {
                 console.error('Bcrypt comparison error:', err);
                 return res.status(500).send('Server error');
             }
             if (isMatch) {
+                // Generate JWT with user_id included in the payload
                 const token = jwt.sign(
-                    { id: user.id, email: user.email, role: user.role },
+                    { id: user.user_id, email: user.email, role: user.role }, // Use user.user_id here
                     process.env.JWT_SECRET,
                     { expiresIn: '1h' }
                 );
-                
+
                 // Log the token to the console
                 console.log('Generated JWT:', token);
 
-                // Send token as part of the response
+                // Send token and user_id as part of the response
                 const response = {
                     message: 'Login successful',
                     token: token,
+                    userId: user.user_id, // Add userId to the response
                     role: user.role
                 };
-                
+
                 // Emit notification for successful login
                 emitNotification('user_logged_in', { email: user.email, role: user.role });
 
+                // Return the response
                 res.json(response);
             } else {
                 return res.status(401).json({ message: 'Invalid credentials' });
@@ -166,23 +171,43 @@ exports.login = (req, res) => {
     });
 };
 
+
 // Read all users
 exports.read = (req, res) => {
-    db.query('SELECT * FROM users', (error, results) => {
-        if (error) {
-            console.log(error);
-            return res.status(500).send('Error fetching users');
-        }
-        res.json(results);
-    });
+    const userId = req.params.id;
+
+    // If an ID is provided, fetch a single user
+    if (userId) {
+        db.query('SELECT * FROM users WHERE user_id = ?', [userId], (error, results) => {
+            if (error) {
+                console.log(error);
+                return res.status(500).send('Error fetching user');
+            }
+            if (results.length === 0) {
+                return res.status(404).send('User not found');
+            }
+            res.json(results[0]); // Return the first user found
+        });
+    } else {
+        // If no ID is provided, fetch all users
+        db.query('SELECT * FROM users', (error, results) => {
+            if (error) {
+                console.log(error);
+                return res.status(500).send('Error fetching users');
+            }
+            res.json(results);
+        });
+    }
 };
 
-// Update a user
-// Update a user
 // Update a user
 exports.update = (req, res) => {
     const id = req.params.id;
     const { name, email, password } = req.body;
+
+    if (!id) {
+        return res.status(400).send('User ID is required'); // Ensure user ID is provided
+    }
 
     // Initialize the query parts
     let query = 'UPDATE users SET ';
@@ -198,7 +223,7 @@ exports.update = (req, res) => {
         values.push(email);
     }
     if (password) {
-        query += 'password = ?, ';
+        query += 'password = ?, '; // Add placeholder for password
     }
     
     // Remove the last comma and space, and add the WHERE clause
@@ -219,10 +244,10 @@ exports.update = (req, res) => {
                     return res.status(500).send('Error updating user');
                 }
                 console.log(`User ${id} updated successfully`);
-                 // Notify clients of user update
-                 emitNotification('user_updated', { id, name, email });
+                // Notify clients of user update
+                emitNotification('user_updated', { id, name, email });
 
-                 res.send('User updated successfully');
+                res.send('User updated successfully');
             });
         });
     } else {
