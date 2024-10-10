@@ -1,42 +1,60 @@
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignIn = () => {
-    const [email, setEmail] = useState('email');
-    const [password, setPassword] = useState('Password');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
     const handleSignIn = async () => {
-        await AsyncStorage.clear();
-
+        if (!email || !password) {
+            Alert.alert('Error', 'Please fill in both email and password!');
+            return;
+        }
+    
+        // Basic email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert('Error', 'Please enter a valid email address!');
+            return;
+        }
+    
+        setLoading(true);
+    
         try {
-            const response = await fetch('http://192.168.57.168:5000/users/login', {
+            const response = await fetch('http://192.168.58.28:5000/users/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
+                body: JSON.stringify({ email, password }),
             });
     
             const data = await response.json();
     
             if (response.ok) {
-                await AsyncStorage.setItem('jwt', data.token);
-                await AsyncStorage.setItem('userId', data.userId); // Store userId
-    
-                 router.push('/(Screens)/home');
+                // Store JWT and User ID
+                if (data.userId) {
+                    await AsyncStorage.setItem('jwt', data.token); // Store JWT
+                    await AsyncStorage.setItem('userId', JSON.stringify(data.userId)); // Convert userId to string
+                    console.log('Stored userId:', data.userId);
+                    router.push('/(Screens)/home'); // Navigate to home
+                } else {
+                    Alert.alert('Error', 'User ID is not available.');
+                }
             } else {
-                Alert.alert('Error', data.message || 'Invalid credentials');
+                Alert.alert('Error', data.message || 'Invalid email or password');
             }
         } catch (error) {
             console.error('SignIn error:', error);
-            Alert.alert('Error', 'Unable to log in, please try again');
+            Alert.alert('Error', 'Unable to log in. Please check your connection and try again.');
+        } finally {
+            setLoading(false);
         }
     };
     
@@ -45,32 +63,41 @@ const SignIn = () => {
     return (
         <SafeAreaView>
             <ScrollView>
-                <Text style={styles.Header}>
-                    Sign-In
-                </Text>
+                <Text style={styles.Header}>Sign-In</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="email"
+                    placeholder="Email"
                     onChangeText={setEmail}
                     value={email}
-                    onFocus={() => setEmail('')}
+                    editable={!loading} // Disable input when loading
                 />
-                <TextInput
-                    style={styles.input}
-                    placeholder="password"
-                    onChangeText={setPassword}
-                    value={password}
-                    onFocus={() => setPassword('')}
-                />
-                <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-                    <Text style={styles.buttonText}>
-                        Sign In
-                    </Text>
+                <View style={styles.passwordContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Password"
+                        onChangeText={setPassword}
+                        value={password}
+                        secureTextEntry={!showPassword}
+                        editable={!loading} // Disable input when loading
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Text style={styles.togglePassword}>
+                            {showPassword ? 'Hide' : 'Show'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={styles.button} onPress={handleSignIn} disabled={loading}>
+                    {loading ? (
+                        <ActivityIndicator color="#f8f8ff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Sign In</Text>
+                    )}
                 </TouchableOpacity>
-
                 <TouchableOpacity 
                     style={styles.quickNavButton} 
-                    onPress={() => router.push('/(Screens)/home')}>
+                    onPress={() => router.push('/(Screens)/home')}
+                    disabled={loading} // Disable when loading
+                >
                     <Text style={styles.buttonText}>Go to Home (Quick Nav)</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -81,23 +108,35 @@ const SignIn = () => {
 const styles = StyleSheet.create({
     Header: {
         fontSize: 25,
+        textAlign: 'center',
+        marginVertical: 20,
     },
     input: {
         height: 40,
         margin: 12,
         borderWidth: 1,
         padding: 10,
+        borderRadius: 5, // Added borderRadius for consistency
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        margin: 12,
+    },
+    togglePassword: {
+        color: '#663399',
     },
     button: {
         backgroundColor: '#663399',
-        paddingVertical: 10,        
-        paddingHorizontal: 20,        
-        borderRadius: 5,             
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
         marginTop: 20,
     },
     buttonText: {
-        color: '#f8f8ff',          
-        fontSize: 16,                 
+        color: '#f8f8ff',
+        fontSize: 16,
         textAlign: 'center',
     },
 });

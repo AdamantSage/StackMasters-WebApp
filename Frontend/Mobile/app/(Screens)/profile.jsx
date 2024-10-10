@@ -47,7 +47,7 @@ const profile = () => {
         return;
       }
 
-      const response = await fetch(`http://192.168.57.168:5000/users/${userId}`, {
+      const response = await fetch(`http://192.168.58.28:5000/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -96,7 +96,7 @@ const profile = () => {
     }
 
     try {
-      const response = await fetch(`http://192.168.57.168:5000/users/update/${userId}`, {
+      const response = await fetch(`http://192.168.58.28:5000/users/update/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ const profile = () => {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('jwt');
-              const response = await fetch(`http://192.168.57.168:5000/users/update/${userId}`, {
+              const response = await fetch(`http://192.168.58.28:5000/users/update/${userId}`, {
                 method: 'DELETE',
                 headers: {
                   Authorization: `Bearer ${token}`,
