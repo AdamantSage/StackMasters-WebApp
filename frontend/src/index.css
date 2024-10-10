@@ -553,3 +553,126 @@ ul {
 /* End Landing Page */
 
 
+.admin-page {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.profile-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+}
+
+.navbar-links li {
+  margin: 0 15px;
+  cursor: pointer;
+}
+
+.profile-dropdown {
+  position: relative;
+}
+
+.dropdown-button {
+  background: none;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: white;
+  color: black;
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.profile-dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dashboard-overview {
+  margin: 20px 0;
+}
+
+.metrics {
+  display: flex;
+  justify-content: space-between;
+}
+
+.metric {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 10px;
+  flex: 1;
+  margin: 0 10px;
+  text-align: center;
+}
+
+.user-management, .video-management, .system-monitoring, .settings {
+  margin: 20px 0;
+}
+
+.search-bar {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.filter-role {
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.user-table, .video-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th, .video-table th {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+}
+
+.user-table td, .video-table td {
+  border: 1px solid #dee2e6;
+  padding: 10px;
+}
+
+.graphs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.graph {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 20px;
+  flex: 1;
+  margin: 0 10px;
+}
