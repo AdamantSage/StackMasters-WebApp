@@ -20,7 +20,6 @@ const CreateAssignment = () => {
       description,
     });
   };
-
   return (
     <div className="page">
       <header>
