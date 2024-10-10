@@ -24,11 +24,6 @@ export default function Index() {
             New User? Register
           </Text>
         </Link>
-        <Link href="/exportMarks" style={styles.button}>
-          <Text style={styles.buttonText}>
-              exportMarks     
-          </Text>
-        </Link>
       </ScrollView>
     </SafeAreaView>
   );
