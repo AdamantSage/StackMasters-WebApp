@@ -11,6 +11,7 @@ router.post('/assignment', authorizeAssignmentAccess, validAssignmentInfo, Assig
 router.post('/userAssignment', authorizeAssignmentAccess, AssignmentController.createUserAssignment);
 //This is used to retrieve assignment
 router.get('/assignment/:module_code', AssignmentController.getAssignment);
+router.get('/assignment/:assignment_id/:user_id', AssignmentController.getAssignmentID);
 router.get('/module', AssignmentController.getModule);
 //this is used to replace data
 router.put('/assignment/:id', authorizeAssignmentAccess, AssignmentController.updateAssignment);
