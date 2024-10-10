@@ -9,10 +9,10 @@ const Assignments = () => {
   const [assignments, setAssignments] = useState([]);
 
   useEffect(() => {
-    fetch('https://your-backend-url.com/module').then(response => response.json()).then((data) => {
+    fetch('http://192.168.0.23:5000/module').then(response => response.json()).then((data) => {
       const FormatedModule = data.map(module => ({
-        label: module.moduleCode,
-        value: module.moduleCode
+        label: module.module_code,
+        value: module.module_code
       }));
       setModuleCode(FormatedModule)
     }).catch((error) => {
@@ -22,13 +22,13 @@ const Assignments = () => {
 
   useEffect(() => {
     if(selectedModule){
-      fetch('https://your-backend-url.com/assignment/${selectedModule}').then(response => response.json()).then((data) =>{
+      fetch('http://192.168.0.23:5000/assignment/${selectedModule}').then(response => response.json()).then((data) =>{
         setAssignments(data);
       }).catch((error) => {
         console.error('Error finding assignments', error);
       });
     }
-  }, [selectedModule]);
+  }, [selectedModule]); 
 
   return (
     <View style={styles.container}>

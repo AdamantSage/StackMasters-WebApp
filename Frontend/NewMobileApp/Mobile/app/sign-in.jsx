@@ -6,13 +6,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 const SignIn = () => {
-    const [username, setUsername] = useState('Username');
-    const [password, setPassword] = useState('Password');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const router = useRouter();
 
     const handleSignIn = async () => {
         try {
-            const response = await fetch('https://localhost:5000/login', {
+            const response = await fetch('http://192.168.0.23:5000/users/login', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
