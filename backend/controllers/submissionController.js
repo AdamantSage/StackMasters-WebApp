@@ -223,3 +223,36 @@ exports.deleteFeedback = (req, res) =>{
 };
 
 exports.deleteUserSubmission
+
+exports.getFeedbackForSubmission = (req, res) => {
+    const { sub_id } = req.params;
+
+    if (!sub_id) {
+        return res.status(400).json({ message: "Submission ID is required." });
+    }
+
+    const user_id = req.user.id; // Ensure this is set in middleware
+
+    console.log('Fetching feedback for user:', user_id, 'and submission:', sub_id);
+
+    const feedbackQuery = `
+        SELECT f.*
+        FROM feedback f
+        JOIN submission s ON f.assignment_id = s.assignment_id
+        JOIN user_on_submission u ON u.sub_id = s.sub_id
+        WHERE u.user_id = ? AND s.sub_id = ?;
+    `;
+
+    db.query(feedbackQuery, [user_id, sub_id], (err, feedbackResults) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error fetching feedback.", error: err.message });
+        }
+
+        if (feedbackResults.length === 0) {
+            return res.status(404).json({ message: "No feedback found for this user and submission." });
+        }
+
+        return res.status(200).json({ feedback: feedbackResults });
+    });
+};
