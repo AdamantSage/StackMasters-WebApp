@@ -120,24 +120,26 @@ const Submission = () => {
 
       {/* Assignment selection */}
       {showAssignments && (
-        <FlatList
-        data={assignments}
-        keyExtractor={(item) => item.assignment_id ? item.assignment_id.toString() : Math.random().toString()} // Use assignment_id for the key
-        renderItem={({ item }) => {
-          if (!item) return null; // Check if item is undefined
-      
-          return (
-            <TouchableOpacity
-              style={[styles.assignmentButton, selectedAssignmentId === item.assignment_id && styles.selectedAssignment]}
-              onPress={() => handleAssignmentSelection(item.assignment_id)}
-            >
-              <Text style={styles.assignmentText}>
-                Assignment: {item.assignment_id ? item.assignment_id.toString() : 'Unnamed Assignment'} {/* Use assignment_id directly */}
-              </Text>
-            </TouchableOpacity>
-          );
-        }}
-      />
+      <FlatList
+      data={assignments}
+      keyExtractor={(item) => item.assignment_id ? item.assignment_id.toString() : Math.random().toString()} // Use assignment_id for the key
+      renderItem={({ item }) => {
+        if (!item) return null; // Check if item is undefined
+    
+        return (
+          <TouchableOpacity
+            style={[styles.assignmentButton, selectedAssignmentId === item.assignment_id && styles.selectedAssignment]}
+            onPress={() => handleAssignmentSelection(item.assignment_id)}
+          >
+            {/* Display assign_name and due_date */}
+            <Text style={styles.assignmentText}>
+              {item.assign_name} - Due: {new Date(item.due_date).toLocaleDateString()} {/* Format due date */}
+            </Text>
+          </TouchableOpacity>
+        );
+      }}
+    />
+    
       )}
 
       {/* Display recorded video */}
