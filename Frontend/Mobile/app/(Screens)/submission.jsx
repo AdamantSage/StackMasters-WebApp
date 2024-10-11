@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getUserId } from '../utils'; // Adjusted import path
+import { getUserId } from '../utils';
+import FeedbackDisplay from '../comp/FeedbackDisplay'; // Adjust the path as necessary
 
 const Submission = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -10,6 +11,7 @@ const Submission = () => {
   const [showSubmissions, setShowSubmissions] = useState(false);
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] = useState(null); // State to hold the selected submission
 
   useEffect(() => {
     const fetchUserIdAndSubmissions = async () => {
@@ -18,7 +20,7 @@ const Submission = () => {
         if (id) {
           setUserId(id);
           await fetchSubmissions(id);
-          await fetchFeedbacks(id); // Fetch feedbacks based on user ID
+          await fetchFeedbacks(id);
         } else {
           Alert.alert('Error', 'User ID is missing. Please log in again.');
         }
@@ -42,7 +44,6 @@ const Submission = () => {
       const response = await axios.get(`http://192.168.48.58:5000/submissions?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Fetched submissions:', response.data);
       setSubmissions(response.data);
     } catch (error) {
       console.error('Error fetching submissions:', error);
@@ -58,7 +59,6 @@ const Submission = () => {
       const response = await axios.get(`http://192.168.48.58:5000/feedbacks?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Fetched feedbacks:', response.data);
       setFeedbacks(response.data);
     } catch (error) {
       console.error('Error fetching feedbacks:', error);
@@ -70,11 +70,25 @@ const Submission = () => {
     setShowSubmissions(prev => !prev);
   };
 
+  const handleSubmissionSelect = (submission) => {
+    setSelectedSubmission(submission);
+  };
+
+  const handleBack = () => {
+    setSelectedSubmission(null); // Reset selected submission to show submissions list
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading...</Text>
       </View>
+    );
+  }
+
+  if (selectedSubmission) {
+    return (
+      <FeedbackDisplay submission={selectedSubmission} onBack={handleBack} />
     );
   }
 
@@ -89,29 +103,13 @@ const Submission = () => {
         <FlatList
           data={submissions}
           keyExtractor={(item) => item.sub_id ? item.sub_id.toString() : Math.random().toString()}
-          renderItem={({ item }) => {
-            const feedbackForSubmission = feedbacks.filter(feedback => 
-              feedback.assignment_id === item.assignment_id && 
-              feedback.user_id === userId
-            );
-
-            return (
-              <View style={styles.submissionContainer}>
-                <Text style={styles.submissionText}>
-                  Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
-                </Text>
-
-                {/* Display Feedback and Grade */}
-                {feedbackForSubmission.map(feedback => (
-                  <View key={feedback.feed_id} style={styles.feedbackContainer}>
-                    <Text style={styles.feedbackText}>
-                      Feedback: {feedback.description} - Grade: {feedback.grade.toFixed(2)}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            );
-          }}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleSubmissionSelect(item)} style={styles.submissionContainer}>
+              <Text style={styles.submissionText}>
+                Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
+              </Text>
+            </TouchableOpacity>
+          )}
         />
       )}
     </View>
@@ -153,15 +151,6 @@ const styles = StyleSheet.create({
   },
   submissionText: {
     fontSize: 16,
-  },
-  feedbackContainer: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 5,
-  },
-  feedbackText: {
-    fontSize: 14,
   },
 });
 
