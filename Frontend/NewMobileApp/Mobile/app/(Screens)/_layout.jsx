@@ -2,12 +2,10 @@ import React from 'react'
 import { Tabs } from 'expo-router';
 import Entypo from '@expo/vector-icons/Entypo';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { AssignmentProvider } from '@/components/assignmentContext';
 
 
 const _layout = () => {
   return (
-    <AssignmentProvider>
       <Tabs  screenOptions={{
         tabBarActiveTintColor: '#ffd33d',
         headerStyle: {
@@ -25,7 +23,6 @@ const _layout = () => {
         <Tabs.Screen name="submission" options={{ title: 'Submission', tabBarIcon: ({ color, size }) => (<AntDesign name="book" size={size} color={color} />) }}/>
         <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color, size }) => (<AntDesign name="user" size={size} color={color} />) }}/>
       </Tabs>
-    </AssignmentProvider>
   )
 }
 

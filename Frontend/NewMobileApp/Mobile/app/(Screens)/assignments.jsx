@@ -55,8 +55,9 @@ const Assignments = () => {
           <View style={styles.assignmentItem}>
             <TouchableOpacity
               onPress={() => {
-                console.log(`Navigating to AssignmentDisplay with ID: ${item.assignment_id}`);
+                console.log(`Setting assignment ID: ${item.assignment_id}`);
                 setAssignmentId(item.assignment_id); // Set the assignment ID in context
+                console.log(`Navigating to AssignmentDisplay with ID: ${item.assignment_id}`);
                 router.push('../../assignmentsDisplay'); // Navigate to assignmentsDisplay without query
               }}
             >

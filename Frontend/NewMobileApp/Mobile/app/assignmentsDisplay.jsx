@@ -3,7 +3,7 @@ import { View, Text, Button, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { RNCamera } from 'react-native-camera';
 import { useAssignmentContext } from '@/components/assignmentContext';;
-import { getUserId } from '../utils';
+import { getUserId } from './utils';
 
 const AssignmentsDisplay = () => {
   const router = useRouter();
@@ -14,11 +14,13 @@ const AssignmentsDisplay = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState(null);
 
-  const uploadVideoApi = 'https://yourapi.com/upload-video';
-  const createSubmissionApi = 'https://yourapi.com/create-submission';
-  const createUserSubmission = 'https://yourapi.com/create-user-submission';
+  console.log('Current assignmentId:', assignmentId);
 
-  useEffect(() => {
+  const uploadVideoApi = 'http://192.168.0.23:5000/uploads';
+  const createSubmissionApi = 'http://192.168.0.23:5000/submission';
+  const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
+
+  /*useEffect(() => {
     const fetchUserId = async () => {
       const id = await getUserId();
       if (id) {
@@ -29,15 +31,13 @@ const AssignmentsDisplay = () => {
     };
     
     fetchUserId();
-  }, []);
+  }, []);*/
 
   // Fetch assignment details based on assignmentId and userId
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
-      if (!userId) return; // Ensure userId is available
-
       try {
-        const response = await fetch(`https://yourapi.com/assignments/${assignmentId}/${userId}`);
+        const response = await fetch(`http://192.168.0.23:5000/assignment/${assignmentId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
@@ -45,12 +45,15 @@ const AssignmentsDisplay = () => {
         setAssignment(assignmentData);
       } catch (error) {
         console.error('Error fetching assignment details:', error);
-        Alert.alert('Error fetching assignment details');
+        Alert.alert ? Alert.alert('Error fetching assignment details') : window.alert('Error fetching assignment details');
       }
     };
-
-    fetchAssignmentDetails();
-  }, [assignmentId, userId]);
+  
+    if (assignmentId) {
+      fetchAssignmentDetails(); // Fetch assignment details if assignmentId is available
+    }
+  }, [assignmentId]);
+  
 
   // If assignment data is not available, handle it gracefully
   if (!assignment) {
