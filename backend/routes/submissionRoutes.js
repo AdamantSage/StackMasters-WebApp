@@ -12,6 +12,8 @@ router.post('/submission/feedback', authorizeFeedbackAccess, SubmissionControlle
 router.post('/userSubmission', authorizeSubmissionAccess, SubmissionController.createUserSubmission);
 //This is used to retrieve submission
 router.get('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.getSubmission);
+// This route is used to retrieve all submissions
+router.get('/submissions', SubmissionController.getSubmissions);
 //This is used to update submission date
 router.put('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.updateSubmissionStudent);
 //this is used to remove data

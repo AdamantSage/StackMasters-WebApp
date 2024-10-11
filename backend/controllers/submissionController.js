@@ -179,6 +179,27 @@ exports.deleteUserSubmission = (req, res) =>{
     });
 };
 
+exports.getSubmissions = (req, res) => {
+    console.log(`Fetching all submissions`);
+
+    // Execute the SQL query to fetch all submissions
+    Submission.selectAllSubmissions((err, results) => {
+        if (err) {
+            console.error(err); // Log any errors
+            // Send a JSON response with error message and status code 500 (server error)
+            return res.status(500).json({ message: "Error occurred while fetching submissions." });
+        } else if (results.length === 0) {
+            // If no submissions are found, send a JSON response with status code 404 (not found)
+            return res.status(404).json({ message: "No submissions found." });
+        } else {
+            console.log(results); // Log the results of the query
+            // Send the submissions data as JSON with status code 200 (success)
+            return res.status(200).json(results);
+        }
+    });
+};
+
+
 exports.deleteFeedback = (req, res) =>{
     const {feed_id} = req.params;// Retrieve the feed_id from the URL
     console.log(`Deleting submission with ID: ${feed_id}`);
