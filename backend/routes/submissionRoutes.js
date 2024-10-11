@@ -13,11 +13,16 @@ router.post('/userSubmission', SubmissionController.createUserSubmission);
 //This is used to retrieve submission
 router.get('/submission/:sub_id', SubmissionController.getSubmission);
 router.get('/submissions', SubmissionController.getSubmissions);
+
 //This is used to update submission date
 router.put('/submission/:sub_id', SubmissionController.updateSubmissionStudent);
 //this is used to remove data
 router.delete('/submission/:sub_id', SubmissionController.deleteSubmission);
 router.delete('/userSubmission/:user_id/:sub_id', SubmissionController.deleteUserSubmission);
 router.delete('/feedSubmission/:feed_id', SubmissionController.deleteFeedback);
+
+// Route to get all video submissions
+router.get('/video-submissions/:user_id',SubmissionController.selectVideoSubmissions);
+
 //This is to export the router
 module.exports = router;
