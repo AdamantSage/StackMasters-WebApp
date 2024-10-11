@@ -71,8 +71,8 @@ class Submission{
         );
     }
 
-    static selectVideoSubmissions(callback) {
-        const query = `
+    static selectVideoSubmissions(assignment_id,callback) {
+        db.query(`
             SELECT 
                 v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,
                 a.assignment_id, a.assign_name, a.upload_date, a.due_date,
@@ -84,9 +84,9 @@ class Submission{
             JOIN 
                 assignment a ON a.user_id = u.user_id
             WHERE 
-                v.user_id = a.user_id AND a.user_id = u.user_id;`;
+                v.user_id = a.user_id AND a.user_id = u.user_id AND a.assignment_id = ?`,
             
-        db.query(query, callback);
+        [assignment_id], callback);
     }
 }
 

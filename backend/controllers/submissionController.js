@@ -222,10 +222,11 @@ exports.deleteFeedback = (req, res) =>{
 };
 
 exports.selectVideoSubmissions = (req, res) => {
-    console.log(`Fetching video submissions`);
+    const {assignment_id} = req.params;
+    console.log(`Fetching video submissions for assignment_id: ${assignment_id}`);
 
     // Execute the SQL query to fetch all video submissions
-    Submission.selectVideoSubmissions((err, results) => {
+    Submission.selectVideoSubmissions(assignment_id, (err, results) => {
         if (err) {
             console.error(err); // Log any errors
             // Send a JSON response with error message and status code 500 (server error)
