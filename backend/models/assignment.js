@@ -17,12 +17,11 @@ class Assignment {
         db.query('INSERT INTO user_on_assignment SET ?', {
             user_id: assignmentData.user_id,
             assignment_id: assignmentData.assignment_id,
-            module_code: assignmentData.module_code
         }, callback);
     }
 
-    static select(assignment_id, user_id, callback){
-        db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id, user_id], callback);
+    static select(assignment_id, callback){
+        db.query('SELECT * FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
     }
 
     static newSelect(module_code, callback){

@@ -5,10 +5,12 @@ const db = require("./config/database");  // Import the db module
 const dotenv = require("dotenv");
 const { setContainerClient } = require('./controllers/videoController'); // Import the middleware
 dotenv.config();
-
+const cors = require('cors');
 const app = express();
 
-
+app.use(cors({
+    origin: '*',
+}));
 
 //we will put files like css/js for frontend we might want to use
 const publicDirectory = path.join(__dirname, './public');

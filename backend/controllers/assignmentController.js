@@ -42,13 +42,11 @@ exports.createUserAssignment = (req, res) => {
     const {
         user_id,
         assignment_id,
-        module_code
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.createUserAssignment({
         user_id,
         assignment_id,
-        module_code
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
@@ -83,10 +81,10 @@ exports.getAssignment = (req, res) => {
     });
 };
 exports.getAssignmentID = (req, res) => {
-    const {assignment_id, user_id} = req.params; // Retrieve the IDs from the URL
-    console.log(`Fetching assignment with module_code: ${assignment_id}, ${user_id}`);
+    const {assignment_id} = req.params; // Retrieve the IDs from the URL
+    console.log(`Fetching assignment with assignment_id: ${assignment_id}`);
     // Execute the SQL query to fetch the assignment with the given IDs from the model
-    Assignment.select(assignment_id, user_id, (err, results) => {
+    Assignment.select(assignment_id, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
