@@ -20,7 +20,7 @@ const VideoFeedback = () => {
     <div className="page"> 
       <header>
         <div className="container">
-          <h1 className="page-heading">Watch Video Feedback</h1>
+          <h1 className="page-heading">Watch Video and Provide Feedback</h1>
           <ul className="linksList">
             <li><Link to="/" className="link">Landing Page</Link></li>
             <li><Link to="/list-videos" className="link">Back to Video List</Link></li>

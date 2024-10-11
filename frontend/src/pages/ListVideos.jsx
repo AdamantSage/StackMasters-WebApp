@@ -47,7 +47,7 @@ const ListVideos = () => {
               <Link to="/" className="link">Landing Page</Link>
             </li>
             <li>
-              <Link to="/watch-feedback/:id" className="link">Watch Feedback</Link>
+              <Link to="/watch-feedback/:id" className="link">Watch Video</Link>
             </li>
           </ul>
         </div>
