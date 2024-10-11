@@ -241,3 +241,23 @@ exports.selectVideoSubmissions = (req, res) => {
         }
     });
 };
+exports.selectVideoSubmissionAll = (req, res) => {
+    console.log(`Fetching video submissions`);
+    console.log(req.query);
+    
+        // Execute the SQL query to fetch all video submissions
+    Submission.selectVideoSubmissionsAll((err, results) => {
+        if (err) {
+            console.error(err); // Log any errors
+                // Send a JSON response with error message and status code 500 (server error)
+            return res.status(500).json({ message: "Error occurred while fetching video submissions." });
+        } else if (results.length === 0) {
+                // If no submissions are found, send a JSON response with status code 404 (not found)
+            return res.status(404).json({ message: "No video submissions found." });
+        } else {
+            console.log(results); // Log the results of the query
+                // Send the submissions data as JSON with status code 200 (success)
+            return res.status(200).json(results);
+        }
+    });
+};

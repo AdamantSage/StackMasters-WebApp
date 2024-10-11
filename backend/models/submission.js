@@ -88,6 +88,20 @@ class Submission{
             
         [assignment_id], callback);
     }
+
+    static selectVideoSubmissionsAll(callback) {
+        db.query(`SELECT 
+                v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,
+                a.assignment_id, a.assign_name, a.upload_date, a.due_date,
+                u.user_id, u.name
+            FROM video v
+            LEFT JOIN 
+                users u ON v.user_id = u.user_id
+            LEFT JOIN 
+                assignment a ON a.user_id = u.user_id`,
+            
+        callback);
+    }
 }
 
 module.exports = Submission;

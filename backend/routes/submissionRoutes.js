@@ -23,6 +23,6 @@ router.delete('/feedSubmission/:feed_id', SubmissionController.deleteFeedback);
 
 // Route to get all video submissions
 router.get('/video-submissions/:assignment_id', SubmissionController.selectVideoSubmissions);
-
+router.get('/video-submission', SubmissionController.selectVideoSubmissionAll);
 //This is to export the router
 module.exports = router;
