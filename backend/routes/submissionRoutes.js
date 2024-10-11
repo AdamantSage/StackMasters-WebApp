@@ -13,7 +13,7 @@ router.post('/userSubmission', authorizeSubmissionAccess, SubmissionController.c
 //This is used to retrieve submission
 router.get('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.getSubmission);
 // This route is used to retrieve all submissions
-router.get('/submissions', authorizeSubmissionAccess, SubmissionController.getSubmissions);
+router.get('/submissions', SubmissionController.getSubmissions);
 //This is used to update submission date
 router.put('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.updateSubmissionStudent);
 //this is used to remove data
