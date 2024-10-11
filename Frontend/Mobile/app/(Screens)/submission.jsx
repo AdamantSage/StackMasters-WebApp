@@ -3,15 +3,15 @@ import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUserId } from '../utils';
-import FeedbackDisplay from '../comp/FeedbackDisplay'; // Adjust the path as necessary
+import FeedbackDisplay from '../comp/FeedbackDisplay';
 
 const Submission = () => {
   const [submissions, setSubmissions] = useState([]);
-  const [feedbacks, setFeedbacks] = useState([]);
+  const [feedbacks, setFeedbacks] = useState({});
   const [showSubmissions, setShowSubmissions] = useState(false);
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedSubmission, setSelectedSubmission] = useState(null); // State to hold the selected submission
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
 
   useEffect(() => {
     const fetchUserIdAndSubmissions = async () => {
@@ -20,7 +20,6 @@ const Submission = () => {
         if (id) {
           setUserId(id);
           await fetchSubmissions(id);
-          await fetchFeedbacks(id);
         } else {
           Alert.alert('Error', 'User ID is missing. Please log in again.');
         }
@@ -36,11 +35,6 @@ const Submission = () => {
   const fetchSubmissions = async (userId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      if (!token) {
-        Alert.alert('Error', 'No token found. Please log in again.');
-        return;
-      }
-
       const response = await axios.get(`http://192.168.48.58:5000/submissions?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,13 +47,13 @@ const Submission = () => {
     }
   };
 
-  const fetchFeedbacks = async (userId) => {
+  const fetchFeedbacks = async (userId, subId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await axios.get(`http://192.168.48.58:5000/feedbacks?userId=${userId}`, {
+      const response = await axios.get(`http://192.168.48.58:5000/feedback/${subId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFeedbacks(response.data);
+      setFeedbacks(prevFeedbacks => ({ ...prevFeedbacks, [subId]: response.data }));
     } catch (error) {
       console.error('Error fetching feedbacks:', error);
       Alert.alert('Error', 'Failed to fetch feedbacks.');
@@ -72,10 +66,15 @@ const Submission = () => {
 
   const handleSubmissionSelect = (submission) => {
     setSelectedSubmission(submission);
+    const { sub_id } = submission;
+
+    if (!feedbacks[sub_id]) {
+      fetchFeedbacks(userId, sub_id);
+    }
   };
 
   const handleBack = () => {
-    setSelectedSubmission(null); // Reset selected submission to show submissions list
+    setSelectedSubmission(null);
   };
 
   if (isLoading) {
@@ -92,6 +91,10 @@ const Submission = () => {
     );
   }
 
+  if (submissions.length === 0) {
+    return <Text>No submissions available.</Text>;
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>View Submissions and Feedback</Text>
@@ -103,13 +106,24 @@ const Submission = () => {
         <FlatList
           data={submissions}
           keyExtractor={(item) => item.sub_id ? item.sub_id.toString() : Math.random().toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleSubmissionSelect(item)} style={styles.submissionContainer}>
-              <Text style={styles.submissionText}>
-                Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => {
+            const feedbackForSubmission = feedbacks[item.sub_id] || [];
+            return (
+              <TouchableOpacity onPress={() => handleSubmissionSelect(item)} style={styles.submissionContainer}>
+                <Text style={styles.submissionText}>
+                  Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
+                </Text>
+                {feedbackForSubmission.length > 0 ? feedbackForSubmission.map(feedback => {
+                  const grade = feedback.grade != null ? Number(feedback.grade) : 'N/A';
+                  return (
+                    <Text key={feedback.feed_id} style={styles.feedbackText}>
+                      Feedback: {feedback.description} - Grade: {typeof grade === 'number' ? grade.toFixed(2) : grade}
+                    </Text>
+                  );
+                }) : <Text>No feedback available.</Text>}
+              </TouchableOpacity>
+            );
+          }}
         />
       )}
     </View>
@@ -133,7 +147,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   showButton: {
-    backgroundColor: '#663399', // Purple color
+    backgroundColor: '#663399',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -151,6 +165,10 @@ const styles = StyleSheet.create({
   },
   submissionText: {
     fontSize: 16,
+  },
+  feedbackText: {
+    fontSize: 14,
+    color: '#555',
   },
 });
 
