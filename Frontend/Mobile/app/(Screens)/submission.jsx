@@ -4,7 +4,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { Video } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
-import Icon from 'react-native-vector-icons/Ionicons'; // Importing Ionicons
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Submission = () => {
   const [assignments, setAssignments] = useState([]);
@@ -12,21 +12,29 @@ const Submission = () => {
   const [videoUri, setVideoUri] = useState('');
   const [recordedVideoUri, setRecordedVideoUri] = useState('');
   const [showAssignments, setShowAssignments] = useState(false);
-  const [streamingVideoUri, setStreamingVideoUri] = useState(''); // New state for streaming
+  const [streamingVideoUri, setStreamingVideoUri] = useState('');
 
   // Fetch assignments from backend on component mount
   useEffect(() => {
-    if (showAssignments) {
-      axios.get('/api/assignments')
-        .then(response => setAssignments(response.data))
-        .catch(error => console.error('Error fetching assignments', error));
-    }
+    const fetchAssignments = async () => {
+      try {
+        if (showAssignments) {
+          const response = await axios.get('http://192.168.48.58:5000/assignment');
+          console.log('Fetched assignments:', response.data); // Log the fetched data
+          setAssignments(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching assignments', error);
+      }
+    };
+    
+
+    fetchAssignments();
   }, [showAssignments]);
 
   const handleAssignmentSelection = (id) => {
     setSelectedAssignmentId(id);
-    // Set the streaming video URI when an assignment is selected
-    setStreamingVideoUri(`YOUR_VIDEO_STREAMING_URL/${id}`); // Replace with your actual streaming URL
+    setStreamingVideoUri(`http://192.168.48.58:5000/videos/${id}/stream`);
   };
 
   const handleUpload = () => {
@@ -39,7 +47,7 @@ const Submission = () => {
         name: `assignment_${selectedAssignmentId}.mp4`,
       });
 
-      axios.post(`/api/assignments/${selectedAssignmentId}/videos`, formData)
+      axios.post(`http://192.168.48.58:5000/assignment/${selectedAssignmentId}/videos`, formData)
         .then(response => Alert.alert('Success', 'Video uploaded successfully'))
         .catch(error => console.error('Error uploading video', error));
     } else {
@@ -50,7 +58,7 @@ const Submission = () => {
   const handleDownload = async () => {
     if (selectedAssignmentId) {
       try {
-        const res = await axios.get(`/api/assignments/${selectedAssignmentId}/videos`, { responseType: 'blob' });
+        const res = await axios.get(`http://192.168.48.58:5000/assignments/${selectedAssignmentId}/videos`, { responseType: 'blob' });
         const videoPath = `${FileSystem.documentDirectory}assignment_${selectedAssignmentId}.mp4`;
 
         await FileSystem.writeAsStringAsync(videoPath, res.data, { encoding: FileSystem.EncodingType.Base64 });
@@ -113,20 +121,23 @@ const Submission = () => {
       {/* Assignment selection */}
       {showAssignments && (
         <FlatList
-          data={assignments}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
+        data={assignments}
+        keyExtractor={(item) => item.assignment_id ? item.assignment_id.toString() : Math.random().toString()} // Use assignment_id for the key
+        renderItem={({ item }) => {
+          if (!item) return null; // Check if item is undefined
+      
+          return (
             <TouchableOpacity
-              style={[
-                styles.assignmentButton,
-                selectedAssignmentId === item.id && styles.selectedAssignment,
-              ]}
-              onPress={() => handleAssignmentSelection(item.id)}
+              style={[styles.assignmentButton, selectedAssignmentId === item.assignment_id && styles.selectedAssignment]}
+              onPress={() => handleAssignmentSelection(item.assignment_id)}
             >
-              <Text style={styles.assignmentText}>Assignment {item.id}</Text>
+              <Text style={styles.assignmentText}>
+                Assignment: {item.assignment_id ? item.assignment_id.toString() : 'Unnamed Assignment'} {/* Use assignment_id directly */}
+              </Text>
             </TouchableOpacity>
-          )}
-        />
+          );
+        }}
+      />
       )}
 
       {/* Display recorded video */}
@@ -153,6 +164,10 @@ const Submission = () => {
             useNativeControls
             resizeMode="contain"
             isLooping
+            onError={(error) => {
+              console.error('Error playing video:', error);
+              Alert.alert('Error', 'Failed to load the streaming video.');
+            }}
           />
         </View>
       ) : null}
