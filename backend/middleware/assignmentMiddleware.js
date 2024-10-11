@@ -18,7 +18,7 @@ const validAssignmentInfo = (req, res, next) => {
         }
     next();
 }
-
+//Change from user id to fetch user role from user table
 const authorizeAssignmentAccess = (req, res, next) => {
     const assignment_id = req.params.id; // Get assignment ID from request parameters
     const user_id = req.user.id; // Get user ID from authenticated user
