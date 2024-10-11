@@ -20,5 +20,10 @@ router.put('/submission/:sub_id', authorizeSubmissionAccess, SubmissionControlle
 router.delete('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.deleteSubmission);
 router.delete('/userSubmission/:user_id/:sub_id', authorizeSubmissionAccess, SubmissionController.deleteUserSubmission);
 router.delete('/feedSubmission/:feed_id', authorizeFeedbackAccess, SubmissionController.deleteFeedback);
+
+
+// Route to get all video submissions
+router.get('/video-submissions',SubmissionController.selectVideoSubmissions);
+
 //This is to export the router
 module.exports = router;

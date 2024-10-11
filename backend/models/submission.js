@@ -69,6 +69,25 @@ class Submission{
             [feed_id], callback
         );
     }
+     // New method to select video submissions
+     static selectVideoSubmissions(callback) {
+        const query = `
+            SELECT 
+                v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,
+                a.assignment_id, a.assign_name, a.upload_date, a.due_date,
+                u.user_id, u.name
+            FROM 
+                videos v
+            JOIN 
+                users u ON v.user_id = u.user_id
+            JOIN 
+                assignments a ON a.user_id = u.user_id
+            WHERE 
+                v.user_id = u.user_id;`;
+            
+        db.query(query, callback);
+    }
+    
 }
 
 module.exports = Submission;
