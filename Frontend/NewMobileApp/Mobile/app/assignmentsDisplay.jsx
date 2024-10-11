@@ -1,19 +1,61 @@
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, Button, Alert } from 'react-native';
-import React, { useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { RNCamera } from 'react-native-camera';
-//import DocumentPicker from 'react-native-document-picker';
+import { useAssignmentContext } from '@/components/assignmentContext';;
+import { getUserId } from '../utils';
 
-const assignmentsDisplay = () => {
+const AssignmentsDisplay = () => {
   const router = useRouter();
-  const { assignmentId, assignName, dueDate, assignDesc } = router.query || {};
-
+  const { assignmentId } = useAssignmentContext(); // Get assignmentId from context
+  const [assignment, setAssignment] = useState(null);
+  const [userId, setUserId] = useState(null);
   const cameraRef = useRef(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [videoUri, setVideoUri] = useState(null); 
+  const [videoUri, setVideoUri] = useState(null);
 
-  const uploadVideoApi = 'https://yourapi.com/upload-video'; 
+  const uploadVideoApi = 'https://yourapi.com/upload-video';
   const createSubmissionApi = 'https://yourapi.com/create-submission';
+  const createUserSubmission = 'https://yourapi.com/create-user-submission';
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId();
+      if (id) {
+        setUserId(id);
+      } else {
+        Alert.alert('Error', 'User ID is missing. Please log in again.');
+      }
+    };
+    
+    fetchUserId();
+  }, []);
+
+  // Fetch assignment details based on assignmentId and userId
+  useEffect(() => {
+    const fetchAssignmentDetails = async () => {
+      if (!userId) return; // Ensure userId is available
+
+      try {
+        const response = await fetch(`https://yourapi.com/assignments/${assignmentId}/${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch assignment details');
+        }
+        const assignmentData = await response.json();
+        setAssignment(assignmentData);
+      } catch (error) {
+        console.error('Error fetching assignment details:', error);
+        Alert.alert('Error fetching assignment details');
+      }
+    };
+
+    fetchAssignmentDetails();
+  }, [assignmentId, userId]);
+
+  // If assignment data is not available, handle it gracefully
+  if (!assignment) {
+    return <Text>No assignment found.</Text>;
+  }
 
   const handleRecordVideo = async () => {
     if (cameraRef.current) {
@@ -37,22 +79,19 @@ const assignmentsDisplay = () => {
   };
 
   const uploadVideo = async () => {
-    if (!videoUri) return;
+    if (!videoUri) return null; // If there's no video URI, stop execution
 
     const formData = new FormData();
     formData.append('video', {
       uri: videoUri,
-      type: 'video/mp4', // Adjust if necessary
-      name: 'video.mp4',
+      type: 'video/mp4', // Ensure this matches the expected MIME type
+      name: 'video.mp4', // You can generate a unique name if needed
     });
 
     try {
       const response = await fetch(uploadVideoApi, {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
       });
 
       if (!response.ok) {
@@ -70,18 +109,18 @@ const assignmentsDisplay = () => {
   };
 
   const handleSubmit = async () => {
-    const uploadResponse = await uploadVideo();
-    if (!uploadResponse) return; // Stop if the upload failed
-
-    // Example data for creating a submission (adjust as needed)
-    const submissionData = {
-      userId: 'your-user-id', // Replace with actual user ID
-      assignmentId: assignmentId,
-      videoUrl: uploadResponse.videoUrl, // Adjust based on upload response
-    };
-
     try {
-      const response = await fetch(createSubmissionApi, {
+      // Step 1: Upload the video
+      const uploadResponse = await uploadVideo();
+      if (!uploadResponse) return; // Stop if the video upload failed
+
+      // Step 2: Create the submission
+      const submissionData = {
+        assignmentId: assignmentId, // Get the assignment ID from context
+        subDate: new Date().toISOString(), // Current date as the submission date
+      };
+
+      const createSubmissionResponse = await fetch(createSubmissionApi, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,24 +128,47 @@ const assignmentsDisplay = () => {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) {
+      if (!createSubmissionResponse.ok) {
         throw new Error('Failed to create submission');
       }
 
-      const submissionResponse = await response.json();
-      console.log('Submission response:', submissionResponse);
+      const submissionResult = await createSubmissionResponse.json();
+      const submissionId = submissionResult.sub_id; // Get the created submission ID
+
+      // Step 3: Associate the user with the submission
+      const userOnSubmissionData = {
+        userId: userId, // Replace with actual user ID
+        subId: submissionId, // Use the submission ID from previous API call
+        moduleCode: assignment.module_code, // Use the module code from the assignment
+      };
+
+      const userSubmissionResponse = await fetch(createUserSubmission, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userOnSubmissionData),
+      });
+
+      if (!userSubmissionResponse.ok) {
+        throw new Error('Failed to create user submission');
+      }
+
+      const userSubmissionResult = await userSubmissionResponse.json();
+      console.log('User submission created:', userSubmissionResult);
+
       Alert.alert('Submission successful!');
     } catch (error) {
-      console.error('Error creating submission:', error);
-      Alert.alert('Error creating submission');
+      console.error('Error during submission process:', error);
+      Alert.alert('Error during submission process');
     }
   };
 
   return (
     <View>
-      <Text>Assignment Name: {decodeURIComponent(assignName)}</Text>
-      <Text>Due Date: {decodeURIComponent(dueDate)}</Text>
-      <Text>Assignment Description: {decodeURIComponent(assignDesc)}</Text>
+      <Text>Assignment Name: {assignment.assign_name}</Text>
+      <Text>Due Date: {assignment.due_date}</Text>
+      <Text>Assignment Description: {assignment.assign_desc}</Text>
 
       <View style={{ flex: 1 }}>
         <RNCamera
@@ -132,7 +194,7 @@ const assignmentsDisplay = () => {
         onPress={handleSubmit}
       />
     </View>
-  )
-}
+  );
+};
 
-export default assignmentsDisplay
+export default AssignmentsDisplay;

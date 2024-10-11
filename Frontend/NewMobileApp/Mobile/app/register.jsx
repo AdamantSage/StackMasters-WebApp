@@ -21,7 +21,7 @@ const Register = () => {
       return;
     }
 
-    try {//locally
+    try {
       const response = await fetch('http://192.168.0.23:5000/users/create/', {
         method: 'POST',
         headers: {
