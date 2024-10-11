@@ -5,6 +5,7 @@ const videoController = require('../controllers/videoController');
 const upload = require('../config/multerConfig'); // Import the multer configuration
 const path = require('path');
 const compressVideo = require('../videoCompression');
+const assignmentController = require('../controllers/assignmentController');
 
 // Route to upload a video file
 router.post('/uploads', videoController.setContainerClient, upload.single('file'), videoController.multerErrorHandler, videoController.handleVideoUpload);
@@ -41,5 +42,10 @@ router.post('/test-compress', async (req, res) => {
 router.use((req, res) => {
     res.status(404).send('Route not found');
 });
+
+
+
+//get all assignments
+router.get('/assignments', assignmentController.getAllAssignments);
 
 module.exports = router;

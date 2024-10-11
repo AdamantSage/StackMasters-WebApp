@@ -25,6 +25,14 @@ class Assignment {
         db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id, user_id], callback);
     }
 
+    static newSelect(module_code, callback){
+        db.query('SELECT * FROM assignment WHERE module_code = ?', [module_code], callback);
+    }
+
+    static selectModule(callback){
+        db.query('SELECT * FROM module',callback);
+    }
+
     static update(assignment_id, updateData, callback) {
         db.query(
             'UPDATE assignment SET assign_name = ?, due_date = ?, assign_desc = ? WHERE assignment_id = ?',
@@ -41,6 +49,10 @@ class Assignment {
         db.query('DELETE FROM user_on_assignment WHERE user_id = ?, assignment_id = ?',
             [user_id, assignment_id], callback
         );
+    }
+    // Add the getAll method within the class
+    static getAll(callback) {
+        db.query('SELECT * FROM assignment', callback); // Fetch all assignments
     }
 }
 module.exports = Assignment;
