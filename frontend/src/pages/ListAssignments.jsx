@@ -1,6 +1,7 @@
 // src/components/ListAssignments.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 
 const ListAssignments = () => {
   // Hardcoded assignments with user name, time submitted, and module code
@@ -66,17 +67,29 @@ const ListAssignments = () => {
             ))}
           </select>
         </div>
-
         {/* List of Assignments */}
-        <div className="displayBox">
-          <ul className="list">
-            {filteredAssignments.slice(0, visibleCount).map(assignment => (
-              <li key={assignment.id} className="record">
-                <strong>{assignment.title}</strong> - Submitted by {assignment.userName} on {assignment.timeSubmitted} (Module: {assignment.module})
-              </li>
-            ))}
-          </ul>
-        </div>
+        <TableContainer component={Paper} className="fixed-table-container">
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Title</strong></TableCell>
+                <TableCell><strong>Submitted By</strong></TableCell>
+                <TableCell><strong>Time Submitted</strong></TableCell>
+                <TableCell><strong>Module</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredAssignments.slice(0, visibleCount).map(assignment => (
+                <TableRow key={assignment.id}>
+                  <TableCell>{assignment.title}</TableCell>
+                  <TableCell>{assignment.userName}</TableCell>
+                  <TableCell>{assignment.timeSubmitted}</TableCell>
+                  <TableCell>{assignment.module}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         {/* Button to toggle show more/less */}
         <button

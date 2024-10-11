@@ -1,20 +1,19 @@
-// src/pages/ListVideos.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+
 
 const ListVideos = () => {
-  // Hardcoded video submissions with user name and assignment ID
   const videos = [
-    { id: 1, title: 'Video 1', userName: 'Alice Johnson', timeSubmitted: '2024-10-08 01:00 PM', assignmentId: 1 },
-    { id: 2, title: 'Video 2', userName: 'Bob Smith', timeSubmitted: '2024-10-07 11:30 AM', assignmentId: 1 },
-    { id: 3, title: 'Video 3', userName: 'Charlie Brown', timeSubmitted: '2024-10-06 03:15 PM', assignmentId: 2 },
-    { id: 4, title: 'Video 4', userName: 'David Wilson', timeSubmitted: '2024-10-05 09:45 AM', assignmentId: 2 },
-    { id: 5, title: 'Video 5', userName: 'Eva Green', timeSubmitted: '2024-10-04 02:20 PM', assignmentId: 3 },
-    { id: 6, title: 'Video 6', userName: 'Frankie Blue', timeSubmitted: '2024-10-03 04:50 PM', assignmentId: 3 },
-    { id: 7, title: 'Video 7', userName: 'Gina Purple', timeSubmitted: '2024-10-02 12:10 PM', assignmentId: 4 }
+    { id: 1, title: 'Video 1', userName: 'Alice Johnson', timeSubmitted: '2024-10-08 01:00 PM', assignmentId: 1, videoUrl: 'https://example.com/video1' },
+    { id: 2, title: 'Video 2', userName: 'Bob Smith', timeSubmitted: '2024-10-07 11:30 AM', assignmentId: 1, videoUrl: 'https://example.com/video2' },
+    { id: 3, title: 'Video 3', userName: 'Charlie Brown', timeSubmitted: '2024-10-06 03:15 PM', assignmentId: 2, videoUrl: 'https://example.com/video3' },
+    { id: 4, title: 'Video 4', userName: 'David Wilson', timeSubmitted: '2024-10-05 09:45 AM', assignmentId: 2, videoUrl: 'https://example.com/video4' },
+    { id: 5, title: 'Video 5', userName: 'Eva Green', timeSubmitted: '2024-10-04 02:20 PM', assignmentId: 3, videoUrl: 'https://example.com/video5' },
+    { id: 6, title: 'Video 6', userName: 'Frankie Blue', timeSubmitted: '2024-10-03 04:50 PM', assignmentId: 3, videoUrl: 'https://example.com/video6' },
+    { id: 7, title: 'Video 7', userName: 'Gina Purple', timeSubmitted: '2024-10-02 12:10 PM', assignmentId: 4, videoUrl: 'https://example.com/video7' }
   ];
 
-  // Hardcoded assignments
   const assignments = [
     { id: 1, title: 'Assignment 1' },
     { id: 2, title: 'Assignment 2' },
@@ -22,17 +21,15 @@ const ListVideos = () => {
     { id: 4, title: 'Assignment 4' }
   ];
 
-  const [selectedAssignment, setSelectedAssignment] = useState(''); // Selected assignment for filtering
-  const [visibleCount, setVisibleCount] = useState(3); // Number of visible videos
-  const [showMore, setShowMore] = useState(false); // Toggle for showing more/less
+  const [selectedAssignment, setSelectedAssignment] = useState('');
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [showMore, setShowMore] = useState(false);
 
-  // Handle toggling show more / show less
   const toggleShowMore = () => {
     setShowMore(!showMore);
-    setVisibleCount(showMore ? 3 : videos.length); // Show all if 'showMore' is true, else show first 3
+    setVisibleCount(showMore ? 3 : videos.length);
   };
 
-  // Filter videos based on selected assignment
   const filteredVideos = videos.filter(video =>
     selectedAssignment ? video.assignmentId === parseInt(selectedAssignment) : true
   );
@@ -54,7 +51,6 @@ const ListVideos = () => {
       </header>
 
       <div className="page-Container">
-        {/* Dropdown for assignment selection */}
         <div className="assignment-container">
           <label htmlFor="assignment">Select Assignment:</label>
           <select
@@ -71,22 +67,34 @@ const ListVideos = () => {
           </select>
         </div>
 
-        {/* List of Videos */}
-        <div className="displayBox">
-          <ul className="list">
-            {filteredVideos.slice(0, visibleCount).map(video => (
-              <li key={video.id} className="record">
-                <strong>{video.title}</strong> - Submitted by {video.userName} on {video.timeSubmitted}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <TableContainer component={Paper} className="fixed-table-container">
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Title</strong></TableCell>
+                <TableCell><strong>Submitted By</strong></TableCell>
+                <TableCell><strong>Time Submitted</strong></TableCell>
+                <TableCell><strong>Assignment</strong></TableCell>
+                <TableCell><strong>Video URL</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredVideos.slice(0, visibleCount).map(video => (
+                <TableRow key={video.id}>
+                  <TableCell>{video.title}</TableCell>
+                  <TableCell>{video.userName}</TableCell>
+                  <TableCell>{video.timeSubmitted}</TableCell>
+                  <TableCell>{assignments.find(a => a.id === video.assignmentId)?.title}</TableCell>
+                  <TableCell>
+                    <a href={video.videoUrl} target="_blank" rel="noopener noreferrer">Watch Video</a>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-        {/* Button to toggle show more/less */}
-        <button
-          className="get-started-button"
-          onClick={toggleShowMore}
-        >
+        <button className="get-started-button" onClick={toggleShowMore}>
           {showMore ? 'Show Less' : 'Show More'}
         </button>
       </div>
