@@ -1,26 +1,24 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { RNCamera } from 'react-native-camera';
-import { useAssignmentContext } from '@/components/assignmentContext';;
+import { useAssignmentContext } from '@/components/assignmentContext';
 import { getUserId } from './utils';
+import VideoRecorder from './videoRecorder';
+import * as DocumentPicker from 'expo-document-picker';
 
 const AssignmentsDisplay = () => {
   const router = useRouter();
   const { assignmentId } = useAssignmentContext(); // Get assignmentId from context
   const [assignment, setAssignment] = useState(null);
   const [userId, setUserId] = useState(null);
-  const cameraRef = useRef(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState(null);
-
-  console.log('Current assignmentId:', assignmentId);
+  const [isRecording, setIsRecording] = useState(false);
 
   const uploadVideoApi = 'http://192.168.0.23:5000/uploads';
   const createSubmissionApi = 'http://192.168.0.23:5000/submission';
   const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
 
-  /*useEffect(() => {
+   /*useEffect(() => {
     const fetchUserId = async () => {
       const id = await getUserId();
       if (id) {
@@ -33,19 +31,29 @@ const AssignmentsDisplay = () => {
     fetchUserId();
   }, []);*/
 
-  // Fetch assignment details based on assignmentId and userId
+
+  // Fetch assignment details based on assignmentId
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.0.23:5000/assignment/${assignmentId}`);
+        const response = await fetch(`http://192.168.0.23:5000/assignments/${assignmentId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
         const assignmentData = await response.json();
-        setAssignment(assignmentData);
+        console.log('Fetched assignment data:', assignmentData);
+        
+        // Access the first assignment in the array
+        if (assignmentData.length > 0) {
+          const assignment = assignmentData[0];
+          console.log('Assignment fields:', assignment.assign_name, assignment.due_date, assignment.assign_desc);
+          setAssignment(assignment); // Set the first assignment object to state
+        } else {
+          console.log('No assignment data available.');
+        }
       } catch (error) {
         console.error('Error fetching assignment details:', error);
-        Alert.alert ? Alert.alert('Error fetching assignment details') : window.alert('Error fetching assignment details');
+        Alert.alert('Error fetching assignment details');
       }
     };
   
@@ -53,32 +61,20 @@ const AssignmentsDisplay = () => {
       fetchAssignmentDetails(); // Fetch assignment details if assignmentId is available
     }
   }, [assignmentId]);
-  
 
   // If assignment data is not available, handle it gracefully
   if (!assignment) {
     return <Text>No assignment found.</Text>;
   }
 
-  const handleRecordVideo = async () => {
-    if (cameraRef.current) {
-      const options = { quality: RNCamera.Constants.VideoQuality["480p"] };
-      try {
-        const data = await cameraRef.current.recordAsync(options);
-        console.log('Video recorded:', data.uri);
-        setVideoUri(data.uri); // Set recorded video URI for later use
-      } catch (error) {
-        console.error(error);
-        Alert.alert('Error recording video');
-      }
-    }
+  const handleRecordingComplete = (uri) => {
+    setVideoUri(uri); // Set the video URI after recording
+    setIsRecording(false); // Hide VideoRecorder
   };
 
-  const handleStopVideo = async () => {
-    if (cameraRef.current) {
-      await cameraRef.current.stopRecording();
-      setIsRecording(false);
-    }
+  // Function to start recording
+  const startRecording = () => {
+    setIsRecording(true); // Show VideoRecorder
   };
 
   const uploadVideo = async () => {
@@ -113,15 +109,20 @@ const AssignmentsDisplay = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log('Submit button pressed');
       // Step 1: Upload the video
       const uploadResponse = await uploadVideo();
-      if (!uploadResponse) return; // Stop if the video upload failed
-
+      if (!uploadResponse){ 
+        console.log('Video upload failed or returned no response');
+        return; // Stop if the video upload failed
+      }
       // Step 2: Create the submission
       const submissionData = {
         assignmentId: assignmentId, // Get the assignment ID from context
         subDate: new Date().toISOString(), // Current date as the submission date
       };
+
+      console.log('Submission data:', submissionData);
 
       const createSubmissionResponse = await fetch(createSubmissionApi, {
         method: 'POST',
@@ -132,11 +133,13 @@ const AssignmentsDisplay = () => {
       });
 
       if (!createSubmissionResponse.ok) {
+        console.error('Failed to create submission', createSubmissionResponse.status);
         throw new Error('Failed to create submission');
       }
 
       const submissionResult = await createSubmissionResponse.json();
       const submissionId = submissionResult.sub_id; // Get the created submission ID
+      console.log('Submission created:', submissionResult);
 
       // Step 3: Associate the user with the submission
       const userOnSubmissionData = {
@@ -144,6 +147,8 @@ const AssignmentsDisplay = () => {
         subId: submissionId, // Use the submission ID from previous API call
         moduleCode: assignment.module_code, // Use the module code from the assignment
       };
+
+      console.log('User submission data:', userOnSubmissionData);
 
       const userSubmissionResponse = await fetch(createUserSubmission, {
         method: 'POST',
@@ -153,7 +158,9 @@ const AssignmentsDisplay = () => {
         body: JSON.stringify(userOnSubmissionData),
       });
 
+
       if (!userSubmissionResponse.ok) {
+        console.error('Failed to create user submission', userSubmissionResponse.status);
         throw new Error('Failed to create user submission');
       }
 
@@ -167,35 +174,47 @@ const AssignmentsDisplay = () => {
     }
   };
 
+  const chooseVideo = async () => {
+    console.log('Opening video picker...'); // Debugging log
+  
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'video/*',
+        multiple: false,
+      });
+  
+      console.log('Video picker result:', result); // Debugging log
+  
+      // Check if the user canceled the picker
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        // Get the URI of the selected video
+        const videoUri = result.assets[0].uri;
+        setVideoUri(videoUri);
+        console.log('Video URI:', videoUri); // Log the selected video URI
+      } else {
+        console.log('User cancelled video picker');
+      }
+    } catch (error) {
+      console.error('Error picking video:', error);
+      Alert.alert('Error picking video');
+    }
+  };  
+
   return (
     <View>
-      <Text>Assignment Name: {assignment.assign_name}</Text>
-      <Text>Due Date: {assignment.due_date}</Text>
-      <Text>Assignment Description: {assignment.assign_desc}</Text>
+      <Text>Assignment Name: {assignment?.assign_name}</Text>
+      <Text>Due Date: {assignment?.due_date}</Text>
+      <Text>Assignment Description: {assignment?.assign_desc}</Text>
 
-      <View style={{ flex: 1 }}>
-        <RNCamera
-          ref={cameraRef}
-          style={{ flex: 1 }}
-          type={RNCamera.Constants.Type.back}
-          flashMode={RNCamera.Constants.FlashMode.on}
-          onCameraReady={() => console.log('Camera ready')}
-          captureAudio={true}
-        />
-      </View>
+      <Button title="Choose Video" onPress={chooseVideo} />
+      <Button title="Record Video" onPress={startRecording} />
+      {videoUri && <Text>Video Selected: {videoUri}</Text>}
 
-      <Button
-        title={isRecording ? "Stop Recording" : "Record Video"}
-        onPress={isRecording ? handleStopVideo : () => {
-          setIsRecording(true);
-          handleRecordVideo();
-        }}
-      />
+      {isRecording && (
+        <VideoRecorder onRecordingComplete={handleRecordingComplete} />
+      )}
 
-      <Button
-        title="Submit Video"
-        onPress={handleSubmit}
-      />
+      <Button title="Submit Video" onPress={handleSubmit} />
     </View>
   );
 };
