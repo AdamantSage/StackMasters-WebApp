@@ -126,8 +126,6 @@ const Register = () => {
           onValueChange={(itemValue) => setRole(itemValue)}
         >
           <Picker.Item label="Select Role" value="" />
-          <Picker.Item label="Admin" value="admin" />
-          <Picker.Item label="Lecturer" value="lecturer" />
           <Picker.Item label="Student" value="student" />
         </Picker>
 

@@ -131,57 +131,7 @@ const Profile = () => {
         console.error('Error updating profile:', error);
         Alert.alert('Error', 'Unable to update profile, please try again');
     }
-};
-
-  
-
-  // Handle user deletion
-  const handleDeleteUser = async () => {
-    Alert.alert(
-      'Confirm Deletion',
-      'Are you sure you want to delete your account? This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem('jwt');
-              if (!token) {
-                Alert.alert('Error', 'You need to log in to delete your account.');
-                return;
-              }
-  
-              const response = await fetch(`http://192.168.49.219:5000/users/delete/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json', // Ensure content type is set
-                  Authorization: `Bearer ${token}`,
-                },
-              });
-  
-              if (response.ok) {
-                Alert.alert('Success', 'User deleted successfully');
-                router.push('/sign-in'); // Redirect to login after deletion
-              } else {
-                const data = await response.json();
-                Alert.alert('Error', data.message || 'Failed to delete user');
-              }
-            } catch (error) {
-              console.error('Error deleting user:', error);
-              Alert.alert('Error', 'Unable to delete user, please try again');
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-  
+}; 
 
   if (isLoading) {
     return (
@@ -249,10 +199,6 @@ const Profile = () => {
         </View>
 
         <Text style={styles.label}>Role: {role}</Text>
-
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteUser}>
-          <Text style={styles.buttonText}>Delete User</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
