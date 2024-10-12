@@ -179,6 +179,27 @@ exports.deleteUserSubmission = (req, res) =>{
     });
 };
 
+exports.getSubmissions = (req, res) => {
+    console.log(`Fetching all submissions`);
+
+    // Execute the SQL query to fetch all submissions
+    Submission.selectAllSubmissions((err, results) => {
+        if (err) {
+            console.error(err); // Log any errors
+            // Send a JSON response with error message and status code 500 (server error)
+            return res.status(500).json({ message: "Error occurred while fetching submissions." });
+        } else if (results.length === 0) {
+            // If no submissions are found, send a JSON response with status code 404 (not found)
+            return res.status(404).json({ message: "No submissions found." });
+        } else {
+            console.log(results); // Log the results of the query
+            // Send the submissions data as JSON with status code 200 (success)
+            return res.status(200).json(results);
+        }
+    });
+};
+
+
 exports.deleteFeedback = (req, res) =>{
     const {feed_id} = req.params;// Retrieve the feed_id from the URL
     console.log(`Deleting submission with ID: ${feed_id}`);
@@ -201,4 +222,69 @@ exports.deleteFeedback = (req, res) =>{
     });
 };
 
+exports.selectVideoSubmissions = (req, res) => {
+    console.log(`Fetching video submissions`);
+
+    // Execute the SQL query to fetch all video submissions
+    Submission.selectVideoSubmissions((err, results) => {
+        if (err) {
+            console.error(err); // Log any errors
+            // Send a JSON response with error message and status code 500 (server error)
+            return res.status(500).json({ message: "Error occurred while fetching video submissions." });
+        } else if (results.length === 0) {
+            // If no submissions are found, send a JSON response with status code 404 (not found)
+            return res.status(404).json({ message: "No video submissions found." });
+        } else {
+            console.log(results); // Log the results of the query
+            // Send the submissions data as JSON with status code 200 (success)
+            return res.status(200).json(results);
+        }
+    });
+};
+
+
 exports.deleteUserSubmission
+
+exports.getFeedbackForSubmission = (req, res) => {
+    const { sub_id } = req.params;
+
+    if (!sub_id) {
+        return res.status(400).json({ message: "Submission ID is required." });
+    }
+
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized. User not logged in." });
+    }
+
+    const user_id = req.user.id; // Safe to access req.user.id
+
+    console.log('Fetching feedback for user:', user_id, 'and submission:', sub_id);
+
+    const feedbackQuery = `
+        SELECT f.description, f.grade
+        FROM feedback f
+        JOIN submission s ON f.assignment_id = s.assignment_id
+        JOIN user_on_submission u ON u.sub_id = s.sub_id
+        WHERE u.user_id = ? AND s.sub_id = ?;
+    `;
+
+    db.query(feedbackQuery, [user_id, sub_id], (err, feedbackResults) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error fetching feedback.", error: err.message });
+        }
+
+        if (feedbackResults.length === 0) {
+            return res.status(404).json({ message: "No feedback found for this user and submission." });
+        }
+
+        // Extract feedback and grade
+        const feedback = feedbackResults.map(result => ({
+            description: result.description, // Feedback text
+            grade: result.grade // Numeric grade
+        }));
+
+        return res.status(200).json({ feedback, grade: feedbackResults[0].grade });
+    });
+};

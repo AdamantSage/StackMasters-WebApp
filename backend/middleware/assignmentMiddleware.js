@@ -29,8 +29,8 @@ const authorizeAssignmentAccess = (req, res, next) => {
         } else if (results.length === 0) {
             return res.status(404).json({ message: 'Assignment not found or access denied.' });
         } else {
-            // Assignment belongs to the user, proceed to next middleware/controller
-            next();
+            console.log("Assignment access confirmed:", results); // Log successful access confirmation
+            next(); // Assignment belongs to the user, proceed to the next middleware/controller
         }
     });
 };

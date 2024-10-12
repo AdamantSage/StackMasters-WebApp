@@ -81,13 +81,24 @@ const handleVideoUpload = async (req, res) => {
     const blobClient = req.containerClient.getBlockBlobClient(originalname);
     const videoUrl = blobClient.url; // Get the URL for the uploaded video
 
+    // Extract user_id from the request body
+    const userId = req.body.user_id;
+
+    // Ensure user_id is provided
+    if (!userId) {
+        console.error('No user ID provided.');
+        return res.status(400).send('No user ID provided.');
+    }
+
     try {
         // Upload to Azure Blob Storage
         await blobClient.uploadData(buffer);
 
         // SQL query to insert video metadata into the database
-        const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
-        const values = [originalname, filePath, mimetype, size, videoUrl];
+        const query = `
+            INSERT INTO videos (filename, path, mimetype, size, uploadAt, user_id, compressed_path, compressed_status, videoUrl) 
+            VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?)`;
+        const values = [originalname, filePath, mimetype, size, userId, null, 0, videoUrl]; // Set compressed_path to null and compressed_status to 0
 
         connection.query(query, values, (err) => {
             if (err) {
@@ -111,6 +122,7 @@ const handleVideoUpload = async (req, res) => {
         res.status(500).send('Error uploading video to storage.');
     }
 };
+
 
 
 const downloadVideo = async (req, res) => {

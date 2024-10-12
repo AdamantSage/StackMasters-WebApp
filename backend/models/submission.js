@@ -27,6 +27,9 @@ class Submission{
         db.query('SELECT * FROM submission WHERE sub_id = ?',
             [sub_id], callback);
     }
+    static selectAllSubmissions(callback){
+        db.query('SELECT *FROM submission', callback);
+    }
 
     static updateStudent(sub_id, updateData, callback){
         db.query('UPDATE submission SET sub_date = ? WHERE sub_id',
@@ -66,6 +69,25 @@ class Submission{
             [feed_id], callback
         );
     }
+    static getFeedback(user_id, assignment_id, callback) {
+        db.query('SELECT * FROM feedback WHERE user_id = ? AND assignment_id = ?', 
+            [user_id, assignment_id], callback);
+    }
+     // New method to select video submissions
+     static selectVideoSubmissions(callback) {
+        const query = `
+            SELECT 
+                a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
+            FROM 
+                videos v
+            JOIN 
+                users u ON v.user_id = u.user_id
+            JOIN 
+                assignment a ON a.user_id = u.user_id;`;
+          
+        db.query(query, callback);
+    }
+    
 }
 
 module.exports = Submission;
