@@ -42,7 +42,7 @@ const Submission = () => {
       setSubmissions(response.data);
     } catch (error) {
       console.error('Error fetching submissions:', error);
-      Alert.alert('Error', 'Failed to fetch submissions.');
+      Alert.alert('Error', 'Failed to fetch submissions. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -54,21 +54,26 @@ const Submission = () => {
       const response = await axios.get(`http://192.168.49.219:5000/feedback/${subId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const feedback = response.data.feedback || [];
-      
-      // Ensure to capture the grade correctly
-      const grades = feedback.map(fb => fb.grade).filter(grade => grade != null);
-      const grade = grades.length > 0 ? grades[0] : null;
 
-      setFeedbacks(prevFeedbacks => ({
-        ...prevFeedbacks,
-        [subId]: feedback
-      }));
+      if (response.data && response.data.feedback) {
+        const feedback = response.data.feedback;
+        const grades = feedback.map(fb => fb.grade).filter(grade => grade != null);
+        const grade = grades.length > 0 ? grades[0] : null;
 
-      setFeedbackData({ feedback, grade });
+        setFeedbacks(prevFeedbacks => ({
+          ...prevFeedbacks,
+          [subId]: feedback,
+        }));
+
+        setFeedbackData({ feedback, grade });
+      } else {
+        // Handle case where feedback data is empty
+        Alert.alert('Notice', 'No feedback available for this submission.');
+        setFeedbackData({ feedback: [], grade: null });
+      }
     } catch (error) {
       console.error('Error fetching feedbacks:', error);
-      Alert.alert('Error', 'Failed to fetch feedbacks.');
+      Alert.alert('Error', 'Failed to fetch feedbacks. Please try again later.');
     }
   };
 
@@ -105,11 +110,11 @@ const Submission = () => {
 
   if (selectedSubmission) {
     return (
-      <FeedbackDisplay 
-        submission={selectedSubmission} 
-        feedback={feedbackData.feedback} 
-        grade={feedbackData.grade} 
-        onBack={handleBack} 
+      <FeedbackDisplay
+        submission={selectedSubmission}
+        feedback={feedbackData.feedback}
+        grade={feedbackData.grade}
+        onBack={handleBack}
       />
     );
   }
@@ -148,6 +153,8 @@ const Submission = () => {
               </TouchableOpacity>
             );
           }}
+          showsVerticalScrollIndicator={true}
+          scrollIndicatorInsets={{ right: 1 }}
         />
       )}
     </View>
@@ -155,27 +162,29 @@ const Submission = () => {
 };
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#afdde5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#003135',
     marginBottom: 20,
     textAlign: 'center',
   },
   showButton: {
-    backgroundColor: '#663399',
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: '#0fa4af',
+    padding: 12,
+    borderRadius: 25,
     alignItems: 'center',
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonText: {
     color: '#fff',
@@ -183,16 +192,22 @@ const styles = StyleSheet.create({
   },
   submissionContainer: {
     marginBottom: 20,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
+    padding: 15,
+    backgroundColor: '#024950',
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
   submissionText: {
     fontSize: 16,
+    color: '#fff',
   },
   feedbackText: {
     fontSize: 14,
-    color: '#555',
+    color: 'white',
   },
 });
 

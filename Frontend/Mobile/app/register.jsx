@@ -17,16 +17,13 @@ const Register = () => {
   const router = useRouter();
 
   const handleRegister = async () => {
-    // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Check if the email is valid
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
@@ -50,13 +47,10 @@ const Register = () => {
       });
 
       const text = await response.text();
-      console.log('Response Text:', text);
-
       let data;
       try {
         data = JSON.parse(text);
       } catch (error) {
-        console.error('JSON Parse Error:', error);
         Alert.alert('Error', 'Failed to parse server response');
         setLoading(false);
         return;
@@ -69,7 +63,6 @@ const Register = () => {
         Alert.alert('Error', data.message || 'Registration failed');
       }
     } catch (error) {
-      console.error('Fetch error:', error);
       Alert.alert('Error', 'Unable to register, please try again later');
     } finally {
       setLoading(false);
@@ -77,9 +70,9 @@ const Register = () => {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView>
-        <Text style={styles.Header}>Register</Text>
+        <Text style={styles.header}>Register</Text>
 
         <TextInput
           style={styles.input}
@@ -145,55 +138,88 @@ const Register = () => {
 };
 
 const styles = StyleSheet.create({
-  Header: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#afdde5', // Light background
+  },
+  header: {
     fontSize: 25,
     textAlign: 'center',
     marginVertical: 20,
+    color: '#003135', // Dark teal for header
   },
   input: {
-    height: 40,
+    height: 50,
     margin: 12,
     borderWidth: 1,
-    padding: 10,
+    borderColor: '#024950', // Dark teal border
+    borderRadius: 25, // More pronounced rounded corners
+    padding: 15,
+    backgroundColor: '#ffffff', // White background for input
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     margin: 12,
     borderWidth: 1,
-    borderColor: '#f8f8ff',
-    borderRadius: 5,
+    borderColor: '#024950', // Dark teal border
+    borderRadius: 25, // More pronounced rounded corners
+    backgroundColor: '#ffffff', // White background for container
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
   },
   passwordInput: {
     flex: 1,
-    padding: 10,
+    padding: 15,
     color: '#000',
+    borderRadius: 25, // Rounded corners
   },
   toggleText: {
-    color: '#663399',
+    color: '#0fa4af', // Teal color for toggle text
     padding: 10,
   },
   label: {
     fontSize: 16,
     marginLeft: 12,
     marginTop: 10,
+    color: '#003135', // Dark teal for label
   },
   picker: {
     height: 50,
     margin: 12,
     borderWidth: 1,
-    padding: 10,
+    borderColor: '#024950', // Dark teal border
+    borderRadius: 25, // Rounded corners
+    backgroundColor: '#ffffff', // White background for picker
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
   },
   button: {
-    backgroundColor: '#663399',
-    paddingVertical: 10,
+    backgroundColor: '#663399', 
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 25, // Rounded corners
     marginTop: 20,
     marginHorizontal: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
   },
   buttonText: {
-    color: '#f8f8ff',
+    color: '#f8f8ff', // Light text color for button
     fontSize: 16,
     textAlign: 'center',
   },

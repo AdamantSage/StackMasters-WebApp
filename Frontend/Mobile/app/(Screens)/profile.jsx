@@ -53,9 +53,9 @@ const Profile = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.text(); // Read response as text
+        const errorData = await response.text();
         Alert.alert('Error', errorData || 'Failed to fetch user data');
-        throw new Error(errorData); // Throw an error to handle it in the catch block
+        throw new Error(errorData);
       }
 
       const data = await response.json();
@@ -74,8 +74,6 @@ const Profile = () => {
     try {
       await AsyncStorage.removeItem('jwt'); // Remove the JWT token
       await AsyncStorage.removeItem('userId'); // Remove the user ID
-
-      // Navigate the user to the login screen
       router.push('/sign-in');
     } catch (error) {
       console.error('Error during logout:', error);
@@ -87,65 +85,64 @@ const Profile = () => {
   const handleUpdateProfile = async () => {
     const token = await AsyncStorage.getItem('jwt');
     if (!userId || !token) {
-        Alert.alert('Error', 'User ID or token not found. Please log in again.');
-        return;
+      Alert.alert('Error', 'User ID or token not found. Please log in again.');
+      return;
     }
 
     // Validate password confirmation
     if (password !== confirmPassword) {
-        Alert.alert('Error', 'Passwords do not match');
-        return;
+      Alert.alert('Error', 'Passwords do not match');
+      return;
     }
 
     // Prepare update data (excluding userId)
     const updateData = { name, email };
     if (password) {
-        updateData.password = password; // Only include password if it's set
+      updateData.password = password;
     }
 
     try {
-        const response = await fetch(`http://192.168.49.219:5000/users/update/${userId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(updateData),
-        });
+      const response = await fetch(`http://192.168.49.219:5000/users/update/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updateData),
+      });
 
-        // Check if the response is OK and parse JSON
-        const data = await response.json(); // Directly parse as JSON
+      const data = await response.json();
 
-        if (response.ok) {
-            Alert.alert('Success', 'Profile updated successfully');
-            // Reset fields
-            setName('');
-            setEmail('');
-            setPassword('');
-            setConfirmPassword('');
-            fetchUserData(userId); // Refresh user data after update
-        } else {
-            Alert.alert('Error', data.message || 'Update failed');
-        }
+      if (response.ok) {
+        Alert.alert('Success', 'Profile updated successfully');
+        // Reset fields
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        fetchUserData(userId);
+      } else {
+        Alert.alert('Error', data.message || 'Update failed');
+      }
     } catch (error) {
-        console.error('Error updating profile:', error);
-        Alert.alert('Error', 'Unable to update profile, please try again');
+      console.error('Error updating profile:', error);
+      Alert.alert('Error', 'Unable to update profile, please try again');
     }
-}; 
+  }; 
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView>
-      <ScrollView>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView style={styles.scrollView}>
         <View style={styles.headerContainer}>
-          <Text style={styles.Header}>Profile</Text>
+          <Text style={styles.header}>Profile</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.updateButton} onPress={handleUpdateProfile}>
               <Text style={styles.buttonText}>Update</Text>
@@ -159,12 +156,14 @@ const Profile = () => {
         <TextInput
           style={styles.input}
           placeholder="Name"
+          placeholderTextColor="#afdde5" // Placeholder color
           onChangeText={setName}
           value={name}
         />
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="#afdde5"
           onChangeText={setEmail}
           value={email}
           keyboardType="email-address"
@@ -173,6 +172,7 @@ const Profile = () => {
           <TextInput
             style={styles.passwordInput}
             placeholder="New Password"
+            placeholderTextColor="#afdde5"
             secureTextEntry={!passwordVisible}
             onChangeText={setPassword}
             value={password}
@@ -187,6 +187,7 @@ const Profile = () => {
           <TextInput
             style={styles.passwordInput}
             placeholder="Confirm Password"
+            placeholderTextColor="#afdde5"
             secureTextEntry={!confirmPasswordVisible}
             onChangeText={setConfirmPassword}
             value={confirmPassword}
@@ -205,46 +206,56 @@ const Profile = () => {
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#afdde5', // Light background color
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    color: '#003135', // Darker text for loading message
+    fontSize: 18,
+  },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    margin: 12,
+    margin: 16,
   },
-  Header: {
+  header: {
     fontSize: 25,
+    color: '#003135', // Dark teal for header text
   },
   buttonContainer: {
     flexDirection: 'row', // Align buttons in a row
   },
   updateButton: {
-    backgroundColor: '#663399',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginRight: 10, // Space between buttons
+    backgroundColor: '#663399', // Updated button color
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 25, // Rounded corners for button
+    marginRight: 10,
   },
   logoutButton: {
-    backgroundColor: '#d9534f', // Example red color for logout
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    backgroundColor: '#964734', // Brown color for logout
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 25, // Rounded corners for button
   },
   buttonText: {
-    color: '#fff',
+    color: '#fff', // White text
     fontSize: 16,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    borderColor: '#afdde5', // Soft border color
+    borderRadius: 25, // More pronounced rounded corners
     padding: 10,
     margin: 12,
+    backgroundColor: '#fff', // White background for inputs
   },
   passwordContainer: {
     flexDirection: 'row',
@@ -254,23 +265,19 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    borderColor: '#afdde5', // Soft border color
+    borderRadius: 25, // More pronounced rounded corners
     padding: 10,
     marginRight: 10,
+    backgroundColor: '#fff',
   },
   toggleText: {
-    color: '#663399',
+    color: '#0fa4af', // Teal color for toggle text
   },
   label: {
     fontSize: 16,
     margin: 12,
-  },
-  deleteButton: {
-    backgroundColor: '#d9534f',
-    padding: 10,
-    borderRadius: 5,
-    margin: 12,
+    color: '#003135', // Dark teal for label text
   },
 });
 

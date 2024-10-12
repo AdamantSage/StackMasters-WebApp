@@ -17,15 +17,15 @@ const SignIn = () => {
             Alert.alert('Error', 'Please fill in both email and password!');
             return;
         }
-    
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             Alert.alert('Error', 'Please enter a valid email address!');
             return;
         }
-    
+
         setSignInLoading(true);
-    
+
         try {
             const response = await fetch('http://192.168.49.219:5000/users/login', {
                 method: 'POST',
@@ -34,14 +34,13 @@ const SignIn = () => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 if (data.userId) {
-                    await AsyncStorage.setItem('jwt', data.token); 
+                    await AsyncStorage.setItem('jwt', data.token);
                     await AsyncStorage.setItem('userId', JSON.stringify(data.userId));
-                    console.log('Stored userId:', data.userId);
                     router.push('/(Screens)/home');
                 } else {
                     Alert.alert('Error', 'User ID is not available.');
@@ -50,7 +49,6 @@ const SignIn = () => {
                 Alert.alert('Error', data.message || 'Invalid email or password');
             }
         } catch (error) {
-            console.error('SignIn error:', error);
             if (error.message === 'Network request failed') {
                 Alert.alert('Network Error', 'Unable to connect. Please check your internet connection and try again.');
             } else {
@@ -60,7 +58,7 @@ const SignIn = () => {
             setSignInLoading(false);
         }
     };
-    
+
     const handleRegisterPress = () => {
         setRegisterLoading(true);
         router.push('/register');
@@ -70,9 +68,9 @@ const SignIn = () => {
     };
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={styles.safeArea}>
             <ScrollView>
-                <Text style={styles.Header}>Sign-In</Text>
+                <Text style={styles.header}>Sign-In</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -132,17 +130,32 @@ const SignIn = () => {
 };
 
 const styles = StyleSheet.create({
-    Header: {
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#afdde5', // Light background
+    },
+    header: {
         fontSize: 25,
         textAlign: 'center',
         marginVertical: 20,
+        color: '#003135', // Dark teal for header
     },
     input: {
-        height: 40,
+        height: 45,
         margin: 12,
         borderWidth: 1,
         padding: 10,
-        borderRadius: 5,
+        borderColor: '#024950', // Darker teal border
+        borderRadius: 25, // Rounded corners
+        backgroundColor: '#fff', // White background for input
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2, // For Android shadow
     },
     passwordContainer: {
         flexDirection: 'row',
@@ -151,17 +164,25 @@ const styles = StyleSheet.create({
         margin: 12,
     },
     togglePassword: {
-        color: '#663399',
+        color: '#003135', // Dark teal for toggle text
     },
     button: {
-        backgroundColor: '#663399',
-        paddingVertical: 10,
+        backgroundColor: '#663399', 
+        paddingVertical: 12,
         paddingHorizontal: 20,
-        borderRadius: 5,
+        borderRadius: 25, // Rounded corners
         marginTop: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2, // For Android shadow
     },
     buttonText: {
-        color: '#f8f8ff',
+        color: '#f8f8ff', // Light text for button
         fontSize: 16,
         textAlign: 'center',
     },
