@@ -172,20 +172,127 @@ export const StudentDashboard = () => {
             
         });
 
-    return (
-        <div>className ="user-dashboard"
-            <h2>Student Dashboard</h2>
-            <div className="dashboard-summary">
-                <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
-                <div className="summary-box">Video Feedback: {dashboardData.videoFeedback}</div>
-                <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
-                
-                
+        return (
+            <div className="user-dashboard"> {/* Corrected this line */}
+                <h2>Dashboard Overview</h2>
+                <div className="dashboard-summary">
+                    <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
+                    <div className="summary-box">Video Feedback: {dashboardData.videoFeedback}</div>
+                    <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
+                </div>
             </div>
-        </div>
-    );
+        );
 
 };
 
+export const LecturerDashboard = () => {
+    const [dashboardData, setDashboardData] = useState({
+        videosUploaded: 0,
+        assignmentsCreated: 0,
+        assignmentsSubmitted: 0,
+        
+    });
 
-export default {AdminDashboard, StudentDashboard};
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: 'Videos Uploaded',
+                data: [],
+                fill: false,
+                backgroundColor: 'rgba(75, 192, 192, 1)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+            },
+        ],
+    });
+
+   
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [users, setUsers] = useState([]);
+   
+
+    useEffect(() => {
+        const fetchData = () => {
+            const simulatedData = {
+                videosUploaded: 10,
+                assignmentsCreated: 5,
+                assignmentsSubmitted: 4,
+               
+            };
+            setDashboardData(simulatedData);
+
+            const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+            const dataPoints = [10, 20, 15, 30, 25, 35, 40];
+
+            setChartData({
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Videos Uploaded',
+                        data: dataPoints,
+                        fill: false,
+                        backgroundColor: 'rgba(75, 192, 192, 1)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                    },
+                ],
+            });
+        };
+
+        fetchData();
+    }, []);
+
+    
+    useEffect(() => {
+        const filtered = users.filter(user =>
+            `${user.name} ${user.surname}`.toLowerCase().includes(searchTerm.toLowerCase()) && user.submissions.length > 0
+        );
+        setFilteredUsers(filtered);
+    }, [searchTerm, users]);
+
+    // Fetch active user data for the chart
+    
+
+    
+
+    return (
+        <div className="user-dashboard">
+            <h2>Dashboard Overview</h2>
+            
+            {/* Dashboard Summary in Boxes */}
+            <div className="dashboard-summary">
+                <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
+                <div className="summary-box">Assignments Created: {dashboardData.assignmentsCreated}</div>
+                <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
+                
+              
+                    
+                
+            </div>
+
+            {/* Search Bar */}
+<div className="search-bar-container">
+    <input 
+        type="text" 
+        placeholder="Search by name or surname" 
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)} 
+        className="search-bar" // Add a class for styling
+    />
+</div>
+
+
+     
+
+           
+
+            <h3>Videos Uploaded Over Time</h3>
+            <Line data={chartData} options={{ scales: { y: { beginAtZero: true } } }} />
+        </div>
+    );
+};
+    
+
+
+export default {AdminDashboard, StudentDashboard,LecturerDashboard};

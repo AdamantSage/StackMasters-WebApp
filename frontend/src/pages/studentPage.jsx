@@ -3,7 +3,7 @@ import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
 import { StudentDashboard } from './Dashboard'; // Adjust the path if necessary
-import VideoFeedback from './VideoFeedback';
+
 
 const StudentPage = () => {
     const [activeSection, setActiveSection] = useState('dashboard-overview'); // Default section
@@ -20,8 +20,7 @@ const StudentPage = () => {
                 return <ListVideos />;
             case 'list-assignments':
                 return <ListAssignments />;
-            case 'watch-feedback/:id':
-                return <VideoFeedback />;
+            
             case 'settings':
                 return (
                     <section className="settings">
@@ -47,7 +46,6 @@ const StudentPage = () => {
                         <li><button onClick={() => setActiveSection('student-dashboard')}>Dashboard Overview</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
-                        <li><button onClick={() => setActiveSection('watch-feedback/:id')}>Video Feedback</button></li>
                         <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
                     </ul>
                 </nav>

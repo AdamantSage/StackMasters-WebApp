@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
-import { AdminDashboard } from './Dashboard'; // Adjust the path if necessary
+import { AdminDashboard } from './Dashboard'; 
 
 
 const UserAdminPage = () => {
