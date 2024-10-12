@@ -55,7 +55,10 @@ const Submission = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const feedback = response.data.feedback || [];
-      const grade = feedback.length > 0 && typeof feedback[0].grade === 'number' ? feedback[0].grade : null;
+      
+      // Ensure to capture the grade correctly
+      const grades = feedback.map(fb => fb.grade).filter(grade => grade != null);
+      const grade = grades.length > 0 ? grades[0] : null;
 
       setFeedbacks(prevFeedbacks => ({
         ...prevFeedbacks,
@@ -81,7 +84,8 @@ const Submission = () => {
       await fetchFeedbacks(userId, sub_id);
     } else {
       const selectedFeedback = feedbacks[sub_id] || [];
-      const selectedGrade = selectedFeedback.length > 0 && typeof selectedFeedback[0].grade === 'number' ? selectedFeedback[0].grade : null;
+      const grades = selectedFeedback.map(fb => fb.grade).filter(grade => grade != null);
+      const selectedGrade = grades.length > 0 ? grades[0] : null;
       setFeedbackData({ feedback: selectedFeedback, grade: selectedGrade });
     }
   };

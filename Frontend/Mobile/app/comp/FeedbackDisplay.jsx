@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
 const FeedbackDisplay = ({ submission, feedback, grade, onBack }) => {
+  // Convert grade to a number and set a default
+  const numericGrade = Number(grade) || 0;
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Feedback for Submission ID: {submission.sub_id}</Text>
@@ -20,7 +23,7 @@ const FeedbackDisplay = ({ submission, feedback, grade, onBack }) => {
       )}
       <View style={styles.gradeContainer}>
         <Text style={styles.gradeText}>
-          Grade: {typeof grade === 'number' && !isNaN(grade) ? grade.toFixed(2) : "Not graded yet"}
+          Grade: {typeof numericGrade === 'number' && !isNaN(numericGrade) ? numericGrade.toFixed(2) : "Not graded yet"}
         </Text>
       </View>
       <TouchableOpacity onPress={onBack} style={styles.backButton}>
