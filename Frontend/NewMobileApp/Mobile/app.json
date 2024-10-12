@@ -15,9 +15,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "This app requires access to your camera to record videos.",
-        "NSMicrophoneUsageDescription": "This app requires access to your microphone to record audio.",
-        "NSPhotoLibraryUsageDescription": "This app requires access to your photo library to select videos."
+        "NSCameraUsageDescription": "This app uses the camera to record videos.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to save recorded videos."
       }
     },
     "android": {
@@ -27,9 +26,8 @@
       },
       "permissions": [
         "CAMERA",
-        "RECORD_AUDIO",
-        "READ_EXTERNAL_STORAGE",  
-        "WRITE_EXTERNAL_STORAGE"  
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -45,3 +43,4 @@
     }
   }
 }
+

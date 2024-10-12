@@ -1,59 +1,96 @@
-import { View, Text, Button, Alert } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { RNCamera } from 'react-native-camera';
+import { useAssignmentContext } from '@/components/assignmentContext';
+import { getUserId } from './utils';
+import VideoRecorder from './videoRecorder';
 import * as DocumentPicker from 'expo-document-picker';
 
-const assignmentsDisplay = () => {
+const AssignmentsDisplay = () => {
   const router = useRouter();
-  const { assignmentId, assignName, dueDate, assignDesc } = router.query || {};
-
-  const cameraRef = useRef(null);
+  const { assignmentId } = useAssignmentContext(); // Get assignmentId from context
+  const [assignment, setAssignment] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [videoUri, setVideoUri] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [videoUri, setVideoUri] = useState(null); 
 
-  const uploadVideoApi = 'https://yourapi.com/upload-video'; 
-  const createSubmissionApi = 'https://yourapi.com/create-submission';
-  const createuserOnSubmission ='https://your-backend-url.com/userSubmission';
+  const uploadVideoApi = 'http://192.168.0.23:5000/uploads';
+  const createSubmissionApi = 'http://192.168.0.23:5000/submission';
+  const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
 
-  const handleRecordVideo = async () => {
-    if (cameraRef.current) {
-      const options = { quality: RNCamera.Constants.VideoQuality["480p"] };
-      try {
-        const data = await cameraRef.current.recordAsync(options);
-        console.log('Video recorded:', data.uri);
-        setVideoUri(data.uri); // Set recorded video URI for later use
-      } catch (error) {
-        console.error(error);
-        Alert.alert('Error recording video');
+   /*useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId();
+      if (id) {
+        setUserId(id);
+      } else {
+        Alert.alert('Error', 'User ID is missing. Please log in again.');
       }
+    };
+    
+    fetchUserId();
+  }, []);*/
+
+
+  // Fetch assignment details based on assignmentId
+  useEffect(() => {
+    const fetchAssignmentDetails = async () => {
+      try {
+        const response = await fetch(`http://192.168.0.23:5000/assignments/${assignmentId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch assignment details');
+        }
+        const assignmentData = await response.json();
+        console.log('Fetched assignment data:', assignmentData);
+        
+        // Access the first assignment in the array
+        if (assignmentData.length > 0) {
+          const assignment = assignmentData[0];
+          console.log('Assignment fields:', assignment.assign_name, assignment.due_date, assignment.assign_desc);
+          setAssignment(assignment); // Set the first assignment object to state
+        } else {
+          console.log('No assignment data available.');
+        }
+      } catch (error) {
+        console.error('Error fetching assignment details:', error);
+        Alert.alert('Error fetching assignment details');
+      }
+    };
+  
+    if (assignmentId) {
+      fetchAssignmentDetails(); // Fetch assignment details if assignmentId is available
     }
+  }, [assignmentId]);
+
+  // If assignment data is not available, handle it gracefully
+  if (!assignment) {
+    return <Text>No assignment found.</Text>;
+  }
+
+  const handleRecordingComplete = (uri) => {
+    setVideoUri(uri); // Set the video URI after recording
+    setIsRecording(false); // Hide VideoRecorder
   };
 
-  const handleStopVideo = async () => {
-    if (cameraRef.current) {
-      await cameraRef.current.stopRecording();
-      setIsRecording(false);
-    }
+  // Function to start recording
+  const startRecording = () => {
+    setIsRecording(true); // Show VideoRecorder
   };
 
   const uploadVideo = async () => {
-    if (!videoUri) return;
+    if (!videoUri) return null; // If there's no video URI, stop execution
 
     const formData = new FormData();
     formData.append('video', {
       uri: videoUri,
-      type: 'video/mp4', // Adjust if necessary
-      name: 'video.mp4',
+      type: 'video/mp4', // Ensure this matches the expected MIME type
+      name: 'video.mp4', // You can generate a unique name if needed
     });
 
     try {
       const response = await fetch(uploadVideoApi, {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
       });
 
       if (!response.ok) {
@@ -88,18 +125,23 @@ const assignmentsDisplay = () => {
   };  
 
   const handleSubmit = async () => {
-    const uploadResponse = await uploadVideo();
-    if (!uploadResponse) return; // Stop if the upload failed
-
-    // Example data for creating a submission (adjust as needed)
-    const submissionData = {
-      userId: 'your-user-id', // Replace with actual user ID
-      assignmentId: assignmentId,
-      videoUrl: uploadResponse.videoUrl, // Adjust based on upload response
-    };
-
     try {
-      const response = await fetch(createSubmissionApi, createuserOnSubmission, {
+      console.log('Submit button pressed');
+      // Step 1: Upload the video
+      const uploadResponse = await uploadVideo();
+      if (!uploadResponse){ 
+        console.log('Video upload failed or returned no response');
+        return; // Stop if the video upload failed
+      }
+      // Step 2: Create the submission
+      const submissionData = {
+        assignmentId: assignmentId, // Get the assignment ID from context
+        subDate: new Date().toISOString(), // Current date as the submission date
+      };
+
+      console.log('Submission data:', submissionData);
+
+      const createSubmissionResponse = await fetch(createSubmissionApi, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,55 +149,95 @@ const assignmentsDisplay = () => {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) {
+      if (!createSubmissionResponse.ok) {
+        console.error('Failed to create submission', createSubmissionResponse.status);
         throw new Error('Failed to create submission');
       }
 
-      const submissionResponse = await response.json();
-      console.log('Submission response:', submissionResponse);
+      const submissionResult = await createSubmissionResponse.json();
+      const submissionId = submissionResult.sub_id; // Get the created submission ID
+      console.log('Submission created:', submissionResult);
+
+      // Step 3: Associate the user with the submission
+      const userOnSubmissionData = {
+        userId: userId, // Replace with actual user ID
+        subId: submissionId, // Use the submission ID from previous API call
+        moduleCode: assignment.module_code, // Use the module code from the assignment
+      };
+
+      console.log('User submission data:', userOnSubmissionData);
+
+      const userSubmissionResponse = await fetch(createUserSubmission, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userOnSubmissionData),
+      });
+
+
+      if (!userSubmissionResponse.ok) {
+        console.error('Failed to create user submission', userSubmissionResponse.status);
+        throw new Error('Failed to create user submission');
+      }
+
+      const userSubmissionResult = await userSubmissionResponse.json();
+      console.log('User submission created:', userSubmissionResult);
+
       Alert.alert('Submission successful!');
     } catch (error) {
-      console.error('Error creating submission:', error);
-      Alert.alert('Error creating submission');
+      console.error('Error during submission process:', error);
+      Alert.alert('Error during submission process');
     }
   };
 
+  const chooseVideo = async () => {
+    console.log('Opening video picker...'); // Debugging log
+  
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'video/*',
+        multiple: false,
+      });
+  
+      console.log('Video picker result:', result); // Debugging log
+  
+      // Check if the user canceled the picker
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        // Get the URI of the selected video
+        const videoUri = result.assets[0].uri;
+        setVideoUri(videoUri);
+        console.log('Video URI:', videoUri); // Log the selected video URI
+      } else {
+        console.log('User cancelled video picker');
+      }
+    } catch (error) {
+      console.error('Error picking video:', error);
+      Alert.alert('Error picking video');
+    }
+  };  
+
   return (
     <View>
-      <Text>Assignment Name: {decodeURIComponent(assignName)}</Text>
-      <Text>Due Date: {decodeURIComponent(dueDate)}</Text>
-      <Text>Assignment Description: {decodeURIComponent(assignDesc)}</Text>
+      <Text>Assignment Name: {assignment?.assign_name}</Text>
+      <Text>Due Date: {assignment?.due_date}</Text>
+      <Text>Assignment Description: {assignment?.assign_desc}</Text>
 
-      <View style={{ flex: 1 }}>
-        <RNCamera
-          ref={cameraRef}
-          style={{ flex: 1 }}
-          type={RNCamera.Constants.Type.back}
-          flashMode={RNCamera.Constants.FlashMode.on}
-          onCameraReady={() => console.log('Camera ready')}
-          captureAudio={true}
-        />
-      </View>
+      <Button title="Choose Video" onPress={chooseVideo} />
+      <Button title="Record Video" onPress={startRecording} />
+      {videoUri && <Text>Video Selected: {videoUri}</Text>}
 
-      <Button
-        title={isRecording ? "Stop Recording" : "Record Video"}
-        onPress={isRecording ? handleStopVideo : () => {
-          setIsRecording(true);
-          handleRecordVideo();
-        }}
-      />
+      {isRecording && (
+        <VideoRecorder onRecordingComplete={handleRecordingComplete} />
+      )}
 
-      <Button
-        title="Choose Video from Gallery"
-        onPress={handleChooseVideo}
-      />
-
-      <Button
-        title="Submit Video"
-        onPress={handleSubmit}
-      />
+      <Button title="Submit Video" onPress={handleSubmit} />
     </View>
-  )
-}
+  );
+};
 
-export default assignmentsDisplay
+const styles = StyleSheet.create({
+  
+})
+
+export default AssignmentsDisplay;

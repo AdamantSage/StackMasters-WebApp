@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { useAssignmentContext } from '@/components/assignmentContext';
 
 const Assignments = () => {
   const [moduleCode, setModuleCode] = useState([]);
   const [selectedModule, setSelectedModule] = useState(null);
   const [assignments, setAssignments] = useState([]);
+  const router = useRouter();
+  const { setAssignmentId } = useAssignmentContext();
 
   useEffect(() => {
-    fetch('https://your-backend-url.com/module').then(response => response.json()).then((data) => {
+    fetch('http://192.168.0.23:5000/module').then(response => response.json()).then((data) => {
       const FormatedModule = data.map(module => ({
-        label: module.moduleCode,
-        value: module.moduleCode
+        label: module.module_code,
+        value: module.module_code
       }));
       setModuleCode(FormatedModule)
     }).catch((error) => {
@@ -22,38 +26,50 @@ const Assignments = () => {
 
   useEffect(() => {
     if(selectedModule){
-      fetch('https://your-backend-url.com/assignment/${selectedModule}').then(response => response.json()).then((data) =>{
+      fetch(`http://192.168.0.23:5000/assignment/${selectedModule}`).then(response => response.json()).then((data) =>{
+        console.log('Fetched assignments:', data);
         setAssignments(data);
       }).catch((error) => {
         console.error('Error finding assignments', error);
       });
     }
-  }, [selectedModule]);
+  }, [selectedModule]); 
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select a Module</Text>
 
       <RNPickerSelect
-        onValueChange={(value) => setSelectedModule(value)} 
+        onValueChange={(value) =>{ 
+          console.log('Selected Module:', value);
+          setSelectedModule(value)}}
         items={moduleCode} 
         placeholder={{ label: 'Choose a module', value: null }}
         style={pickerSelectStyles}
       />
-    {selectedModule && (
+    {selectedModule && assignments.length > 0 ?(
       <FlatList
         data={assignments}
         keyExtractor={(item) => item.assignment_id.toString()}
         renderItem={({ item }) => (
           <View style={styles.assignmentItem}>
-            <Link href={'../../assignmentsDisplay?assignmentId=${item.assignment_id}&assignName=${encodeURIComponent(item.assign_name)}&dueDate=${encodeURIComponent(item.due_date)}&assignDesc=${encodeURIComponent(item.assign_desc)}'}>
-              <Text>Assignment Name: {item.assign_name}</Text>
-            </Link>
+            <TouchableOpacity
+              onPress={() => {
+                console.log(`Setting assignment ID: ${item.assignment_id}`);
+                setAssignmentId(item.assignment_id); // Set the assignment ID in context
+                console.log(`Navigating to AssignmentDisplay with ID: ${item.assignment_id}`);
+                router.push('../../assignmentsDisplay'); // Navigate to assignmentsDisplay without query
+              }}
+            >
+            <Text>Assignment Name: {item.assign_name}</Text>
+          </TouchableOpacity>
           </View>
         )}
       />
-    )}
-    <Link href={'../../assignmentsDisplay?assignmentId=${item.assignment_id}&assignName=${encodeURIComponent(item.assign_name)}&dueDate=${encodeURIComponent(item.due_date)}&assignDesc=${encodeURIComponent(item.assign_desc)}'}>
+    ): (
+      selectedModule && <Text>No assignments found for this module.</Text>
+  )}
+    <Link href={'../../assignmentsDisplay'}>
       <Text style={styles.display}>
         AssignmentDisplay
       </Text>

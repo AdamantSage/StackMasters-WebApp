@@ -1,44 +1,70 @@
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUser } from '/UserContext'; // Import your UserContext
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setUserId } from './utils';
 
 const SignIn = () => {
-    const [username, setUsername] = useState('Username');
-    const [password, setPassword] = useState('Password');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [signInLoading, setSignInLoading] = useState(false);
+    const [registerLoading, setRegisterLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const { setUserId } = useUser(); // Get setUserId from UserContext
 
     const handleSignIn = async () => {
+        if (!email || !password) {
+            Alert.alert('Error', 'Please fill in both email and password!');
+            return;
+        }
+    
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert('Error', 'Please enter a valid email address!');
+            return;
+        }
+    
+        setSignInLoading(true);
+    
         try {
-            const response = await fetch('https://localhost:5000/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                username: username,
-                password: password,
-              }),
+            const response = await fetch('http://192.168.0.23:5000/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
-                Alert.alert('Success', 'Login successful');
-
-                // Store user ID in context
-                const userId = data.userId; // Assuming the API returns userId
-                setUserId(userId);
-                
-                router.push('/(Screens)/home');  
+                if (data.userId) {
+                    await AsyncStorage.setItem('jwt', data.token); 
+                    await AsyncStorage.setItem('userId', JSON.stringify(data.userId));
+                    console.log('Stored userId:', data.userId);
+                    router.push('/(Screens)/home');
+                } else {
+                    Alert.alert('Error', 'User ID is not available.');
+                }
             } else {
-                Alert.alert('Error', data.message || 'Invalid credentials');
+                Alert.alert('Error', data.message || 'Invalid email or password');
             }
         } catch (error) {
-            Alert.alert('Error', 'Unable to log in, please try again');
+            console.error('SignIn error:', error);
+            Alert.alert('Error', 'Unable to log in. Please check your connection and try again.');
+        } finally {
+            setSignInLoading(false);
         }
+    };
+    
+    const handleRegisterPress = () => {
+        setRegisterLoading(true);
+        router.push('/register');
+        setTimeout(() => {
+            setRegisterLoading(false);
+        }, 500);
     };
 
     return (
@@ -47,25 +73,55 @@ const SignIn = () => {
                 <Text style={styles.Header}>Sign-In</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="username"
-                    onChangeText={setUsername}
-                    value={username}
-                    onFocus={() => setUsername('')}
+                    placeholder="Email"
+                    onChangeText={setEmail}
+                    value={email}
+                    editable={!signInLoading && !registerLoading}
                 />
-                <TextInput
-                    style={styles.input}
-                    placeholder="password"
-                    onChangeText={setPassword}
-                    value={password}
-                    onFocus={() => setPassword('')}
-                />
-                <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-                    <Text style={styles.buttonText}>Sign In</Text>
+                <View style={styles.passwordContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Password"
+                        onChangeText={setPassword}
+                        value={password}
+                        secureTextEntry={!showPassword}
+                        editable={!signInLoading && !registerLoading}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Text style={styles.togglePassword}>
+                            {showPassword ? 'Hide' : 'Show'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                <TouchableOpacity 
+                    style={styles.button} 
+                    onPress={handleSignIn} 
+                    disabled={signInLoading || registerLoading}
+                >
+                    {signInLoading ? (
+                        <ActivityIndicator color="#f8f8ff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Sign In</Text>
+                    )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                    style={styles.button} 
+                    onPress={handleRegisterPress} 
+                    disabled={signInLoading || registerLoading}
+                >
+                    {registerLoading ? (
+                        <ActivityIndicator color="#f8f8ff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Register</Text>
+                    )}
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                     style={styles.quickNavButton} 
-                    onPress={() => router.push('/(Screens)/home')}>
+                    onPress={() => router.push('/(Screens)/home')}
+                    disabled={signInLoading || registerLoading}
+                >
                     <Text style={styles.buttonText}>Go to Home (Quick Nav)</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -76,12 +132,24 @@ const SignIn = () => {
 const styles = StyleSheet.create({
     Header: {
         fontSize: 25,
+        textAlign: 'center',
+        marginVertical: 20,
     },
     input: {
         height: 40,
         margin: 12,
         borderWidth: 1,
         padding: 10,
+        borderRadius: 5,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        margin: 12,
+    },
+    togglePassword: {
+        color: '#663399',
     },
     button: {
         backgroundColor: '#663399',

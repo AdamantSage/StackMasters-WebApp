@@ -21,16 +21,17 @@ const Register = () => {
       return;
     }
 
-    try {//locally
-      const response = await fetch('https://localhost:5000/create', {
+    try {
+      const response = await fetch('http://192.168.0.23:5000/users/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username,
+          name: username,
           email,
           password,
+          passwordConfirm: confirmPassword,
           role,
         }),
       });
