@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import axios from 'axios'; // Import axios for API requests
 
 const VideoFeedback = () => {
   const [mark, setMark] = useState(''); // State for mark input
@@ -8,12 +9,25 @@ const VideoFeedback = () => {
   // Use location to access the passed video URL
   const location = useLocation();
   const videoUrl = location.state?.video?.videoUrl; // Get the video URL from the location state
+  const videoId = location.state?.video?.videoId; // Get the video ID from the location state
 
-  const handleSubmitFeedback = (e) => {
+  const handleSubmitFeedback = async (e) => {
     e.preventDefault();
-    // Handle feedback submission logic here
-    console.log('Feedback submitted:', { mark, comment });
-    // You can send this data to your backend using fetch or axios.
+
+    try {
+      // Make an API request to submit feedback
+      const response = await axios.post('/api/marks/submit-feedback', {
+        videoId, // video_id from the video
+        mark,
+        comment,
+      });
+
+      // Handle the response from the backend
+      alert(response.data.message); // Display a success message
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('Failed to submit feedback. Please try again.');
+    }
   };
 
   return (
@@ -44,7 +58,7 @@ const VideoFeedback = () => {
           <div className="form-group">
             <label htmlFor="mark">Mark:</label>
             <input
-              type="text"
+              type="number"
               id="mark"
               value={mark}
               onChange={(e) => setMark(e.target.value)}
