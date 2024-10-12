@@ -69,6 +69,10 @@ class Submission{
             [feed_id], callback
         );
     }
+    static getFeedback(user_id, assignment_id, callback) {
+        db.query('SELECT * FROM feedback WHERE user_id = ? AND assignment_id = ?', 
+            [user_id, assignment_id], callback);
+    }
      // New method to select video submissions
      static selectVideoSubmissions(callback) {
         const query = `
@@ -85,5 +89,7 @@ class Submission{
     }
     
 }
+
+
 
 module.exports = Submission;
