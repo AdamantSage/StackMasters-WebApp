@@ -125,36 +125,8 @@ const handleVideoUpload = async (req, res) => {
 
 
 
-const downloadVideo = async (req, res) => {
-    const filename = req.params.filename;
-    const filePath = path.join(__dirname, '../compressed', filename); // Adjust path as needed
 
-    try {
-        // Check if the file exists using promises and async/await
-        await fs.access(filePath, constants.F_OK);
 
-        // Set headers to trigger download
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', 'video/mp4'); // Adjust Content-Type based on your video format
-
-        // Stream the file to the response
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res).on('error', (err) => {
-            console.error(`Error streaming file: ${filename}`, err);
-            res.status(500).send({
-                message: 'Error streaming file',
-                error: err.message
-            });
-        });
-
-    } catch (err) {
-        console.error(`File not found: ${filePath}`, err);
-        res.status(404).send({
-            message: 'File not found',
-            error: err.message
-        });
-    }
-};
 // Retrieve Video
 const retrieveVideo = async (req, res) => {
     try {
@@ -231,4 +203,4 @@ const multerErrorHandler = (err, req, res, next) => {
     next();
 };
 
-module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,downloadVideo,containerClient,setContainerClient};
+module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,containerClient,setContainerClient};
