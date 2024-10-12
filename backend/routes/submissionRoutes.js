@@ -8,15 +8,15 @@ const { get } = require("./assignmentsRoutes");
 //This is a request to this route path to executed
 //This is used to create a new submission 
 router.post('/submission', validSubmission, SubmissionController.createSubmission);
-router.post('/submission/feedback', authorizeFeedbackAccess, SubmissionController.createFeedback);
-router.post('/userSubmission', authorizeSubmissionAccess, SubmissionController.createUserSubmission);
+router.post('/submission/feedback', SubmissionController.createFeedback);
+router.post('/userSubmission', SubmissionController.createUserSubmission);
 //This is used to retrieve submission
-router.get('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.getSubmission);
+router.get('/submission/:sub_id', SubmissionController.getSubmission);
 //This is used to update submission date
-router.put('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.updateSubmissionStudent);
+router.put('/submission/:sub_id', SubmissionController.updateSubmissionStudent);
 //this is used to remove data
-router.delete('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.deleteSubmission);
-router.delete('/userSubmission/:user_id/:sub_id', authorizeSubmissionAccess, SubmissionController.deleteUserSubmission);
-router.delete('/feedSubmission/:feed_id', authorizeFeedbackAccess, SubmissionController.deleteFeedback);
+router.delete('/submission/:sub_id', SubmissionController.deleteSubmission);
+router.delete('/userSubmission/:user_id/:sub_id', SubmissionController.deleteUserSubmission);
+router.delete('/feedSubmission/:feed_id', SubmissionController.deleteFeedback);
 //This is to export the router
 module.exports = router;
