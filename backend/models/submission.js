@@ -77,7 +77,7 @@ class Submission{
      static selectVideoSubmissions(callback) {
         const query = `
             SELECT 
-                a.assign_name,u.user_id,a.upload_date, v.uploadAt, a.assignment_id, v.videoUrl
+                a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
             FROM 
                 videos v
             JOIN 
@@ -89,7 +89,5 @@ class Submission{
     }
     
 }
-
-
 
 module.exports = Submission;
