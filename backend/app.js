@@ -23,6 +23,14 @@ app.use(express.static(publicDirectory));
 app.use(express.urlencoded({ extended: true}));
 app.use(express.json());
 
+
+// Add the logging middleware here
+app.use((req, res, next) => {
+    console.log(`${req.method} request for '${req.url}'`);
+    console.log('Request Body:', req.body);
+    next();
+});
+
 app.set('view engine', 'hbs');
 
 
