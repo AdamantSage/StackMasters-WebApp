@@ -27,7 +27,7 @@ const SignIn = () => {
         setSignInLoading(true);
     
         try {
-            const response = await fetch('http://192.168.48.58:5000/users/login', {
+            const response = await fetch('http://192.168.49.219:5000/users/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,7 +51,11 @@ const SignIn = () => {
             }
         } catch (error) {
             console.error('SignIn error:', error);
-            Alert.alert('Error', 'Unable to log in. Please check your connection and try again.');
+            if (error.message === 'Network request failed') {
+                Alert.alert('Network Error', 'Unable to connect. Please check your internet connection and try again.');
+            } else {
+                Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
+            }
         } finally {
             setSignInLoading(false);
         }
