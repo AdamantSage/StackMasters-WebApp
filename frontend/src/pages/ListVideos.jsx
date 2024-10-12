@@ -30,7 +30,6 @@ const ListVideos = () => {
     fetchVideos();
   }, []);
 
-
   const toggleShowMore = () => {
     setShowMore(!showMore);
     setVisibleCount(showMore ? 3 : videos.length);
@@ -40,8 +39,6 @@ const ListVideos = () => {
   const filteredVideos = videos.filter(video =>
     selectedAssignment ? video.assign_name === selectedAssignment : true
   );
-
-
 
   return (
     <div className="page">
@@ -102,13 +99,18 @@ const ListVideos = () => {
                   <TableCell>{new Date(video.upload_date).toLocaleString()}</TableCell>
                   <TableCell>{video.assignment_id}</TableCell>
                   <TableCell>
-                    <a href={video.videoUrl} target="_blank" rel="noopener noreferrer">
-                      View Video
-                    </a>
+                    <Link 
+                      to={{
+                        pathname: '/watch-feedback/:id', // Update the path to be static
+                        state: { video: { videoUrl: video.videoUrl } }, // Pass the video URL
+                      }}
+                    >
+                      Watch Video
+                    </Link>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
+                ))}
+              </TableBody>
           </Table>
         </TableContainer>
 
