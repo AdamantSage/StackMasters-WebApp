@@ -4,7 +4,7 @@ import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
-const Dashboard = () => {
+export const AdminDashboard = () => {
     const [dashboardData, setDashboardData] = useState({
         videosUploaded: 0,
         assignmentsCreated: 0,
@@ -118,7 +118,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="dashboard">
+        <div className="user-dashboard">
             <h2>Dashboard Overview</h2>
             
             {/* Dashboard Summary in Boxes */}
@@ -158,6 +158,34 @@ const Dashboard = () => {
             <Line data={chartData} options={{ scales: { y: { beginAtZero: true } } }} />
         </div>
     );
+
+    
 };
 
-export default Dashboard;
+export const StudentDashboard = () => {
+
+    
+        const [dashboardData, setDashboardData] = useState({
+            videosUploaded: 0,
+            assignmentsCreated: 0,
+            assignmentsSubmitted: 0,
+            
+        });
+
+    return (
+        <div>className ="user-dashboard"
+            <h2>Student Dashboard</h2>
+            <div className="dashboard-summary">
+                <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
+                <div className="summary-box">Video Feedback: {dashboardData.videoFeedback}</div>
+                <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
+                
+                
+            </div>
+        </div>
+    );
+
+};
+
+
+export default {AdminDashboard, StudentDashboard};

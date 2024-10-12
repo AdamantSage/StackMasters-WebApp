@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
-import Dashboard from './Dashboard'; // Import the ListVideos component
+import { AdminDashboard } from './Dashboard'; // Adjust the path if necessary
+
 
 const UserAdminPage = () => {
     const [activeSection, setActiveSection] = useState('dashboard-overview'); // Default section
@@ -13,7 +15,7 @@ const UserAdminPage = () => {
     const renderSection = () => {
         switch (activeSection) {
             case 'dashboard':
-                return <Dashboard />;
+                return <AdminDashboard />;
             case 'list-videos':
                 return <ListVideos />;  // Render the ListVideos component when 'List Videos' is clicked
             case 'list-assignments':
@@ -47,22 +49,22 @@ const UserAdminPage = () => {
                         </section>
                     );
                     default:
-                        return <Dashboard />;
+                        return <AdminDashboard />;
                 
         }
     };
 
     return (
-        <div className="user-admin-page">
+        <div className="user-page">
             {/* Sidebar for navigation */}
             <aside className="sidebar">
                 <div className="profile-section">
-                <img src="admin-profile-pic.jpg" alt="Admin" className="admin-profile-pic" />
-                <p className="admin-name">John Doe</p>
+                <img src="admin-profile-pic.jpg" alt="Admin" className="profile-pic" />
+                <p className="user-name">John Doe</p>
                 </div>
                 <nav className='nav-menu'>
                 <ul>
-                    <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
+                    <li><button onClick={() => setActiveSection('dashboard')}>AdminDashboard</button></li>
                     <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                     <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
                     <li><button onClick={() => setActiveSection('user-management')}>User Management</button></li>

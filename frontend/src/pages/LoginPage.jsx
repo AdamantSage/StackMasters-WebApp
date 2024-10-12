@@ -1,12 +1,16 @@
-// src/pages/LoginPage.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import paper from 'paper';
-import { Link } from 'react-router-dom';
-import '../index.css'; // Include your main CSS file
+import '../index.css';
 
 const LoginPage = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate(); // For navigation
+
   useEffect(() => {
-    // Handle Paper.js animation setup here
+    // Paper.js animation setup
     paper.install(window);
     paper.setup(document.getElementById('canvas'));
     initializeShapes();
@@ -18,46 +22,62 @@ const LoginPage = () => {
   }, []);
 
   const initializeShapes = () => {
-    // Paper.js shapes logic (example)
     const circle = new paper.Path.Circle({
       center: paper.view.center,
       radius: 50,
       fillColor: 'blue'
     });
-
     paper.view.onFrame = () => {
       circle.rotate(1);
     };
   };
 
   const onResize = () => {
-    // Canvas resizing logic
     const canvas = document.getElementById('canvas');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     paper.view.viewSize = new paper.Size(canvas.width, canvas.height);
   };
 
-  const handleSignUp = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Handle signup logic
-    console.log('Sign Up form submitted');
+    setError(''); // Clear previous errors
+
+    // Mock API request to verify login (replace this with actual API call)
+    const response = await mockApiLogin(username, password); // Use a real API call here
+
+    if (response.success) {
+      const userRole = response.role; // Get the role from the response (Admin, Lecturer, Student)
+      
+      // Navigate based on user role
+      if (userRole === 'Admin') {
+        navigate('/user-admin');
+      } else if (userRole === 'Lecturer') {
+        navigate('/list-assignments'); // or any page for Lecturer
+      } else if (userRole === 'Student') {
+        navigate('/user-student'); // Create a student dashboard or assignments page
+      }
+    } else {
+      setError('Invalid username or password');
+    }
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Handle login logic
-    console.log('Login form submitted');
-  };
-
-  const goToSignUp = () => {
-    document.getElementById('slideBox').style.marginLeft = '0';
-    document.querySelector('.topLayer').style.marginLeft = '100%';
-  };
-
-  const goToLogin = () => {
-    document.getElementById('slideBox').style.marginLeft = window.innerWidth > 769 ? '50%' : '20%';
-    document.querySelector('.topLayer').style.marginLeft = '0';
+  // Mock API call for login - replace this with a real API call
+  const mockApiLogin = (username, password) => {
+    // Replace this logic with your backend API request
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (username === 'admin' && password === 'admin') {
+          resolve({ success: true, role: 'Admin' });
+        } else if (username === 'lecturer' && password === 'lecturer') {
+          resolve({ success: true, role: 'Lecturer' });
+        } else if (username === 'student' && password === 'student') {
+          resolve({ success: true, role: 'Student' });
+        } else {
+          resolve({ success: false });
+        }
+      }, 1000);
+    });
   };
 
   return (
@@ -68,59 +88,37 @@ const LoginPage = () => {
 
       <div id="slideBox">
         <div className="topLayer">
-          <div className="left">
-            <div className="content">
-              <h2>Sign Up</h2>
-              <form id="form-signup" method="post" onSubmit={handleSignUp}>
-                <div className="form-element form-stack">
-                  <label htmlFor="email" className="form-label">Email</label>
-                  <input id="email" type="email" name="email" required />
-                </div>
-                <div className="form-element form-stack">
-                  <label htmlFor="username-signup" className="form-label">Username</label>
-                  <input id="username-signup" type="text" name="username" required />
-                </div>
-                <div className="form-element form-stack">
-                  <label htmlFor="password-signup" className="form-label">Password</label>
-                  <input id="password-signup" type="password" name="password" required />
-                </div>
-                <div className="form-element form-checkbox">
-                  <input id="confirm-terms" type="checkbox" name="confirm" value="yes" className="checkbox" required />
-                  <label htmlFor="confirm-terms">
-                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                  </label>
-                </div>
-                <div className="form-element form-submit">
-                  <button id="signUp" className="signup" type="submit" name="signup">Sign up</button>
-                  <button type="button" id="goLeft" className="signup off" onClick={goToLogin}>Log In</button>
-                </div>
-              </form>
-            </div>
-          </div>
           <div className="right">
             <div className="content">
               <h2>Login</h2>
               <form id="form-login" method="post" onSubmit={handleLogin}>
                 <div className="form-element form-stack">
                   <label htmlFor="username-login" className="form-label">Username</label>
-                  <input id="username-login" type="text" name="username" required />
+                  <input
+                    id="username-login"
+                    type="text"
+                    name="username"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
                 </div>
                 <div className="form-element form-stack">
                   <label htmlFor="password-login" className="form-label">Password</label>
-                  <input id="password-login" type="password" name="password" required />
+                  <input
+                    id="password-login"
+                    type="password"
+                    name="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <div className="form-element form-submit">
                   <button id="logIn" className="login" type="submit" name="login">Log In</button>
-                  <button type="button" id="goRight" className="login off" onClick={goToSignUp}>Sign Up</button>
                 </div>
               </form>
-              {/* Navigation Links to Other Pages */}
-              <div className="links-container">
-                <Link to="/" className="link">Landing Page</Link>
-                <Link to="/user-admin" className="link">User Administration</Link>
-                <Link to="/list-assignments" className="link">List Assignments</Link>
-                <Link to="/create-assignment" className="link">Create Assignment</Link>
-              </div>
+              {error && <p style={{ color: 'red' }}>{error}</p>}
             </div>
           </div>
         </div>

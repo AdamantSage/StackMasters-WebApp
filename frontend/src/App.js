@@ -7,6 +7,8 @@ import ListAssignments from './pages/ListAssignments';
 import CreateAssignment from './pages/CreateAssignment';
 import ListVideos from './pages/ListVideos';
 import VideoFeedback from './pages/VideoFeedback';
+import StudentPage from './pages/studentPage';
+
 import logo from './logo.svg';
 import './App.css';
 
@@ -21,6 +23,7 @@ const App = () => {
         <Route path="/create-assignment" element={<CreateAssignment />} />
         <Route path="/list-videos" element={<ListVideos />} />
         <Route path="/watch-feedback/:id" element={<VideoFeedback />} />
+        <Route path="/user-student" element={<StudentPage />} />
       </Routes>
     </Router>
   );
