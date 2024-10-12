@@ -257,12 +257,12 @@ exports.getFeedbackForSubmission = (req, res) => {
         return res.status(401).json({ message: "Unauthorized. User not logged in." });
     }
 
-    const user_id = req.user.id; // Now it's safe to access req.user.id
+    const user_id = req.user.id; // Safe to access req.user.id
 
     console.log('Fetching feedback for user:', user_id, 'and submission:', sub_id);
 
     const feedbackQuery = `
-        SELECT f.*
+        SELECT f.description, f.grade
         FROM feedback f
         JOIN submission s ON f.assignment_id = s.assignment_id
         JOIN user_on_submission u ON u.sub_id = s.sub_id
@@ -279,6 +279,12 @@ exports.getFeedbackForSubmission = (req, res) => {
             return res.status(404).json({ message: "No feedback found for this user and submission." });
         }
 
-        return res.status(200).json({ feedback: feedbackResults });
+        // Extract feedback and grade
+        const feedback = feedbackResults.map(result => ({
+            description: result.description, // Feedback text
+            grade: result.grade // Numeric grade
+        }));
+
+        return res.status(200).json({ feedback, grade: feedbackResults[0].grade });
     });
 };
