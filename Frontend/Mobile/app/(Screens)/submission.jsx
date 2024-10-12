@@ -12,6 +12,7 @@ const Submission = () => {
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [feedbackData, setFeedbackData] = useState({ feedback: [], grade: null });
 
   useEffect(() => {
     const fetchUserIdAndSubmissions = async () => {
@@ -53,32 +54,41 @@ const Submission = () => {
       const response = await axios.get(`http://192.168.49.219:5000/feedback/${subId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const feedback = response.data.feedback || [];
+      const grade = feedback.length > 0 && typeof feedback[0].grade === 'number' ? feedback[0].grade : null;
+
       setFeedbacks(prevFeedbacks => ({
         ...prevFeedbacks,
-        [subId]: response.data.feedback // Ensure you're setting the feedback correctly
+        [subId]: feedback
       }));
+
+      setFeedbackData({ feedback, grade });
     } catch (error) {
       console.error('Error fetching feedbacks:', error);
       Alert.alert('Error', 'Failed to fetch feedbacks.');
     }
   };
-  
 
   const handleShowSubmissions = () => {
     setShowSubmissions(prev => !prev);
   };
 
-  const handleSubmissionSelect = (submission) => {
+  const handleSubmissionSelect = async (submission) => {
     setSelectedSubmission(submission);
     const { sub_id } = submission;
 
     if (!feedbacks[sub_id]) {
-      fetchFeedbacks(userId, sub_id);
+      await fetchFeedbacks(userId, sub_id);
+    } else {
+      const selectedFeedback = feedbacks[sub_id] || [];
+      const selectedGrade = selectedFeedback.length > 0 && typeof selectedFeedback[0].grade === 'number' ? selectedFeedback[0].grade : null;
+      setFeedbackData({ feedback: selectedFeedback, grade: selectedGrade });
     }
   };
 
   const handleBack = () => {
     setSelectedSubmission(null);
+    setFeedbackData({ feedback: [], grade: null });
   };
 
   if (isLoading) {
@@ -91,7 +101,12 @@ const Submission = () => {
 
   if (selectedSubmission) {
     return (
-      <FeedbackDisplay submission={selectedSubmission} onBack={handleBack} />
+      <FeedbackDisplay 
+        submission={selectedSubmission} 
+        feedback={feedbackData.feedback} 
+        grade={feedbackData.grade} 
+        onBack={handleBack} 
+      />
     );
   }
 
@@ -109,7 +124,7 @@ const Submission = () => {
       {showSubmissions && (
         <FlatList
           data={submissions}
-          keyExtractor={(item) => item.sub_id ? item.sub_id.toString() : Math.random().toString()}
+          keyExtractor={(item) => item.sub_id.toString()}
           renderItem={({ item }) => {
             const feedbackForSubmission = feedbacks[item.sub_id] || [];
             return (
@@ -117,10 +132,11 @@ const Submission = () => {
                 <Text style={styles.submissionText}>
                   Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
                 </Text>
-                {feedbackForSubmission.length > 0 ? feedbackForSubmission.map(feedback => {
+                {feedbackForSubmission.length > 0 ? feedbackForSubmission.map((feedback, index) => {
                   const grade = feedback.grade != null ? Number(feedback.grade) : 'N/A';
+                  const key = feedback.feed_id ? feedback.feed_id : `fallback-${index}`;
                   return (
-                    <Text key={feedback.feed_id} style={styles.feedbackText}>
+                    <Text key={`${key}-${item.sub_id}`} style={styles.feedbackText}>
                       Feedback: {feedback.description} - Grade: {typeof grade === 'number' ? grade.toFixed(2) : grade}
                     </Text>
                   );

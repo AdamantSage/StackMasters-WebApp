@@ -1,36 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import axios from 'axios';
 
-const FeedbackDisplay = ({ submission, onBack }) => {
-  const [feedback, setFeedback] = useState([]);
-  const [grade, setGrade] = useState(null);
-
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        const response = await axios.get(`https://your-backend-url/api/feedback/${submission.sub_id}`);
-        const feedbackData = response.data;
-        setFeedback(feedbackData.feedback);
-        setGrade(feedbackData.grade);
-      } catch (error) {
-        console.error("Error fetching feedback:", error);
-      }
-    };
-
-    fetchFeedback();
-  }, [submission]);
-
+const FeedbackDisplay = ({ submission, feedback, grade, onBack }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Feedback for Submission ID: {submission.sub_id}</Text>
       {feedback.length > 0 ? (
         <FlatList
           data={feedback}
-          keyExtractor={(item) => item.feed_id.toString()} // Use feed_id for keys
+          keyExtractor={(item) => (item.feed_id ? item.feed_id.toString() : `fallback-${Math.random()}`)} // Fallback for undefined feed_id
           renderItem={({ item }) => (
             <View style={styles.feedbackItem}>
-              <Text>{item.description}</Text> {/* Ensure to use description */}
+              <Text>{item.description}</Text>
             </View>
           )}
         />
@@ -39,7 +20,7 @@ const FeedbackDisplay = ({ submission, onBack }) => {
       )}
       <View style={styles.gradeContainer}>
         <Text style={styles.gradeText}>
-          Grade: {grade !== null ? grade.toFixed(2) : "Not graded yet"} {/* Format grade */}
+          Grade: {typeof grade === 'number' && !isNaN(grade) ? grade.toFixed(2) : "Not graded yet"}
         </Text>
       </View>
       <TouchableOpacity onPress={onBack} style={styles.backButton}>
