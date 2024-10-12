@@ -53,12 +53,16 @@ const Submission = () => {
       const response = await axios.get(`http://192.168.49.219:5000/feedback/${subId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFeedbacks(prevFeedbacks => ({ ...prevFeedbacks, [subId]: response.data }));
+      setFeedbacks(prevFeedbacks => ({
+        ...prevFeedbacks,
+        [subId]: response.data.feedback // Ensure you're setting the feedback correctly
+      }));
     } catch (error) {
       console.error('Error fetching feedbacks:', error);
       Alert.alert('Error', 'Failed to fetch feedbacks.');
     }
   };
+  
 
   const handleShowSubmissions = () => {
     setShowSubmissions(prev => !prev);

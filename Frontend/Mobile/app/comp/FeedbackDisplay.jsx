@@ -27,10 +27,10 @@ const FeedbackDisplay = ({ submission, onBack }) => {
       {feedback.length > 0 ? (
         <FlatList
           data={feedback}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item) => item.feed_id.toString()} // Use feed_id for keys
           renderItem={({ item }) => (
             <View style={styles.feedbackItem}>
-              <Text>{item.comment}</Text>
+              <Text>{item.description}</Text> {/* Ensure to use description */}
             </View>
           )}
         />
@@ -39,7 +39,7 @@ const FeedbackDisplay = ({ submission, onBack }) => {
       )}
       <View style={styles.gradeContainer}>
         <Text style={styles.gradeText}>
-          Grade: {grade !== null ? grade : "Not graded yet"}
+          Grade: {grade !== null ? grade.toFixed(2) : "Not graded yet"} {/* Format grade */}
         </Text>
       </View>
       <TouchableOpacity onPress={onBack} style={styles.backButton}>
