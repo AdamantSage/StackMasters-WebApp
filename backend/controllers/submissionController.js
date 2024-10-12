@@ -252,7 +252,12 @@ exports.getFeedbackForSubmission = (req, res) => {
         return res.status(400).json({ message: "Submission ID is required." });
     }
 
-    const user_id = req.user.id; // Ensure this is set in middleware
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized. User not logged in." });
+    }
+
+    const user_id = req.user.id; // Now it's safe to access req.user.id
 
     console.log('Fetching feedback for user:', user_id, 'and submission:', sub_id);
 

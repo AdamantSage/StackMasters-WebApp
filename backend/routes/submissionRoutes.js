@@ -4,6 +4,7 @@ const router = express.Router();
 const { validSubmission, authorizeSubmissionAccess, authorizeFeedbackAccess } = require('../middleware/submissionMiddleware');
 // This is the specific functions that are coded in the controller
 const SubmissionController = require('../controllers/submissionController');
+const authMiddleware = require('../middleware/auth');
 
 // This is a request to this route path to execute
 // This is used to create a new submission 
@@ -28,6 +29,6 @@ router.get('/video-submissions',SubmissionController.selectVideoSubmissions);
 // This is to export the router
 
 // Get feedback via user_id and assignment_id
-router.get('/feedback/:sub_id', SubmissionController.getFeedbackForSubmission);
+router.get('/feedback/:sub_id',authMiddleware, SubmissionController.getFeedbackForSubmission);
 
 module.exports = router;
