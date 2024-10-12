@@ -19,15 +19,7 @@ function LandingPage() {
             <li>
               <Link to="/login">Login</Link>
             </li>
-            <li>
-              <Link to="/user-admin">User Administration</Link>
-            </li>
-            <li>
-              <Link to="/list-assignments">List Assignments</Link>
-            </li>
-            <li>
-              <Link to="/create-assignment">Create Assignment</Link>
-            </li>
+            
             
             <li>
               <Link to="/about">About Us</Link>

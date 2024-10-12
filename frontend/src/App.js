@@ -9,6 +9,7 @@ import ListVideos from './pages/ListVideos';
 import VideoFeedback from './pages/VideoFeedback';
 import StudentPage from './pages/studentPage';
 import LecturerPage from './pages/lecturerPage';
+import ExportMarks from './pages/exportMarks';
 
 import logo from './logo.svg';
 import './App.css';
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/watch-feedback/:id" element={<VideoFeedback />} />
         <Route path="/user-student" element={<StudentPage />} />
         <Route path="/user-lecturer" element={<LecturerPage />} />
+        <Route path="/export-marks" element={<ExportMarks />} />
       </Routes>
     </Router>
   );
