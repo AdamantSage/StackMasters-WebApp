@@ -1,25 +1,32 @@
-// src/components/ListAssignments.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import axios from 'axios';
 
 const ListAssignments = () => {
-  // Hardcoded assignments with user name, time submitted, and module code
-  const assignments = [
-    { id: 1, title: 'Assignment 1', userName: 'John Doe', timeSubmitted: '2024-10-07 12:30 PM', module: 'MOD123' },
-    { id: 2, title: 'Assignment 2', userName: 'Jane Smith', timeSubmitted: '2024-10-06 11:00 AM', module: 'MOD456' },
-    { id: 3, title: 'Assignment 3', userName: 'Mark Johnson', timeSubmitted: '2024-10-05 03:45 PM', module: 'MOD789' },
-    { id: 4, title: 'Assignment 4', userName: 'Emily Davis', timeSubmitted: '2024-10-04 10:20 AM', module: 'MOD123' },
-    { id: 5, title: 'Assignment 5', userName: 'Michael Brown', timeSubmitted: '2024-10-03 09:15 AM', module: 'MOD456' },
-    { id: 6, title: 'Assignment 6', userName: 'Sarah Wilson', timeSubmitted: '2024-10-02 04:50 PM', module: 'MOD789' },
-    { id: 7, title: 'Assignment 7', userName: 'David Martinez', timeSubmitted: '2024-10-01 02:10 PM', module: 'MOD123' }
-  ];
+  const [assignments, setAssignments] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [showMore, setShowMore] = useState(false);
+  const [selectedModule, setSelectedModule] = useState('');
+  const [moduleFilter, setModuleFilter] = useState('');
 
-  const moduleCodes = ['MOD123', 'MOD456', 'MOD789'];
+  // Sample module codes for dropdown
+  const moduleCodes = ['CS101', 'CS102', 'CS103']; // Replace with actual module codes
 
-  const [visibleCount, setVisibleCount] = useState(3); // Number of visible assignments
-  const [showMore, setShowMore] = useState(false); // Toggle for showing more/less
-  const [selectedModule, setSelectedModule] = useState(''); // Module filter
+  // Fetch assignments from API
+  const fetchAssignments = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/assignment');
+      console.log('API Response:', response.data); // Log API response
+      setAssignments(response.data);
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []); // Fetch assignments on component mount
 
   // Handle toggling show more / show less
   const toggleShowMore = () => {
@@ -27,9 +34,10 @@ const ListAssignments = () => {
     setVisibleCount(showMore ? 3 : assignments.length); // Show all if 'showMore' is true, else show first 3
   };
 
-  // Filter assignments based on selected module
+  // Filter assignments based on module filter
   const filteredAssignments = assignments.filter(assignment =>
-    selectedModule ? assignment.module === selectedModule : true
+    (selectedModule ? assignment.module_code === selectedModule : true) && // Filter by selected module
+    (moduleFilter ? assignment.module_code.toLowerCase().includes(moduleFilter.toLowerCase()) : true)
   );
 
   return (
@@ -80,11 +88,11 @@ const ListAssignments = () => {
             </TableHead>
             <TableBody>
               {filteredAssignments.slice(0, visibleCount).map(assignment => (
-                <TableRow key={assignment.id}>
-                  <TableCell>{assignment.title}</TableCell>
-                  <TableCell>{assignment.userName}</TableCell>
-                  <TableCell>{assignment.timeSubmitted}</TableCell>
-                  <TableCell>{assignment.module}</TableCell>
+                <TableRow key={assignment.assignment_id}>
+                  <TableCell>{assignment.assign_name}</TableCell> {/* Update to assign_name */}
+                  <TableCell>{assignment.user_id}</TableCell> {/* This might need adjustment based on how you want to display the user's name */}
+                  <TableCell>{new Date(assignment.upload_date).toLocaleString()}</TableCell> {/* Format date as needed */}
+                  <TableCell>{assignment.module_code}</TableCell> {/* Update to module_code */}
                 </TableRow>
               ))}
             </TableBody>

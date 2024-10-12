@@ -1,25 +1,59 @@
-// src/pages/CreateAssignment.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
-const CreateAssignment = () => {
-  const [modeCode, setModeCode] = useState('');
+const CreateAssignment = ({ userId }) => { // Accept userId as a prop
+  const [moduleCode, setModuleCode] = useState('');
   const [assignName, setAssignName] = useState('');
-  const [uploadedDate, setUploadedDate] = useState('');
+  const [uploadDate, setUploadDate] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [description, setDescription] = useState('');
+  const [assignDesc, setAssignDesc] = useState('');
+  const [notification, setNotification] = useState(''); // Notification state
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log({
-      modeCode,
-      assignName,
-      uploadedDate,
-      dueDate,
-      description,
-    });
+    console.log('Form submitted');
+
+    const assignmentData = {
+      module_code: moduleCode,
+      assign_name: assignName,
+      upload_date: uploadDate,
+      due_date: dueDate,
+      assign_desc: assignDesc,
+      user_id: userId || 1, // Include user_id
+    };
+
+    try {
+      try {
+        const response = await axios.post('http://localhost:5000/assignment', assignmentData);
+        console.log('Assignment created successfully:', response.data);
+        if (response.status === 201) { // Check for successful creation
+          setNotification('Assignment created successfully!');
+        } else {
+          setNotification('Unexpected response. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error creating assignment:', error);
+        setNotification('Error creating assignment. Please try again.');
+      }
+      
+      // Optionally clear the form after successful submission
+      setModuleCode('');
+      setAssignName('');
+      setUploadDate('');
+      setDueDate('');
+      setAssignDesc('');
+    } catch (error) {
+      console.error('Error creating assignment:', error);
+      // Show error notification
+      setNotification('Error creating assignment. Please try again.');
+    }
   };
+
+  const handleCloseNotification = () => {
+    setNotification(''); // Clear notification
+  };
+
   return (
     <div className="page">
       <header>
@@ -35,23 +69,29 @@ const CreateAssignment = () => {
           </ul>
         </div>
       </header>
+      {notification && (
+        <div className="notification">
+          {notification}
+          <button onClick={handleCloseNotification} className="close-button">X</button>
+        </div>
+      )}
       <div className="page-Container">
         <form onSubmit={handleSubmit} className="creatAssignForm">
-          <div className="inputContainer"> {/* Increased bottom margin for spacing */}
-            <label className="form-label" htmlFor="modeCode">
-              Mode Code
+          <div className="inputContainer">
+            <label className="form-label" htmlFor="moduleCode">
+              Module Code
             </label>
             <input
               type="text"
-              id="modeCode"
-              placeholder="Enter mode code"
-              value={modeCode}
-              onChange={(e) => setModeCode(e.target.value)}
+              id="moduleCode"
+              placeholder="Enter module code"
+              value={moduleCode}
+              onChange={(e) => setModuleCode(e.target.value)}
               className="assign-Input"
               required
             />
           </div>
-          <div className="inputContainer"> {/* Increased bottom margin for spacing */}
+          <div className="inputContainer">
             <label className="form-label" htmlFor="assignName">
               Assignment Name
             </label>
@@ -65,20 +105,20 @@ const CreateAssignment = () => {
               required
             />
           </div>
-          <div className="inputContainer"> {/* Increased bottom margin for spacing */}
-            <label className="form-label" htmlFor="uploadedDate">
-              Uploaded Date
+          <div className="inputContainer">
+            <label className="form-label" htmlFor="uploadDate">
+              Upload Date
             </label>
             <input
               type="date"
-              id="uploadedDate"
-              value={uploadedDate}
-              onChange={(e) => setUploadedDate(e.target.value)}
+              id="uploadDate"
+              value={uploadDate}
+              onChange={(e) => setUploadDate(e.target.value)}
               className="assign-Input"
               required
             />
           </div>
-          <div className="inputContainer"> {/* Increased bottom margin for spacing */}
+          <div className="inputContainer">
             <label className="form-label" htmlFor="dueDate">
               Due Date
             </label>
@@ -91,15 +131,15 @@ const CreateAssignment = () => {
               required
             />
           </div>
-          <div className="inputContainer"> {/* Increased bottom margin for spacing */}
-            <label className="form-label" htmlFor="description">
+          <div className="inputContainer">
+            <label className="form-label" htmlFor="assignDesc">
               Description
             </label>
             <textarea
-              id="description"
+              id="assignDesc"
               placeholder="Enter description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={assignDesc}
+              onChange={(e) => setAssignDesc(e.target.value)}
               className="assign-Input"
               required
             />
@@ -110,7 +150,6 @@ const CreateAssignment = () => {
         </form>
       </div>
     </div>
-    
   );
 };
 
