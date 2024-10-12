@@ -752,3 +752,170 @@ table th {
   flex: 1;
   margin: 0 10px;
 }
+
+
+
+
+
+
+/* User Admin Page */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.user-admin-page {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.sidebar {
+  width: 250px;
+    background-color: #f4f4f4;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100vh; 
+}
+
+.profile-section {
+  text-align: center;
+  margin-bottom: 20px; /* Reduce gap */
+}
+
+.admin-profile-pic {
+  width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: block;
+    margin: 0 auto 10px;
+}
+
+.admin-name {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.nav-menu ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.nav-menu ul li {
+  margin-bottom: 10px;
+}
+
+.nav-menu ul li button {
+  width: 100%;
+  padding: 10px;
+  background-color:rgb(186, 204, 50);
+  color: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.3s ease;
+}
+
+.nav-menu ul li button:hover {
+  background-color: #673AB7;
+}
+
+
+
+.section {
+  padding: 20px;
+  background-color: white; /* Background color to help visibility */
+}
+
+
+
+.logout-button {
+  width: 100%;
+    padding: 10px;
+    background-color: #673AB7;
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    margin-top: auto;
+}
+
+.logout-button:hover {
+  background-color: #673AB7;
+}
+
+/* Main content area */
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  padding: 20px;
+  height: 100vh; /* Set height to full viewport */
+  box-sizing: border-box;
+}
+/* User Admin Page */
+
+/*Dashboard*/
+.dashboard-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between boxes */
+  margin-bottom: 20px;
+}
+
+.summary-box {
+  background-color: #f0f0f0; /* Light gray background */
+  border: 1px solid #ccc; /* Gray border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 20px; /* Space inside the box */
+  flex: 1 1 calc(33% - 20px); /* Responsive width */
+  min-width: 250px; /* Minimum width for each box */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  transition: background-color 0.2s; /* Smooth background color change */
+}
+.summary-box:hover {
+  background-color: #673AB7; /* Change color on hover */
+}
+
+.search-bar-container {
+  width: 100%; /* Ensure the container takes the full width */
+  margin-bottom: 20px; /* Space below the search bar */
+}
+
+.search-bar {
+  width: 100%; /* Full width */
+  padding: 10px; /* Padding for comfort */
+  border: 2px solid #673AB7; /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  outline: none; /* Remove default outline */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  font-size: 16px; /* Font size */
+  height: 40px; /* Set a fixed height for consistency */
+}
+
+.search-bar::placeholder {
+  color: #9E9E9E; /* Placeholder color */
+  opacity: 1; /* Ensure it's fully visible */
+}
+
+.search-bar:focus {
+  border-color: #5E35B1; /* Darker shade on focus */
+}
+
+
+
+
+
+
+
+
+
+
+
+/*Dashboard*/
+
+
+
