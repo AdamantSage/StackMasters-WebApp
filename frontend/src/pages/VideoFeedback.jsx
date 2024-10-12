@@ -1,13 +1,13 @@
-// src/pages/VideoFeedback.jsx
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const VideoFeedback = () => {
   const [mark, setMark] = useState(''); // State for mark input
   const [comment, setComment] = useState(''); // State for feedback comment
 
-  // Mock URL for the video. You should replace this with the actual URL from your backend.
-  const videoUrl = "https://example.com/path-to-video.mp4"; 
+  // Use location to access the passed video URL
+  const location = useLocation();
+  const videoUrl = location.state?.video?.videoUrl; // Get the video URL from the location state
 
   const handleSubmitFeedback = (e) => {
     e.preventDefault();
@@ -30,10 +30,14 @@ const VideoFeedback = () => {
 
       <div className="page-Container">
         {/* Video Player */}
-        <video width="640" height="360" controls>
-          <source src={videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        {videoUrl ? (
+          <video width="640" height="360" controls autoPlay>
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <p>No video available to play.</p>
+        )}
 
         {/* Feedback Form */}
         <form onSubmit={handleSubmitFeedback} className="feedback-form">
