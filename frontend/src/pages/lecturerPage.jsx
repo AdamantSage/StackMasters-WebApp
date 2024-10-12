@@ -3,6 +3,7 @@ import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
 import VideoFeedback from './VideoFeedback';
+import CreateAssignment from './CreateAssignment';
 import { LecturerDashboard } from './Dashboard'; 
 
 const LecturerPage = () => {
@@ -23,6 +24,8 @@ const LecturerPage = () => {
                 return <ListAssignments />;
             case 'watch-feedback':
                 return <VideoFeedback videoId={selectedVideoId} />;
+            case 'create-assignment':
+                return <CreateAssignment />;
                 case 'settings':
                     return (
                         <section className="settings">
@@ -47,6 +50,7 @@ const LecturerPage = () => {
                         <li><button onClick={() => setActiveSection('dashboard')}>LecturerDashboard</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
+                        <li><button onClick={() => setActiveSection('create-assignment')}>Create Assignment</button></li>
                         <li><button onClick={() => setActiveSection('watch-feedback')}>Video Feedback</button></li>
                         <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
                     </ul>
