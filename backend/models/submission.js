@@ -13,8 +13,7 @@ class Submission{
         db.query('INSERT INTO user_on_submission SET ?', {
             user_id: submissionData.user_id,
             sub_id: submissionData.sub_id,
-            module_code: submissionData.module_code,
-        })
+        }, callback);
 
     }
 
@@ -27,8 +26,9 @@ class Submission{
         db.query('SELECT * FROM submission WHERE sub_id = ?',
             [sub_id], callback);
     }
+
     static selectAllSubmissions(callback){
-        db.query('SELECT *FROM submission', callback);
+        db.query('SELECT * FROM submission', callback); 
     }
 
     static updateStudent(sub_id, updateData, callback){
@@ -69,25 +69,38 @@ class Submission{
             [feed_id], callback
         );
     }
-    static getFeedback(user_id, assignment_id, callback) {
-        db.query('SELECT * FROM feedback WHERE user_id = ? AND assignment_id = ?', 
-            [user_id, assignment_id], callback);
-    }
-     // New method to select video submissions
-     static selectVideoSubmissions(callback) {
-        const query = `
+
+    static selectVideoSubmissions(assignment_id,callback) {
+        db.query(`
             SELECT 
-                a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
+                v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,
+                a.assignment_id, a.assign_name, a.upload_date, a.due_date,
+                u.user_id, u.name
             FROM 
-                videos v
+                video v
             JOIN 
                 users u ON v.user_id = u.user_id
             JOIN 
-                assignment a ON a.user_id = u.user_id;`;
-          
-        db.query(query, callback);
+                assignment a ON a.user_id = u.user_id
+            WHERE 
+                v.user_id = a.user_id AND a.user_id = u.user_id AND a.assignment_id = ?`,
+            
+        [assignment_id], callback);
     }
-    
+
+    static selectVideoSubmissionsAll(callback) {
+        db.query(`SELECT 
+                v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,
+                a.assignment_id, a.assign_name, a.upload_date, a.due_date,
+                u.user_id, u.name
+            FROM video v
+            LEFT JOIN 
+                users u ON v.user_id = u.user_id
+            LEFT JOIN 
+                assignment a ON a.user_id = u.user_id`,
+            
+        callback);
+    }
 }
 
 module.exports = Submission;
