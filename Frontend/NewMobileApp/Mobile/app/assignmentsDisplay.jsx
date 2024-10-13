@@ -24,6 +24,19 @@ const AssignmentsDisplay = () => {
   const createSubmissionApi = 'http://192.168.0.23:5000/submission';
   const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
 
+  /*useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId();
+      if (id) {
+        setUserId(id);
+      } else {
+        Alert.alert('Error', 'User ID is missing. Please log in again.');
+      }
+    };
+    
+    fetchUserId();
+  }, []);*/
+
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
@@ -113,14 +126,18 @@ const AssignmentsDisplay = () => {
 
   const handleSubmit = async () => {
     try {
-      const uploadResponse = await uploadVideo();
-      if (!uploadResponse) return;
-
+      // Hardcode userId to 1 for testing
+      const hardcodedUserId = 1;
+      //const uploadResponse = await uploadVideo();
+      //if (!uploadResponse) return;
+      
+      const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const submissionData = {
-        assignmentId: assignmentId,
-        subDate: new Date().toISOString(),
+        sub_date: formattedDate,
+        assignment_id: assignmentId
       };
-
+  
+      console.log("Creating submission with data:", submissionData);
       const createSubmissionResponse = await fetch(createSubmissionApi, {
         method: 'POST',
         headers: {
@@ -128,19 +145,22 @@ const AssignmentsDisplay = () => {
         },
         body: JSON.stringify(submissionData),
       });
-
+  
       if (!createSubmissionResponse.ok) {
         throw new Error('Failed to create submission');
       }
-
+  
       const submissionResult = await createSubmissionResponse.json();
+      console.log("Submission Result:", submissionResult);
       const submissionId = submissionResult.sub_id;
-
+  
+      // Use hardcoded userId
       const userOnSubmissionData = {
-        userId: userId,
-        subId: submissionId,
+        user_id: hardcodedUserId,
+        sub_id: submissionId,
       };
-
+  
+      console.log("Creating user submission with data:", userOnSubmissionData);
       const userSubmissionResponse = await fetch(createUserSubmission, {
         method: 'POST',
         headers: {
@@ -148,18 +168,23 @@ const AssignmentsDisplay = () => {
         },
         body: JSON.stringify(userOnSubmissionData),
       });
-
+  
+      // Now check the status and log the response
+      console.log('User Submission Response Status:', userSubmissionResponse.status);
+      const userResponseText = await userSubmissionResponse.text(); // Read the response as text
+      console.log('User Submission Response Text:', userResponseText);
+  
       if (!userSubmissionResponse.ok) {
         throw new Error('Failed to create user submission');
       }
-
+  
       Alert.alert('Submission successful!');
     } catch (error) {
       console.error('Error during submission process:', error);
-      Alert.alert('Error during submission process');
+      Alert.alert('Error during submission process', error.message);
     }
   };
-
+  
   const chooseVideo = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -247,7 +272,6 @@ const AssignmentsDisplay = () => {
           ref={(ref) => setCameraRef(ref)}
           type={Camera.Constants.Type.back}
         >
-          {/* Optional overlay or additional UI elements can go here */}
         </Camera>
       )}
     </View>
