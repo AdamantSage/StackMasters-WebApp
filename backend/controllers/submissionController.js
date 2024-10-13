@@ -100,7 +100,6 @@ exports.createFeedback = (req, res) =>{
     console.log(req.body);// Log the data sent by the client
     // Extract specific fields from the request body
     const{
-        feed_id,
         user_id,
         assignment_id,
         description,
@@ -108,7 +107,7 @@ exports.createFeedback = (req, res) =>{
     } = req.body;
     //Execute sql query to update submission
     Submission.createLectureFeedback(
-        {   feed_id,
+        { 
             user_id,
             assignment_id,
             description,

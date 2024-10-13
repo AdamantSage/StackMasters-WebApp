@@ -44,7 +44,6 @@ class Submission{
     static createLectureFeedback(feedbackData, callback){
         db.query('INSERT INTO feedback SET ?',
             {
-                feed_id: feedbackData.feed_id,
                 user_id: feedbackData.user_id,
                 assignment_id: feedbackData.assignment_id,
                 description: feedbackData.description,
