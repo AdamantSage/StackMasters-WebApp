@@ -33,13 +33,11 @@ exports.createUserSubmission = (req, res) =>{
     const{
         user_id,
         sub_id,
-        module_code,
     } = req.body;
     // Execute the SQL query to insert a new submission into the database
     Submission.createUserSubmission({
         user_id,
         sub_id,
-        module_code,
         }, (err, results) => {
         if(err){
             console.log(err); // Log any errors
