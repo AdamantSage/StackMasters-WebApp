@@ -49,9 +49,6 @@ const ListVideos = () => {
             <li>
               <Link to="/" className="link">Landing Page</Link>
             </li>
-            <li>
-              <Link to="/watch-feedback/:id" className="link">Watch Video</Link>
-            </li>
           </ul>
         </div>
       </header>
@@ -88,7 +85,7 @@ const ListVideos = () => {
                 <TableCell><strong>Submitted By (User ID)</strong></TableCell>
                 <TableCell><strong>Time Submitted</strong></TableCell>
                 <TableCell><strong>Assignment ID</strong></TableCell>
-                <TableCell><strong>Video URL</strong></TableCell>
+                <TableCell><strong>Action</strong></TableCell> {/* Changed the header for clarity */}
               </TableRow>
             </TableHead>
             <TableBody>

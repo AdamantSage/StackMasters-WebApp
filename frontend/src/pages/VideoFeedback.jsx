@@ -3,7 +3,9 @@ import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const VideoFeedback = () => {
-  const { videoUrl } = useParams(); // Get videoUrl from URL parameters
+  const { id } = useParams(); // id contains the video URL
+  console.log('Received video URL:', id); // Log the video URL
+
   const [mark, setMark] = useState('');
   const [comment, setComment] = useState('');
 
@@ -12,7 +14,7 @@ const VideoFeedback = () => {
     
     try {
       const response = await axios.post('/api/marks/submit-feedback', {
-        videoUrl, // Use videoUrl directly here
+        videoUrl: id, // Use id here as videoUrl
         mark,
         comment,
       });
@@ -37,10 +39,9 @@ const VideoFeedback = () => {
 
       <div className="page-Container">
         {/* Video Player */}
-        {videoUrl ? (
+        {id ? (
           <video width="640" height="360" controls autoPlay>
-            <source src={decodeURIComponent(videoUrl)} type="video/mp4"
-            onError={(e) => console.error('Video failed to load:', e)} />
+            <source src={decodeURIComponent(id)} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         ) : (
