@@ -9,7 +9,7 @@ const authMiddleware = require('../middleware/auth');
 // This is a request to this route path to execute
 // This is used to create a new submission 
 router.post('/submission', validSubmission, SubmissionController.createSubmission);
-router.post('/submission/feedback', authorizeFeedbackAccess, SubmissionController.createFeedback);
+router.post('/submission/feedback', SubmissionController.createFeedback);
 router.post('/userSubmission', authorizeSubmissionAccess, SubmissionController.createUserSubmission);
 // This is used to retrieve submission
 router.get('/submission/:sub_id', authorizeSubmissionAccess, SubmissionController.getSubmission);
