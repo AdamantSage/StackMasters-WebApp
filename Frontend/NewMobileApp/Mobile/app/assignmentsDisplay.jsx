@@ -3,38 +3,27 @@ import { View, Text, Button, Alert, StyleSheet, TouchableOpacity } from 'react-n
 import { useRouter } from 'expo-router';
 import { useAssignmentContext } from '@/components/assignmentContext';
 import { getUserId } from './utils';
-import { VideoRecorder } from './videoRecorder';
 import * as DocumentPicker from 'expo-document-picker';
 import Entypo from '@expo/vector-icons/Entypo';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { Camera } from 'expo-camera';
 
 const AssignmentsDisplay = () => {
   const router = useRouter();
-  const { assignmentId } = useAssignmentContext(); // Get assignmentId from context
+  const { assignmentId } = useAssignmentContext();
   const [assignment, setAssignment] = useState(null);
   const [userId, setUserId] = useState(null);
   const [videoUri, setVideoUri] = useState(null);
+  const [videoType, setVideoType] = useState(null);
+  const [videoName, setVideoName] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [cameraRef, setCameraRef] = useState(null);
 
-  const uploadVideoApi = 'http://192.168.0.23:5000/uploads';
+  const uploadVideoApi = 'http://192.168.0.23:5000/routes/uploads';
+  const compressVideoApi = 'http://192.168.0.23:5000/routes/compress-video';
   const createSubmissionApi = 'http://192.168.0.23:5000/submission';
   const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
 
-   /*useEffect(() => {
-    const fetchUserId = async () => {
-      const id = await getUserId();
-      if (id) {
-        setUserId(id);
-      } else {
-        Alert.alert('Error', 'User ID is missing. Please log in again.');
-      }
-    };
-    
-    fetchUserId();
-  }, []);*/
-
-
-  // Fetch assignment details based on assignmentId
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
@@ -43,13 +32,8 @@ const AssignmentsDisplay = () => {
           throw new Error('Failed to fetch assignment details');
         }
         const assignmentData = await response.json();
-        console.log('Fetched assignment data:', assignmentData);
-        
-        // Access the first assignment in the array
         if (assignmentData.length > 0) {
-          const assignment = assignmentData[0];
-          console.log('Assignment fields:', assignment.assign_name, assignment.due_date, assignment.assign_desc);
-          setAssignment(assignment); // Set the first assignment object to state
+          setAssignment(assignmentData[0]);
         } else {
           console.log('No assignment data available.');
         }
@@ -58,35 +42,54 @@ const AssignmentsDisplay = () => {
         Alert.alert('Error fetching assignment details');
       }
     };
-  
+
     if (assignmentId) {
-      fetchAssignmentDetails(); // Fetch assignment details if assignmentId is available
+      fetchAssignmentDetails();
     }
   }, [assignmentId]);
 
-  // If assignment data is not available, handle it gracefully
   if (!assignment) {
     return <Text>No assignment found.</Text>;
   }
 
-  const handleRecordingComplete = (uri) => {
-    setVideoUri(uri); // Set the video URI after recording
-    setIsRecording(false); // Hide VideoRecorder
-  };
+  const compressVideo = async (uri) => {
+    const formData = new FormData();
+    formData.append('video', {
+      uri: uri,
+      type: videoType,
+      name: videoName,
+    });
 
-  // Function to start recording
-  const startRecording = () => {
-    setIsRecording(true); // Show VideoRecorder
+    try {
+      const response = await fetch(compressVideoApi, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to compress video');
+      }
+
+      const compressedVideoResponse = await response.json();
+      return compressedVideoResponse.compressedVideoUrl;
+    } catch (error) {
+      console.error('Error compressing video:', error);
+      Alert.alert('Error compressing video');
+      return null;
+    }
   };
 
   const uploadVideo = async () => {
-    if (!videoUri) return null; // If there's no video URI, stop execution
+    if (!videoUri) return null;
+
+    const compressedVideoUrl = await compressVideo(videoUri);
+    if (!compressedVideoUrl) return null;
 
     const formData = new FormData();
     formData.append('video', {
-      uri: videoUri,
-      type: 'video/mp4', // Ensure this matches the expected MIME type
-      name: 'video.mp4', // You can generate a unique name if needed
+      uri: compressedVideoUrl,
+      type: videoType,
+      name: videoName,
     });
 
     try {
@@ -100,31 +103,23 @@ const AssignmentsDisplay = () => {
       }
 
       const uploadResponse = await response.json();
-      console.log('Video upload response:', uploadResponse);
-      return uploadResponse; // Return the response for submission
+      return uploadResponse;
     } catch (error) {
       console.error('Error uploading video:', error);
       Alert.alert('Error uploading video');
-      return null; // Return null on failure
+      return null;
     }
   };
 
   const handleSubmit = async () => {
     try {
-      console.log('Submit button pressed');
-      // Step 1: Upload the video
       const uploadResponse = await uploadVideo();
-      if (!uploadResponse){ 
-        console.log('Video upload failed or returned no response');
-        return; // Stop if the video upload failed
-      }
-      // Step 2: Create the submission
-      const submissionData = {
-        assignmentId: assignmentId, // Get the assignment ID from context
-        subDate: new Date().toISOString(), // Current date as the submission date
-      };
+      if (!uploadResponse) return;
 
-      console.log('Submission data:', submissionData);
+      const submissionData = {
+        assignmentId: assignmentId,
+        subDate: new Date().toISOString(),
+      };
 
       const createSubmissionResponse = await fetch(createSubmissionApi, {
         method: 'POST',
@@ -135,21 +130,16 @@ const AssignmentsDisplay = () => {
       });
 
       if (!createSubmissionResponse.ok) {
-        console.error('Failed to create submission', createSubmissionResponse.status);
         throw new Error('Failed to create submission');
       }
 
       const submissionResult = await createSubmissionResponse.json();
-      const submissionId = submissionResult.sub_id; // Get the created submission ID
-      console.log('Submission created:', submissionResult);
+      const submissionId = submissionResult.sub_id;
 
-      // Step 3: Associate the user with the submission
       const userOnSubmissionData = {
-        userId: userId, // Replace with actual user ID
-        subId: submissionId, // Use the submission ID from previous API call
+        userId: userId,
+        subId: submissionId,
       };
-
-      console.log('User submission data:', userOnSubmissionData);
 
       const userSubmissionResponse = await fetch(createUserSubmission, {
         method: 'POST',
@@ -159,14 +149,9 @@ const AssignmentsDisplay = () => {
         body: JSON.stringify(userOnSubmissionData),
       });
 
-
       if (!userSubmissionResponse.ok) {
-        console.error('Failed to create user submission', userSubmissionResponse.status);
         throw new Error('Failed to create user submission');
       }
-
-      const userSubmissionResult = await userSubmissionResponse.json();
-      console.log('User submission created:', userSubmissionResult);
 
       Alert.alert('Submission successful!');
     } catch (error) {
@@ -176,30 +161,50 @@ const AssignmentsDisplay = () => {
   };
 
   const chooseVideo = async () => {
-    console.log('Opening video picker...'); // Debugging log
-  
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'video/*',
         multiple: false,
       });
-  
-      console.log('Video picker result:', result); // Debugging log
-  
-      // Check if the user canceled the picker
+
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        // Get the URI of the selected video
-        const videoUri = result.assets[0].uri;
+        const selectedVideo = result.assets[0];
+        const videoUri = selectedVideo.uri;
+        const videoType = selectedVideo.mime;
+        const videoName = selectedVideo.name;
+
         setVideoUri(videoUri);
-        console.log('Video URI:', videoUri); // Log the selected video URI
-      } else {
-        console.log('User cancelled video picker');
+        setVideoType(videoType);
+        setVideoName(videoName);
       }
     } catch (error) {
       console.error('Error picking video:', error);
       Alert.alert('Error picking video');
     }
-  };  
+  };
+
+  const startRecording = async () => {
+    if (cameraRef) {
+      try {
+        const videoRecordPromise = cameraRef.recordAsync();
+        if (videoRecordPromise) {
+          const data = await videoRecordPromise;
+          setVideoUri(data.uri); // Get the video URI from the recorded video
+          setIsRecording(false); // Stop recording
+        }
+      } catch (error) {
+        console.error('Error recording video:', error);
+        Alert.alert('Error recording video');
+      }
+    }
+  };
+
+  const stopRecording = () => {
+    if (cameraRef) {
+      cameraRef.stopRecording();
+      setIsRecording(false);
+    }
+  };
 
   return (
     <View style={styles.screenContainer}>
@@ -216,20 +221,35 @@ const AssignmentsDisplay = () => {
           <Entypo name="folder-video" size={50} color="#9400d3" />
           <Text>Choose Video</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={startRecording}>
-          <AntDesign name="camera" size={50} color="#9400d3" />
-          <Text>Record Video</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            setIsRecording(!isRecording);
+            if (isRecording) {
+              stopRecording();
+            } else {
+              startRecording();
+            }
+          }}
+        >
+          <AntDesign name="videocamera" size={50} color="#9400d3" />
+          <Text>{isRecording ? 'Stop Recording' : 'Record Video'}</Text>
         </TouchableOpacity>
-
-        {isRecording && (
-          <VideoRecorder onRecordingComplete={handleRecordingComplete} />
-        )}
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <AntDesign name="checksquare" size={50} color="#9400d3" />
           <Text>Submit Video</Text>
         </TouchableOpacity>
       </View>
 
+      {isRecording && (
+        <Camera
+          style={{ flex: 1 }}
+          ref={(ref) => setCameraRef(ref)}
+          type={Camera.Constants.Type.back}
+        >
+          {/* Optional overlay or additional UI elements can go here */}
+        </Camera>
+      )}
     </View>
   );
 };
