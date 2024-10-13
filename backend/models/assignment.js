@@ -9,7 +9,13 @@ class Assignment {
             due_date: assignmentData.due_date,
             assign_desc: assignmentData.assign_desc,
             user_id: assignmentData.user_id
-        }, callback);
+        }, (err, results) => {
+            if(err){
+                console.log(err);
+                return callback(err);
+            }
+            return callback(null, {assignment_id: results.insertId })
+    });
     }
 
     static createUserAssignment(assignmentData, callback){
