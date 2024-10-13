@@ -100,7 +100,7 @@ const handleVideoUpload = async (req, res) => {
         }
         
         // SQL query to insert video metadata into the database
-        const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
+        const query = 'INSERT INTO video (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
         const values = [originalname, filePath, mimetype, size, videoUrl];
 
         connection.query(query, values, (err) => {

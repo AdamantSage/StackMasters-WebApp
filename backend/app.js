@@ -9,7 +9,7 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-    origin: '*',
+    origin: 'https://localhost:8081',
 }));
 
 //we will put files like css/js for frontend we might want to use
