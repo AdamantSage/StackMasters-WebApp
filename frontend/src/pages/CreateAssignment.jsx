@@ -58,12 +58,7 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
                 <div className="container">
                     <h1 className="page-heading">Create Assignment</h1>
                     <ul className="linksList">
-                        <li>
-                            <Link to="/" className="link">Landing Page</Link>
-                        </li>
-                        <li>
-                            <Link to="/list-videos" className="link">List Videos</Link>
-                        </li>
+                       
                     </ul>
                 </div>
             </header>

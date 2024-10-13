@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
+import ExportMarks from './exportMarks';
 import { AdminDashboard } from './Dashboard'; 
 
 
@@ -20,6 +21,10 @@ const UserAdminPage = () => {
                 return <ListVideos />;  // Render the ListVideos component when 'List Videos' is clicked
             case 'list-assignments':
                 return <ListAssignments />;
+                case 'export-marks':
+                    return <ExportMarks/>;
+                        
+                    
                 case 'video-management':
                     return (
                         <section className="video-management">
@@ -64,9 +69,10 @@ const UserAdminPage = () => {
                 </div>
                 <nav className='nav-menu'>
                 <ul>
-                    <li><button onClick={() => setActiveSection('dashboard')}>AdminDashboard</button></li>
+                    <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
                     <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                     <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
+                    <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
                     <li><button onClick={() => setActiveSection('user-management')}>User Management</button></li>
                     <li><button onClick={() => setActiveSection('system-monitoring')}>System Monitoring</button></li>
                     <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
