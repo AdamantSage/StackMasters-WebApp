@@ -42,11 +42,13 @@ exports.createUserAssignment = (req, res) => {
     const {
         user_id,
         assignment_id,
+        module_code
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.createUserAssignment({
         user_id,
         assignment_id,
+        module_code
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
@@ -81,10 +83,10 @@ exports.getAssignment = (req, res) => {
     });
 };
 exports.getAssignmentID = (req, res) => {
-    const {assignment_id} = req.params; // Retrieve the IDs from the URL
-    console.log(`Fetching assignment with assignment_id: ${assignment_id}`);
+    const {assignment_id, user_id} = req.params; // Retrieve the IDs from the URL
+    console.log(`Fetching assignment with module_code: ${assignment_id}, ${user_id}`);
     // Execute the SQL query to fetch the assignment with the given IDs from the model
-    Assignment.select(assignment_id, (err, results) => {
+    Assignment.select(assignment_id, user_id, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -191,3 +193,19 @@ exports.deleteUserAssignment = (req, res) => {
     });
 };
   
+
+exports.getAllAssignments = (req, res) => {
+    console.log("Fetching all assignments");
+
+    Assignment.getAll((err, results) => {
+        if (err) {
+            console.error("Database error:", err); // Log detailed database error
+            return res.status(500).json({ message: "Error occurred while fetching assignments." });
+        } else if (results.length === 0) {
+            return res.status(404).json({ message: "No assignments found." });
+        } else {
+            console.log("Fetched assignments:", results); // Log the results of the query
+            return res.status(200).json(results); // Send the results back to the client
+        }
+    });
+};

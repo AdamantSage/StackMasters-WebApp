@@ -8,11 +8,10 @@ const connection = mysql.createConnection({
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'test',
- 
 });
 
-if(isAzure){
-    conectionConfig.ssl = {
+if (isAzure) {
+    connection.config.ssl = {
         rejectUnauthorized: true
     };
 }

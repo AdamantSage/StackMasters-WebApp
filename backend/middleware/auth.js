@@ -11,5 +11,12 @@ function authenticateToken(req, res, next) {
         next();
     });
 }
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization.split(" ")[1];
+    // Verify token and extract user info
+    // Set req.user to the user object from the token
+    req.user = { id: userIdFromToken }; // Set this properly
+    next();
+};
 
-module.exports = authenticateToken;
+module.exports = authenticateToken, authMiddleware;
