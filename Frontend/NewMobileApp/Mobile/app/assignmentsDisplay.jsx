@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Alert } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAssignmentContext } from '@/components/assignmentContext';
 import { getUserId } from './utils';
-import VideoRecorder from './videoRecorder';
+import { VideoRecorder } from './videoRecorder';
 import * as DocumentPicker from 'expo-document-picker';
+import Entypo from '@expo/vector-icons/Entypo';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const AssignmentsDisplay = () => {
   const router = useRouter();
@@ -145,7 +147,6 @@ const AssignmentsDisplay = () => {
       const userOnSubmissionData = {
         userId: userId, // Replace with actual user ID
         subId: submissionId, // Use the submission ID from previous API call
-        moduleCode: assignment.module_code, // Use the module code from the assignment
       };
 
       console.log('User submission data:', userOnSubmissionData);
@@ -201,22 +202,96 @@ const AssignmentsDisplay = () => {
   };  
 
   return (
-    <View>
-      <Text>Assignment Name: {assignment?.assign_name}</Text>
-      <Text>Due Date: {assignment?.due_date}</Text>
-      <Text>Assignment Description: {assignment?.assign_desc}</Text>
+    <View style={styles.screenContainer}>
+      <Text style={styles.Heading}>{assignment?.assign_name}</Text>
+      <Text style={styles.date}>Due Date:</Text>
+      <Text style={styles.dateDisplay}>{assignment?.due_date}</Text>
+      <Text style={styles.descHead}>Assignment Description:</Text>
+      <Text style={styles.desc}>{assignment?.assign_desc}</Text>
 
-      <Button title="Choose Video" onPress={chooseVideo} />
-      <Button title="Record Video" onPress={startRecording} />
-      {videoUri && <Text>Video Selected: {videoUri}</Text>}
+      {videoUri && <Text style={styles.Video}>Video Selected: {videoUri}</Text>}
 
-      {isRecording && (
-        <VideoRecorder onRecordingComplete={handleRecordingComplete} />
-      )}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={chooseVideo}>
+          <Entypo name="folder-video" size={50} color="#9400d3" />
+          <Text>Choose Video</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={startRecording}>
+          <AntDesign name="camera" size={50} color="#9400d3" />
+          <Text>Record Video</Text>
+        </TouchableOpacity>
 
-      <Button title="Submit Video" onPress={handleSubmit} />
+        {isRecording && (
+          <VideoRecorder onRecordingComplete={handleRecordingComplete} />
+        )}
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <AntDesign name="checksquare" size={50} color="#9400d3" />
+          <Text>Submit Video</Text>
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    padding: 0
+  },
+  Heading: {
+    fontSize: 28,
+    color: '#9400d3',
+    textAlign: 'center',
+    padding: 10
+  },
+  date: {
+    fontSize: 20,
+    marginBottom: 5,
+    paddingHorizontal: 10,
+    marginTop: 10
+  },
+  dateDisplay: {
+    fontSize: 20,
+    marginBottom: 15,
+    paddingHorizontal: 10
+  },
+  descHead: {
+    fontSize: 20,
+    paddingHorizontal: 10
+  },
+  desc: {
+    fontSize: 15,
+    paddingHorizontal: 5,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#000000',
+    padding: 5,
+    borderRadius: 5,
+    marginBottom: 20
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0
+  },
+  button: {
+    alignItems: 'center',
+    marginHorizontal: 10
+  },
+  Header: {
+    fontSize: 15,
+    textAlign: 'center',
+    marginTop: 10
+  },
+  Video: {
+    paddingHorizontal: 15
+  }
+});
 
 export default AssignmentsDisplay;
