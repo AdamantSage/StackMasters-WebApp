@@ -98,39 +98,45 @@ exports.updateSubmissionStudent = (req, res) =>{
         });
 };
 //Function to grade submission
-exports.createFeedback = (req, res) =>{
-    console.log(req.body);// Log the data sent by the client
-    // Extract specific fields from the request body
-    const{
-        feed_id,
+// Function to grade submission
+exports.createFeedback = (req, res) => {
+    console.log(req.body); // Log the data sent by the client
+    const {
+        feed_id = null, // Default to null if not provided
         user_id,
         assignment_id,
+        sub_id, // Add sub_id here
         description,
-        grade
+        grade,
     } = req.body;
-    //Execute sql query to update submission
+
+    // Execute SQL query to insert/update submission
     Submission.createLectureFeedback(
-        {   feed_id,
+        {
+            feed_id,
             user_id,
             assignment_id,
+            sub_id, // Include sub_id in the object
             description,
-            grade
-        }, (err, results) => {
-            if(err){
-                console.log(err);// Log any errors
-                // Send a JSON response with error message and status code 500 which is a server error
-                return res.status(500).json({message: "Error occured while grading submission"});
-            }else if(results.affectedRows == 0){
-                // If no rows were affected, send a JSON response with status code 404 which means it could not find
-                //the given data in the server
-                return res.status(404).json({message: "Feedback could not be found"});
-            }else{
-                console.log(results);// Log the results of the query
-                // Send a JSON response with success message and status code 200 which means the request is successful
-                return res.status(200).json({message: "Feedback created"});
+            grade,
+        },
+        (err, results) => {
+            if (err) {
+                console.log('Database error:', err); // Log any errors
+                return res.status(500).json({ message: "Error occurred while grading submission" });
             }
-        });
+            console.log('Query results:', results); // Log the results of the query
+
+            // Check if the operation was successful
+            if (results.insertId) {
+                return res.status(200).json({ message: "Feedback created successfully", id: results.insertId });
+            } else {
+                return res.status(404).json({ message: "Feedback could not be created" });
+            }
+        }
+    );
 };
+
 
 //Deletes a specific submission based on the specific user
 exports.deleteSubmission = (req, res) =>{
