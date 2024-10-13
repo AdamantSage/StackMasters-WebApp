@@ -19,16 +19,21 @@ function LandingPage() {
             <li>
               <Link to="/login">Login</Link>
             </li>
-            
-            
+            <li>
+              <Link to="/watch-feedback/:id">Watch Video</Link>
+            </li>
+            <li>
+              <Link to="/list-videos">List Video</Link>
+            </li>
+            <li>
+              <Link to="/list-assignments">List Assignments</Link>
+            </li>
             <li>
               <Link to="/about">About Us</Link>
             </li>
-            
             <li>
               <Link to="/info">Info</Link>
             </li>
-            
           </ul>
         </div>
       </header>

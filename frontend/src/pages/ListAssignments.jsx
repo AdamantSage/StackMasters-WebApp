@@ -8,7 +8,7 @@ const ListAssignments = () => {
   const [visibleCount, setVisibleCount] = useState(3);
   const [showMore, setShowMore] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
-  const [moduleFilter, setModuleFilter] = useState('');
+  const [moduleFilter] = useState('');
   const [distinctModuleCodes, setDistinctModuleCodes] = useState([]);
 
   // Fetch assignments from API and extract distinct module codes

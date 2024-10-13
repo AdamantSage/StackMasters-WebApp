@@ -6,17 +6,23 @@ const VideoFeedback = () => {
   const { id } = useParams(); // id contains the video URL
   console.log('Received video URL:', id); // Log the video URL
 
-  const [mark, setMark] = useState('');
-  const [comment, setComment] = useState('');
+  // State variables for feedback
+  const [assignment_id, setAssignmentId] = useState(''); // Updated variable name
+  const [user_id, setUserId] = useState(''); // Updated variable name
+  const [sub_id, setSubId] = useState(''); // Updated variable name
+  const [grade, setGrade] = useState('');
+  const [description, setFeedbackDescription] = useState(''); // Updated variable name
 
   const handleSubmitFeedback = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const response = await axios.post('/api/marks/submit-feedback', {
-        videoUrl: id, // Use id here as videoUrl
-        mark,
-        comment,
+      const response = await axios.post('http://localhost:5000/submission/feedback', {
+        assignment_id, // Updated key name
+        user_id, // Updated key name
+        sub_id, // Updated key name
+        grade,
+        description, // Updated key name
       });
       alert(response.data.message);
     } catch (error) {
@@ -31,7 +37,7 @@ const VideoFeedback = () => {
         <div className="container">
           <h1 className="page-heading">Watch Video and Provide Feedback</h1>
           <ul className="linksList">
-           
+            {/* Other links can go here */}
           </ul>
         </div>
       </header>
@@ -50,24 +56,57 @@ const VideoFeedback = () => {
         {/* Feedback Form */}
         <form onSubmit={handleSubmitFeedback} className="feedback-form">
           <div className="form-group">
-            <label htmlFor="mark">Mark:</label>
+            <label htmlFor="assignment_id">Assignment ID:</label> {/* Updated id */}
             <input
-              type="number"
-              id="mark"
-              value={mark}
-              onChange={(e) => setMark(e.target.value)}
+              type="text"
+              id="assignment_id" // Updated id
+              value={assignment_id} // Updated state variable
+              onChange={(e) => setAssignmentId(e.target.value)}
               required
-              min="0"
-              max="100"
-              placeholder="Enter mark out of 100"
+              placeholder="Enter assignment ID"
             />
           </div>
           <div className="form-group">
-            <label htmlFor="comment">Commentary Feedback:</label>
+            <label htmlFor="user_id">User ID:</label> {/* Updated id */}
+            <input
+              type="text"
+              id="user_id" // Updated id
+              value={user_id} // Updated state variable
+              onChange={(e) => setUserId(e.target.value)}
+              required
+              placeholder="Enter user ID"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="sub_id">Submission ID:</label> {/* Updated id */}
+            <input
+              type="text"
+              id="sub_id" // Updated id
+              value={sub_id} // Updated state variable
+              onChange={(e) => setSubId(e.target.value)}
+              required
+              placeholder="Enter submission ID"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="grade">Grade:</label>
+            <input
+              type="number"
+              id="grade"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+              required
+              min="0"
+              max="100"
+              placeholder="Enter grade out of 100"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="description">Feedback Description:</label> {/* Updated label */}
             <textarea
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              id="description" // Updated id
+              value={description} // Updated state variable
+              onChange={(e) => setFeedbackDescription(e.target.value)}
               required
               placeholder="Enter your feedback here"
             ></textarea>
