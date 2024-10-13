@@ -1,29 +1,22 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import axios from 'axios'; // Import axios for API requests
+import { Link, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 const VideoFeedback = () => {
-  const [mark, setMark] = useState(''); // State for mark input
-  const [comment, setComment] = useState(''); // State for feedback comment
-
-  // Use location to access the passed video URL
-  const location = useLocation();
-  const videoUrl = location.state?.video?.videoUrl; // Get the video URL from the location state
-  const videoId = location.state?.video?.videoId; // Get the video ID from the location state
+  const { videoUrl } = useParams(); // Get videoUrl from URL parameters
+  const [mark, setMark] = useState('');
+  const [comment, setComment] = useState('');
 
   const handleSubmitFeedback = async (e) => {
     e.preventDefault();
-
+    
     try {
-      // Make an API request to submit feedback
       const response = await axios.post('/api/marks/submit-feedback', {
-        videoId, // video_id from the video
+        videoUrl, // Use videoUrl directly here
         mark,
         comment,
       });
-
-      // Handle the response from the backend
-      alert(response.data.message); // Display a success message
+      alert(response.data.message);
     } catch (error) {
       console.error('Error submitting feedback:', error);
       alert('Failed to submit feedback. Please try again.');
@@ -31,7 +24,7 @@ const VideoFeedback = () => {
   };
 
   return (
-    <div className="page"> 
+    <div className="page">
       <header>
         <div className="container">
           <h1 className="page-heading">Watch Video and Provide Feedback</h1>
@@ -46,7 +39,8 @@ const VideoFeedback = () => {
         {/* Video Player */}
         {videoUrl ? (
           <video width="640" height="360" controls autoPlay>
-            <source src={videoUrl} type="video/mp4" />
+            <source src={decodeURIComponent(videoUrl)} type="video/mp4"
+            onError={(e) => console.error('Video failed to load:', e)} />
             Your browser does not support the video tag.
           </video>
         ) : (

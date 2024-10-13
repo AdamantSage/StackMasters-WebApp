@@ -93,24 +93,22 @@ const ListVideos = () => {
             </TableHead>
             <TableBody>
               {filteredVideos.slice(0, visibleCount).map((video) => (
-                <TableRow key={video.videoUrl}>
+                <TableRow key={video.videoId}>
                   <TableCell>{video.assign_name}</TableCell>
                   <TableCell>{video.user_id}</TableCell>
                   <TableCell>{new Date(video.upload_date).toLocaleString()}</TableCell>
                   <TableCell>{video.assignment_id}</TableCell>
                   <TableCell>
                     <Link 
-                      to={{
-                        pathname: '/watch-feedback/:id', // Update the path to be static
-                        state: { video: { videoUrl: video.videoUrl } }, // Pass the video URL
-                      }}
+                      to={`/watch-feedback/${encodeURIComponent(video.videoUrl)}`} // Use encodeURIComponent for safety
+                      onClick={() => console.log(video.videoUrl)} // Log the video URL for debugging
                     >
                       Watch Video
                     </Link>
                   </TableCell>
                 </TableRow>
-                ))}
-              </TableBody>
+              ))}
+            </TableBody>
           </Table>
         </TableContainer>
 

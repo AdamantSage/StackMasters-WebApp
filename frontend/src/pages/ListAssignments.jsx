@@ -9,16 +9,18 @@ const ListAssignments = () => {
   const [showMore, setShowMore] = useState(false);
   const [selectedModule, setSelectedModule] = useState('');
   const [moduleFilter, setModuleFilter] = useState('');
+  const [distinctModuleCodes, setDistinctModuleCodes] = useState([]);
 
-  // Sample module codes for dropdown
-  const moduleCodes = ['CS101', 'CS102', 'CS103']; // Replace with actual module codes
-
-  // Fetch assignments from API
+  // Fetch assignments from API and extract distinct module codes
   const fetchAssignments = async () => {
     try {
       const response = await axios.get('http://localhost:5000/assignment');
-      console.log('API Response:', response.data); // Log API response
+      console.log('API Response:', response.data);
       setAssignments(response.data);
+
+      // Extract distinct module codes
+      const uniqueModules = [...new Set(response.data.map(assignment => assignment.module_code))];
+      setDistinctModuleCodes(uniqueModules);
     } catch (error) {
       console.error('Error fetching assignments:', error);
     }
@@ -31,12 +33,12 @@ const ListAssignments = () => {
   // Handle toggling show more / show less
   const toggleShowMore = () => {
     setShowMore(!showMore);
-    setVisibleCount(showMore ? 3 : assignments.length); // Show all if 'showMore' is true, else show first 3
+    setVisibleCount(showMore ? 3 : assignments.length);
   };
 
-  // Filter assignments based on module filter
+  // Filter assignments based on selected module and module filter
   const filteredAssignments = assignments.filter(assignment =>
-    (selectedModule ? assignment.module_code === selectedModule : true) && // Filter by selected module
+    (selectedModule ? assignment.module_code === selectedModule : true) &&
     (moduleFilter ? assignment.module_code.toLowerCase().includes(moduleFilter.toLowerCase()) : true)
   );
 
@@ -68,13 +70,14 @@ const ListAssignments = () => {
             onChange={(e) => setSelectedModule(e.target.value)}
           >
             <option value="">All Modules</option>
-            {moduleCodes.map((module, index) => (
+            {distinctModuleCodes.map((module, index) => (
               <option key={index} value={module}>
                 {module}
               </option>
             ))}
           </select>
         </div>
+
         {/* List of Assignments */}
         <TableContainer component={Paper} className="fixed-table-container">
           <Table stickyHeader>
@@ -89,10 +92,10 @@ const ListAssignments = () => {
             <TableBody>
               {filteredAssignments.slice(0, visibleCount).map(assignment => (
                 <TableRow key={assignment.assignment_id}>
-                  <TableCell>{assignment.assign_name}</TableCell> {/* Update to assign_name */}
-                  <TableCell>{assignment.user_id}</TableCell> {/* This might need adjustment based on how you want to display the user's name */}
-                  <TableCell>{new Date(assignment.upload_date).toLocaleString()}</TableCell> {/* Format date as needed */}
-                  <TableCell>{assignment.module_code}</TableCell> {/* Update to module_code */}
+                  <TableCell>{assignment.assign_name}</TableCell>
+                  <TableCell>{assignment.user_id}</TableCell>
+                  <TableCell>{new Date(assignment.upload_date).toLocaleString()}</TableCell>
+                  <TableCell>{assignment.module_code}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
