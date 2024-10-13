@@ -48,15 +48,8 @@ const ListAssignments = () => {
         <div className="container">
           <h1 className="page-heading">List of Assignments</h1>
           <ul className="linksList">
-            <li>
-              <Link to="/" className="link">Landing Page</Link>
-            </li>
-            <li>
-              <Link to="/user-admin" className="link">User Administration</Link>
-            </li>
-            <li>
-              <Link to="/create-assignment" className="link">Create Assignment</Link>
-            </li>
+            
+            
           </ul>
         </div>
       </header>

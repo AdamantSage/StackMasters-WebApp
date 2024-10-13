@@ -4,6 +4,7 @@ import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
 import VideoFeedback from './VideoFeedback';
 import CreateAssignment from './CreateAssignment';
+import ExportMarks from './exportMarks';
 import { LecturerDashboard } from './Dashboard'; 
 
 const LecturerPage = () => {
@@ -26,6 +27,10 @@ const LecturerPage = () => {
                 return <VideoFeedback videoId={selectedVideoId} />;
             case 'create-assignment':
                 return <CreateAssignment />;
+                case 'export-marks':
+                    return <ExportMarks/>;
+                
+
                 case 'settings':
                     return (
                         <section className="settings">
@@ -47,11 +52,12 @@ const LecturerPage = () => {
                 </div>
                 <nav className='nav-menu'>
                     <ul>
-                        <li><button onClick={() => setActiveSection('dashboard')}>LecturerDashboard</button></li>
+                        <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
                         <li><button onClick={() => setActiveSection('create-assignment')}>Create Assignment</button></li>
                         <li><button onClick={() => setActiveSection('watch-feedback')}>Video Feedback</button></li>
+                        <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
                         <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
                     </ul>
                 </nav>

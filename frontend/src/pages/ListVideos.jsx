@@ -46,12 +46,7 @@ const ListVideos = () => {
         <div className="container">
           <h1 className="page-heading">List of Video Submissions</h1>
           <ul className="linksList">
-            <li>
-              <Link to="/" className="link">Landing Page</Link>
-            </li>
-            <li>
-              <Link to="/watch-feedback/:id" className="link">Watch Video</Link>
-            </li>
+            
           </ul>
         </div>
       </header>
