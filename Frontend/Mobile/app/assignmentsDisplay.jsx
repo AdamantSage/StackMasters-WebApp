@@ -64,7 +64,31 @@ const AssignmentsDisplay = () => {
   if (!assignment) {
     return <Text style={styles.loadingText}>No assignment found.</Text>;
   }
+  // 1. Choose Video
+  const chooseVideo = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+          type: 'video/*',
+          multiple: false,
+      });
 
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+          const selectedVideo = result.assets[0];
+          const videoUri = selectedVideo.uri;
+          const videoType = selectedVideo.mime;
+          const videoName = selectedVideo.name;
+
+          setVideoUri(videoUri);
+          setVideoType(videoType);
+          setVideoName(videoName);
+      }
+    } catch (error) {
+      console.error('Error picking video:', error);
+      Alert.alert('Error picking video');
+    }
+  };
+
+  // 2. Compress Video
   const compressVideo = async (uri) => {
     const formData = new FormData();
     formData.append('video', {
@@ -75,12 +99,12 @@ const AssignmentsDisplay = () => {
 
     try {
       const response = await fetch(compressVideoApi, {
-        method: 'POST',
-        body: formData,
+          method: 'POST',
+          body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to compress video');
+          throw new Error('Failed to compress video');
       }
 
       const compressedVideoResponse = await response.json();
@@ -92,9 +116,11 @@ const AssignmentsDisplay = () => {
     }
   };
 
+  // 3. Upload Video
   const uploadVideo = async () => {
     if (!videoUri) return null;
 
+    // Compress the video before upload
     const compressedVideoUrl = await compressVideo(videoUri);
     if (!compressedVideoUrl) return null;
 
@@ -107,15 +133,16 @@ const AssignmentsDisplay = () => {
 
     try {
       const response = await fetch(uploadVideoApi, {
-        method: 'POST',
-        body: formData,
+          method: 'POST',
+          body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload video');
+          throw new Error('Failed to upload video');
       }
 
       const uploadResponse = await response.json();
+      Alert.alert('Video uploaded successfully');
       return uploadResponse;
     } catch (error) {
       console.error('Error uploading video:', error);
@@ -126,6 +153,9 @@ const AssignmentsDisplay = () => {
 
   const handleSubmit = async () => {
     try {
+      const uploadResponse = await uploadVideo();
+      if (!uploadResponse) return;
+      
       const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const submissionData = {
         sub_date: formattedDate,
