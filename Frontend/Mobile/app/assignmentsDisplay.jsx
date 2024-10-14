@@ -20,7 +20,7 @@ const AssignmentsDisplay = () => {
   const [cameraRef, setCameraRef] = useState(null);
 
   const uploadVideoApi = 'http://192.168.58.188:5000/routes/uploads';
-  const compressVideoApi = 'http://192.168.58.188:5000/routes/compress-video';
+  const compressVideoApi = 'http://192.168.58.188:5000/routes/test-compress';
   const createSubmissionApi = 'http://192.168.58.188:5000/submission';
   const createUserSubmission = 'http://192.168.58.188:5000/userSubmission';
 
@@ -40,7 +40,7 @@ const AssignmentsDisplay = () => {
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.58.188:5000/assignments/${assignmentId},${userId}`);
+        const response = await fetch(`http://192.168.58.188:5000/assignment/${assignmentId},${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
@@ -126,8 +126,6 @@ const AssignmentsDisplay = () => {
 
   const handleSubmit = async () => {
     try {
-      // Hardcode userId to 1 for testing
-      const hardcodedUserId = 1;
       //const uploadResponse = await uploadVideo();
       //if (!uploadResponse) return;
       
@@ -154,7 +152,6 @@ const AssignmentsDisplay = () => {
       console.log("Submission Result:", submissionResult);
       const submissionId = submissionResult.sub_id;
   
-      // Use hardcoded userId
       const userOnSubmissionData = {
         user_id: userId,
         sub_id: submissionId,
