@@ -64,23 +64,23 @@ const AssignmentsDisplay = () => {
   if (!assignment) {
     return <Text>No assignment found.</Text>;
   }
-  // 1. Choose Video
+
   const chooseVideo = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-          type: 'video/*',
-          multiple: false,
+        type: 'video/*',
+        multiple: false,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-          const selectedVideo = result.assets[0];
-          const videoUri = selectedVideo.uri;
-          const videoType = selectedVideo.mime;
-          const videoName = selectedVideo.name;
+        const selectedVideo = result.assets[0];
+        const videoUri = selectedVideo.uri;
+        const videoType = selectedVideo.mime;
+        const videoName = selectedVideo.name;
 
-          setVideoUri(videoUri);
-          setVideoType(videoType);
-          setVideoName(videoName);
+        setVideoUri(videoUri);
+        setVideoType(videoType);
+        setVideoName(videoName);
       }
     } catch (error) {
       console.error('Error picking video:', error);
@@ -99,12 +99,12 @@ const AssignmentsDisplay = () => {
 
     try {
       const response = await fetch(compressVideoApi, {
-          method: 'POST',
-          body: formData,
+        method: 'POST',
+        body: formData,
       });
 
       if (!response.ok) {
-          throw new Error('Failed to compress video');
+        throw new Error('Failed to compress video');
       }
 
       const compressedVideoResponse = await response.json();
@@ -117,32 +117,27 @@ const AssignmentsDisplay = () => {
   };
 
   // 3. Upload Video
-  const uploadVideo = async () => {
-    if (!videoUri) return null;
-
-    // Compress the video before upload
-    const compressedVideoUrl = await compressVideo(videoUri);
-    if (!compressedVideoUrl) return null;
-
+  const uploadVideo = async (uri) => {
     const formData = new FormData();
     formData.append('video', {
-      uri: compressedVideoUrl,
+      uri: uri,
       type: videoType,
       name: videoName,
     });
 
+    console.log('Uploading video with FormData:', formData);
+
     try {
       const response = await fetch(uploadVideoApi, {
-          method: 'POST',
-          body: formData,
+        method: 'POST',
+        body: formData,
       });
 
       if (!response.ok) {
-          throw new Error('Failed to upload video');
+        throw new Error('Failed to upload video');
       }
 
       const uploadResponse = await response.json();
-      Alert.alert('Video uploaded successfully');
       return uploadResponse;
     } catch (error) {
       console.error('Error uploading video:', error);
@@ -153,55 +148,57 @@ const AssignmentsDisplay = () => {
 
   const handleSubmit = async () => {
     try {
-      const uploadResponse = await uploadVideo();
-      if (!uploadResponse) return;
-      
       const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const submissionData = {
         sub_date: formattedDate,
-        assignment_id: assignmentId
+        assignment_id: assignmentId,
       };
-  
-      console.log("Creating submission with data:", submissionData);
-      const createSubmissionResponse = await fetch(createSubmissionApi, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submissionData),
-      });
-  
-      if (!createSubmissionResponse.ok) {
-        throw new Error('Failed to create submission');
-      }
-  
-      const submissionResult = await createSubmissionResponse.json();
-      console.log("Submission Result:", submissionResult);
-      const submissionId = submissionResult.sub_id;
-  
-      const userOnSubmissionData = {
-        user_id: userId,
-        sub_id: submissionId,
-      };
-  
-      console.log("Creating user submission with data:", userOnSubmissionData);
-      const userSubmissionResponse = await fetch(createUserSubmission, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userOnSubmissionData),
-      });
-  
-      // Now check the status and log the response
-      console.log('User Submission Response Status:', userSubmissionResponse.status);
-      const userResponseText = await userSubmissionResponse.text(); // Read the response as text
-      console.log('User Submission Response Text:', userResponseText);
-  
-      if (!userSubmissionResponse.ok) {
-        throw new Error('Failed to create user submission');
-      }
-  
+
+    console.log("Creating submission with data:", submissionData);
+    const createSubmissionResponse = await fetch(createSubmissionApi, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(submissionData),
+    });
+
+    if (!createSubmissionResponse.ok) {
+      throw new Error('Failed to create submission');
+    }
+
+    const submissionResult = await createSubmissionResponse.json();
+    console.log("Submission Result:", submissionResult);
+    const submissionId = submissionResult.sub_id;
+
+    const userOnSubmissionData = {
+      user_id: userId,
+      sub_id: submissionId,
+    };
+
+    console.log("Creating user submission with data:", userOnSubmissionData);
+    const userSubmissionResponse = await fetch(createUserSubmission, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userOnSubmissionData),
+    });
+
+    if (!userSubmissionResponse.ok) {
+      throw new Error('Failed to create user submission');
+    }
+
+    // Now upload the video after user submission is created
+    const uploadResponse = await uploadVideo(videoUri);
+    if (!uploadResponse) return;
+
+    // Then compress the video after upload
+    const compressedVideoUrl = await compressVideo(videoUri);
+    if (compressedVideoUrl) {
+      setCompressedVideoUrl(compressedVideoUrl); // Store the compressed video URL if needed
+    }
+
       Alert.alert('Submission successful!');
     } catch (error) {
       console.error('Error during submission process:', error);
