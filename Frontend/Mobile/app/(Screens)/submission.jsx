@@ -13,11 +13,12 @@ const Submission = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [feedbackData, setFeedbackData] = useState({ feedback: [], grade: null });
+  const [loadingFeedback, setLoadingFeedback] = useState(false); // New state for loading feedback
 
   useEffect(() => {
     const fetchUserIdAndSubmissions = async () => {
       try {
-        const id = await getUserId();
+        const id = await getUserId(); // Replace with your user ID fetching logic
         if (id) {
           setUserId(id);
           await fetchSubmissions(id);
@@ -36,7 +37,7 @@ const Submission = () => {
   const fetchSubmissions = async (userId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await axios.get(`http://192.168.49.219:5000/submissions?userId=${userId}`, {
+      const response = await axios.get(`http://192.168.58.188:5000/submissions?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSubmissions(response.data);
@@ -48,34 +49,56 @@ const Submission = () => {
     }
   };
 
-  const fetchFeedbacks = async (userId, subId) => {
+  const fetchFeedbacks = async (subId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await axios.get(`http://192.168.49.219:5000/feedback/${subId}`, {
+      const response = await axios.get(`http://192.168.58.188:5000/feedback/${subId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.data && response.data.feedback) {
-        const feedback = response.data.feedback;
-        const grades = feedback.map(fb => fb.grade).filter(grade => grade != null);
-        const grade = grades.length > 0 ? grades[0] : null;
-
+  
+      // Log the response to see its structure
+      console.log('Feedback response:', response.data);
+  
+      if (response.data) {
+        // Access feedback from the response data
+        const feedback = response.data.feedback; // Accessing feedback array
+  
+        // Ensure feedback is an array before proceeding
+        if (Array.isArray(feedback) && feedback.length > 0) {
+          // Get the first feedback item
+          const firstFeedback = feedback[0];
+          
+          // Extract grade
+          const grade = firstFeedback.grade !== null ? firstFeedback.grade : null;
+  
+          // Set feedback state (only first feedback)
+          setFeedbacks(prevFeedbacks => ({
+            ...prevFeedbacks,
+            [subId]: [firstFeedback], // Store only the first feedback
+          }));
+  
+          // Assuming submissionData is available here
+          setSelectedSubmission({ ...submissionData, feedback: firstFeedback, grade });
+        } else {
+          Alert.alert('Error', 'No feedback available.');
+          console.error('Expected feedback array but got:', feedback);
+        }
+      } else {
+        Alert.alert('Notice', 'No feedback available for this submission.');
         setFeedbacks(prevFeedbacks => ({
           ...prevFeedbacks,
-          [subId]: feedback,
+          [subId]: [],
         }));
-
-        setFeedbackData({ feedback, grade });
-      } else {
-        // Handle case where feedback data is empty
-        Alert.alert('Notice', 'No feedback available for this submission.');
-        setFeedbackData({ feedback: [], grade: null });
       }
     } catch (error) {
-      console.error('Error fetching feedbacks:', error);
-      Alert.alert('Error', 'Failed to fetch feedbacks. Please try again later.');
+      console.error('Error fetching feedbacks:', error.response?.data || error.message);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to fetch feedbacks. Please try again later.');
     }
   };
+  
+  
+  
+  
 
   const handleShowSubmissions = () => {
     setShowSubmissions(prev => !prev);
@@ -86,7 +109,7 @@ const Submission = () => {
     const { sub_id } = submission;
 
     if (!feedbacks[sub_id]) {
-      await fetchFeedbacks(userId, sub_id);
+      await fetchFeedbacks(sub_id);
     } else {
       const selectedFeedback = feedbacks[sub_id] || [];
       const grades = selectedFeedback.map(fb => fb.grade).filter(grade => grade != null);
@@ -141,15 +164,21 @@ const Submission = () => {
                 <Text style={styles.submissionText}>
                   Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
                 </Text>
-                {feedbackForSubmission.length > 0 ? feedbackForSubmission.map((feedback, index) => {
-                  const grade = feedback.grade != null ? Number(feedback.grade) : 'N/A';
-                  const key = feedback.feed_id ? feedback.feed_id : `fallback-${index}`;
-                  return (
-                    <Text key={`${key}-${item.sub_id}`} style={styles.feedbackText}>
-                      Feedback: {feedback.description} - Grade: {typeof grade === 'number' ? grade.toFixed(2) : grade}
-                    </Text>
-                  );
-                }) : <Text>No feedback available.</Text>}
+                {loadingFeedback ? (
+                  <Text>Loading feedback...</Text> // Show loading text while feedback is being fetched
+                ) : feedbackForSubmission.length > 0 ? (
+                  feedbackForSubmission.map((feedback, index) => {
+                    const grade = feedback.grade != null ? Number(feedback.grade) : 'N/A';
+                    const key = feedback.feed_id ? feedback.feed_id : `fallback-${index}`;
+                    return (
+                      <Text key={`${key}-${item.sub_id}`} style={styles.feedbackText}>
+                        Feedback: {feedback.description} - Grade: {typeof grade === 'number' ? grade.toFixed(2) : grade}
+                      </Text>
+                    );
+                  })
+                ) : (
+                  <Text>No feedback available.</Text> // Show message if no feedback
+                )}
               </TouchableOpacity>
             );
           }}
