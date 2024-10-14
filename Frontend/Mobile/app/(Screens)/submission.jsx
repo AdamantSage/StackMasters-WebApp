@@ -1,265 +1,214 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, Alert, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Ensure you import AsyncStorage
+import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getUserId } from '../utils';
+import FeedbackDisplay from '../comp/FeedbackDisplay';
 
-const submission = () => {
-  const [sub_id, setSubId] = useState('');
-  const [sub_date, setSubDate] = useState('');
-  const [assignment_id, setAssignmentId] = useState('');
-  const [user_id, setUserId] = useState('');
+const Submission = () => {
   const [submissions, setSubmissions] = useState([]);
-  const [feed_id, setFeedId] = useState('');
-  const [grade, setGrade] = useState('');
-  const [description, setDescription] = useState('');
-  const [videoId, setVideoId] = useState(''); // For video streaming and downloading
+  const [feedbacks, setFeedbacks] = useState({});
+  const [showSubmissions, setShowSubmissions] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
+  const [feedbackData, setFeedbackData] = useState({ feedback: [], grade: null });
 
-  // Fetch all submissions on component mount
   useEffect(() => {
-    fetchSubmissions();
+    const fetchUserIdAndSubmissions = async () => {
+      try {
+        const id = await getUserId();
+        if (id) {
+          setUserId(id);
+          await fetchSubmissions(id);
+        } else {
+          Alert.alert('Error', 'User ID is missing. Please log in again.');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+        Alert.alert('Error', 'Failed to fetch user ID.');
+      }
+    };
+
+    fetchUserIdAndSubmissions();
   }, []);
 
-  const fetchSubmissions = async () => {
-    try {
-      const response = await fetch('https://your-backend-url.com/submissions'); // Adjust the URL
-      const data = await response.json();
-      if (response.ok) {
-        setSubmissions(data);
-      } else {
-        Alert.alert('Error', 'Failed to fetch submissions');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to fetch submissions, please try again');
-    }
-  };
-
-  const handleCreateSubmission = async () => {
+  const fetchSubmissions = async (userId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch('https://your-backend-url.com/submissions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ sub_id, sub_date, assignment_id }),
+      const response = await axios.get(`http://192.168.49.219:5000/submissions?userId=${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', 'Submission created successfully');
-        fetchSubmissions(); // Refresh the submissions list
-      } else {
-        Alert.alert('Error', data.message || 'Failed to create submission');
-      }
+      setSubmissions(response.data);
     } catch (error) {
-      Alert.alert('Error', 'Unable to create submission, please try again');
+      console.error('Error fetching submissions:', error);
+      Alert.alert('Error', 'Failed to fetch submissions. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleUpdateSubmission = async (id) => {
+  const fetchFeedbacks = async (userId, subId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch(`https://your-backend-url.com/submissions/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ sub_date }),
+      const response = await axios.get(`http://192.168.49.219:5000/feedback/${subId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', 'Submission updated successfully');
-        fetchSubmissions(); // Refresh the submissions list
+
+      if (response.data && response.data.feedback) {
+        const feedback = response.data.feedback;
+        const grades = feedback.map(fb => fb.grade).filter(grade => grade != null);
+        const grade = grades.length > 0 ? grades[0] : null;
+
+        setFeedbacks(prevFeedbacks => ({
+          ...prevFeedbacks,
+          [subId]: feedback,
+        }));
+
+        setFeedbackData({ feedback, grade });
       } else {
-        Alert.alert('Error', data.message || 'Failed to update submission');
+        // Handle case where feedback data is empty
+        Alert.alert('Notice', 'No feedback available for this submission.');
+        setFeedbackData({ feedback: [], grade: null });
       }
     } catch (error) {
-      Alert.alert('Error', 'Unable to update submission, please try again');
+      console.error('Error fetching feedbacks:', error);
+      Alert.alert('Error', 'Failed to fetch feedbacks. Please try again later.');
     }
   };
 
-  const handleDeleteSubmission = async (id) => {
-    Alert.alert('Confirm Deletion', 'Are you sure you want to delete this submission?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        onPress: async () => {
-          try {
-            const token = await AsyncStorage.getItem('jwt');
-            const response = await fetch(`https://your-backend-url.com/submissions/${id}`, {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            if (response.ok) {
-              Alert.alert('Success', 'Submission deleted successfully');
-              fetchSubmissions(); // Refresh the submissions list
-            } else {
-              Alert.alert('Error', 'Failed to delete submission');
-            }
-          } catch (error) {
-            Alert.alert('Error', 'Unable to delete submission, please try again');
-          }
-        },
-      },
-    ]);
+  const handleShowSubmissions = () => {
+    setShowSubmissions(prev => !prev);
   };
 
-  const handleViewFeedback = async (id) => {
-    try {
-      const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch(`https://your-backend-url.com/feedback/${id}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Feedback', data.feedback || 'No feedback available');
-      } else {
-        Alert.alert('Error', data.message || 'Failed to fetch feedback');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to fetch feedback, please try again');
-    }
-  };
+  const handleSubmissionSelect = async (submission) => {
+    setSelectedSubmission(submission);
+    const { sub_id } = submission;
 
-  const handleStreamVideo = async (id) => {
-    // Placeholder URL, replace with your video stream URL logic
-    const videoUrl = `https://your-backend-url.com/videos/stream/${id}`;
-    // Open the video stream in a browser or video player
-    Alert.alert('Streaming Video', `Video will stream from: ${videoUrl}`);
-    // Implement video streaming logic, e.g., using React Native Video player
-  };
-
-  const handleDownloadVideo = async (id) => {
-    // Placeholder URL, replace with your video download URL logic
-    const videoUrl = `https://your-backend-url.com/videos/download/${id}`;
-    const response = await fetch(videoUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `submission_${id}.mp4`; // Assuming video format is mp4
-      a.click();
-      Alert.alert('Success', 'Video downloading...');
+    if (!feedbacks[sub_id]) {
+      await fetchFeedbacks(userId, sub_id);
     } else {
-      Alert.alert('Error', 'Failed to download video');
+      const selectedFeedback = feedbacks[sub_id] || [];
+      const grades = selectedFeedback.map(fb => fb.grade).filter(grade => grade != null);
+      const selectedGrade = grades.length > 0 ? grades[0] : null;
+      setFeedbackData({ feedback: selectedFeedback, grade: selectedGrade });
     }
   };
 
-  const handleCreateFeedback = async () => {
-    try {
-      const token = await AsyncStorage.getItem('jwt');
-      const response = await fetch('https://your-backend-url.com/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ feed_id, user_id, assignment_id, description, grade }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Alert.alert('Success', 'Feedback created successfully');
-      } else {
-        Alert.alert('Error', data.message || 'Failed to create feedback');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Unable to create feedback, please try again');
-    }
+  const handleBack = () => {
+    setSelectedSubmission(null);
+    setFeedbackData({ feedback: [], grade: null });
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (selectedSubmission) {
+    return (
+      <FeedbackDisplay
+        submission={selectedSubmission}
+        feedback={feedbackData.feedback}
+        grade={feedbackData.grade}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  if (submissions.length === 0) {
+    return <Text>No submissions available.</Text>;
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Submission Management</Text>
+      <Text style={styles.title}>View Submissions and Feedback</Text>
+      <TouchableOpacity style={styles.showButton} onPress={handleShowSubmissions}>
+        <Text style={styles.buttonText}>Show Submissions</Text>
+      </TouchableOpacity>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Submission ID"
-        value={sub_id}
-        onChangeText={setSubId}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Submission Date"
-        value={sub_date}
-        onChangeText={setSubDate}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Assignment ID"
-        value={assignment_id}
-        onChangeText={setAssignmentId}
-      />
-      <Button title="Create Submission" onPress={handleCreateSubmission} />
-
-      <FlatList
-        data={submissions}
-        keyExtractor={(item) => item.sub_id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.submissionItem}>
-            <Text>ID: {item.sub_id}</Text>
-            <Text>Date: {item.sub_date}</Text>
-            <Text>Assignment ID: {item.assignment_id}</Text>
-            <Button title="Update" onPress={() => handleUpdateSubmission(item.sub_id)} />
-            <Button title="Delete" onPress={() => handleDeleteSubmission(item.sub_id)} />
-            <Button title="View Feedback" onPress={() => handleViewFeedback(item.sub_id)} />
-            <Button title="Stream Video" onPress={() => handleStreamVideo(item.sub_id)} />
-            <Button title="Download Video" onPress={() => handleDownloadVideo(item.sub_id)} />
-          </View>
-        )}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Feedback ID"
-        value={feed_id}
-        onChangeText={setFeedId}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Grade"
-        value={grade}
-        onChangeText={setGrade}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <Button title="Create Feedback" onPress={handleCreateFeedback} />
+      {showSubmissions && (
+        <FlatList
+          data={submissions}
+          keyExtractor={(item) => item.sub_id.toString()}
+          renderItem={({ item }) => {
+            const feedbackForSubmission = feedbacks[item.sub_id] || [];
+            return (
+              <TouchableOpacity onPress={() => handleSubmissionSelect(item)} style={styles.submissionContainer}>
+                <Text style={styles.submissionText}>
+                  Submission ID: {item.sub_id} - Date: {new Date(item.sub_date).toLocaleDateString()}
+                </Text>
+                {feedbackForSubmission.length > 0 ? feedbackForSubmission.map((feedback, index) => {
+                  const grade = feedback.grade != null ? Number(feedback.grade) : 'N/A';
+                  const key = feedback.feed_id ? feedback.feed_id : `fallback-${index}`;
+                  return (
+                    <Text key={`${key}-${item.sub_id}`} style={styles.feedbackText}>
+                      Feedback: {feedback.description} - Grade: {typeof grade === 'number' ? grade.toFixed(2) : grade}
+                    </Text>
+                  );
+                }) : <Text>No feedback available.</Text>}
+              </TouchableOpacity>
+            );
+          }}
+          showsVerticalScrollIndicator={true}
+          scrollIndicatorInsets={{ right: 1 }}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
+    backgroundColor: '#afdde5',
   },
-  header: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#003135',
     marginBottom: 20,
+    textAlign: 'center',
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 8,
+  showButton: {
+    backgroundColor: '#0fa4af',
+    padding: 12,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  submissionItem: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius
-    : 5,
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  submissionContainer: {
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: '#024950',
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  submissionText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  feedbackText: {
+    fontSize: 14,
+    color: 'white',
   },
 });
 
-export default submission;
+export default Submission;

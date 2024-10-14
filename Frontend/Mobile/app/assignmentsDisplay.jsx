@@ -19,10 +19,10 @@ const AssignmentsDisplay = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [cameraRef, setCameraRef] = useState(null);
 
-  const uploadVideoApi = 'http://192.168.0.23:5000/routes/uploads';
-  const compressVideoApi = 'http://192.168.0.23:5000/routes/compress-video';
-  const createSubmissionApi = 'http://192.168.0.23:5000/submission';
-  const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
+  const uploadVideoApi = 'http://192.168.58.188:5000/routes/uploads';
+  const compressVideoApi = 'http://192.168.58.188:5000/routes/compress-video';
+  const createSubmissionApi = 'http://192.168.58.188:5000/submission';
+  const createUserSubmission = 'http://192.168.58.188:5000/userSubmission';
 
   /*useEffect(() => {
     const fetchUserId = async () => {
@@ -40,7 +40,7 @@ const AssignmentsDisplay = () => {
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.0.23:5000/assignments/${assignmentId}`);
+        const response = await fetch(`http://192.168.58.188:5000/assignments/${assignmentId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }

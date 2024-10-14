@@ -8,7 +8,7 @@ const ExportMarks = () => {
   const handleExport = async () => {
     setLoading(true); // Show loading spinner
     try {
-      const response = await fetch('http://localhost:5000/exportMarks', {
+      const response = await fetch('http://192.168.58.188:5000/exportMarks', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

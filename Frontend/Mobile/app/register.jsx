@@ -22,7 +22,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.0.23:5000/users/create/', {
+      const response = await fetch('http://192.168.58.188:5000/users/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

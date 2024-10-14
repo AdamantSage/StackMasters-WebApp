@@ -13,7 +13,7 @@ const Assignments = () => {
   const { setAssignmentId } = useAssignmentContext();
 
   useEffect(() => {
-    fetch('http://192.168.0.23:5000/module').then(response => response.json()).then((data) => {
+    fetch('http://192.168.58.188:5000/module').then(response => response.json()).then((data) => {
       const FormatedModule = data.map(module => ({
         label: module.module_code,
         value: module.module_code
@@ -26,7 +26,7 @@ const Assignments = () => {
 
   useEffect(() => {
     if(selectedModule){
-      fetch(`http://192.168.0.23:5000/assignment/${selectedModule}`).then(response => response.json()).then((data) =>{
+      fetch(`http://192.168.58.188:5000/assignment/${selectedModule}`).then(response => response.json()).then((data) =>{
         console.log('Fetched assignments:', data);
         setAssignments(data);
       }).catch((error) => {
