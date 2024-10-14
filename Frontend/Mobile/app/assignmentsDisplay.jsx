@@ -24,7 +24,7 @@ const AssignmentsDisplay = () => {
   const createSubmissionApi = 'http://192.168.58.188:5000/submission';
   const createUserSubmission = 'http://192.168.58.188:5000/userSubmission';
 
-  /*useEffect(() => {
+  useEffect(() => {
     const fetchUserId = async () => {
       const id = await getUserId();
       if (id) {
@@ -35,12 +35,12 @@ const AssignmentsDisplay = () => {
     };
     
     fetchUserId();
-  }, []);*/
+  }, [userId]);
 
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.58.188:5000/assignments/${assignmentId}`);
+        const response = await fetch(`http://192.168.58.188:5000/assignments/${assignmentId},${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
@@ -156,7 +156,7 @@ const AssignmentsDisplay = () => {
   
       // Use hardcoded userId
       const userOnSubmissionData = {
-        user_id: hardcodedUserId,
+        user_id: userId,
         sub_id: submissionId,
       };
   
