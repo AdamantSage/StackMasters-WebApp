@@ -6,7 +6,6 @@ exports.createAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {
-        assignment_id,
         module_code,
         assign_name,
         upload_date,
@@ -16,7 +15,6 @@ exports.createAssignment = (req, res) => {
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.create({
-        assignment_id,
         module_code,
         assign_name,
         upload_date,
@@ -31,7 +29,7 @@ exports.createAssignment = (req, res) => {
         } else {
             console.log(results); // Log the results of the query
             // Send a JSON response with success message and status code 201 which means it create the assignment
-            return res.status(201).json({ message: "Assignment created successfully." });
+            return res.status(201).json({ message: "Assignment created successfully." , assignment_id: results.assignment_id});
         }
     });
 };

@@ -3,10 +3,15 @@ const db = require('../config/database'); // Assuming you have a db connection f
 class Submission{
     static create(submissionData, callback){
         db.query('INSERT INTO submission SET ?',{
-            sub_id: submissionData.sub_id,
             sub_date: submissionData.sub_date,
             assignment_id: submissionData.assignment_id,
-        }, callback);
+        },  (err, results) => {
+            if(err){
+                console.log(err);
+                return callback(err);
+            }
+            return callback(null, {sub_id: results.insertId })
+    });
     }
 
     static createUserSubmission(submissionData, callback){
@@ -39,7 +44,6 @@ class Submission{
     static createLectureFeedback(feedbackData, callback){
         db.query('INSERT INTO feedback SET ?',
             {
-                feed_id: feedbackData.feed_id,
                 user_id: feedbackData.user_id,
                 assignment_id: feedbackData.assignment_id,
                 description: feedbackData.description,
