@@ -77,13 +77,15 @@ class Submission{
      static selectVideoSubmissions(callback) {
         const query = `
             SELECT 
-                a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
+                s.sub_id, a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
             FROM 
                 videos v
             JOIN 
                 users u ON v.user_id = u.user_id
             JOIN 
-                assignment a ON a.user_id = u.user_id;`;
+                assignment a ON a.user_id = u.user_id
+            JOIN 
+                submission s ON s.assignment_id= a.assignment_id;`;
           
         db.query(query, callback);
     }
