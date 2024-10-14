@@ -1,6 +1,6 @@
 // layout.jsx
 import { Stack } from "expo-router";
-import { AssignmentProvider } from '@/components/assignmentContext'
+import { AssignmentProvider } from '@/components/assignmentContext';
 
 export default function RootLayout() {
   return (

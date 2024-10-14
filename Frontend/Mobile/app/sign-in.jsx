@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setUserId } from './utils';
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
@@ -12,7 +11,6 @@ const SignIn = () => {
     const [registerLoading, setRegisterLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
-    const { setUserId } = useUser(); // Get setUserId from UserContext
 
     const handleSignIn = async () => {
         if (!email || !password) {
