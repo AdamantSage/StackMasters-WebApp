@@ -48,23 +48,21 @@ exports.createUserSubmission = (req, res) =>{
         }
     });
 };
-// Retrieve a specific submission based on ID for user and submission
-exports.getSubmission = (req, res) =>{
-    const {sub_id} = req.params; // Retrieve the submission ID and user ID from the URL
-    console.log(`Fetching submission with ID: ${sub_id}, ${user_id}`);
-    // Execute the SQL query to fetch the submission with the given ID's
+exports.getSubmission = (req, res) => {
+    const { sub_id } = req.params; // Retrieve the submission ID from the URL
+    console.log(`Fetching submission with ID: ${sub_id}`); // Log the submission ID
+
+    // Execute the SQL query to fetch the submission with the given ID
     Submission.selectSubmission(sub_id, (err, results) => {
-        if(err){
+        if (err) {
             console.log(err); // Log any errors
-            // Send a JSON response with error message and status code 500 which is a server error
-            return res.status(500).json({ message: "Error occurred while fetching submission."});
-        }else if(results.length === 0) {
-            // If no submission is found, send a JSON response with status code 404 which means it could not find
-            //the given data in the server
+            return res.status(500).json({ message: "Error occurred while fetching submission." });
+        } else if (results.length === 0) {
+            // If no submission is found, send a JSON response with status code 404
             return res.status(404).json({ message: "Submission not found." });
-        }else{
-            console.log(results);// Log the results of the query
-            // Sends the submission data as JSON with status code 200 which means the request is successful
+        } else {
+            console.log(results); // Log the results of the query
+            // Send the submission data as JSON with status code 200
             return res.status(200).json(results[0]);
         }
     });
@@ -96,38 +94,45 @@ exports.updateSubmissionStudent = (req, res) =>{
         });
 };
 //Function to grade submission
-exports.createFeedback = (req, res) =>{
-    console.log(req.body);// Log the data sent by the client
-    // Extract specific fields from the request body
-    const{
+// Function to grade submission
+exports.createFeedback = (req, res) => {
+    console.log(req.body); // Log the data sent by the client
+    const {
+        feed_id = null, // Default to null if not provided
         user_id,
         assignment_id,
+        sub_id, // Add sub_id here
         description,
-        grade
+        grade,
     } = req.body;
-    //Execute sql query to update submission
+
+    // Execute SQL query to insert/update submission
     Submission.createLectureFeedback(
-        { 
+        {
+            feed_id,
             user_id,
             assignment_id,
+            sub_id, // Include sub_id in the object
             description,
-            grade
-        }, (err, results) => {
-            if(err){
-                console.log(err);// Log any errors
-                // Send a JSON response with error message and status code 500 which is a server error
-                return res.status(500).json({message: "Error occured while grading submission"});
-            }else if(results.affectedRows == 0){
-                // If no rows were affected, send a JSON response with status code 404 which means it could not find
-                //the given data in the server
-                return res.status(404).json({message: "Feedback could not be found"});
-            }else{
-                console.log(results);// Log the results of the query
-                // Send a JSON response with success message and status code 200 which means the request is successful
-                return res.status(200).json({message: "Feedback created"});
+            grade,
+        },
+        (err, results) => {
+            if (err) {
+                console.log('Database error:', err); // Log any errors
+                return res.status(500).json({ message: "Error occurred while grading submission" });
             }
-        });
+            console.log('Query results:', results); // Log the results of the query
+
+            // Check if the operation was successful
+            if (results.insertId) {
+                return res.status(200).json({ message: "Feedback created successfully", id: results.insertId });
+            } else {
+                return res.status(404).json({ message: "Feedback could not be created" });
+            }
+        }
+    );
 };
+
 
 //Deletes a specific submission based on the specific user
 exports.deleteSubmission = (req, res) =>{
@@ -157,7 +162,7 @@ exports.deleteUserSubmission = (req, res) =>{
     console.log(`Deleting submission with ID: ${user_id}, ${sub_id}`);
     // Execute the SQL query to delete the submission with the given IDs
     Submission.deleteUserSubmission(
-    user_id, sub_id, (err, results) => {
+    [user_id, sub_id], (err, results) => {
         if(err){
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -194,6 +199,7 @@ exports.getSubmissions = (req, res) => {
     });
 };
 
+
 exports.deleteFeedback = (req, res) =>{
     const {feed_id} = req.params;// Retrieve the feed_id from the URL
     console.log(`Deleting submission with ID: ${feed_id}`);
@@ -217,11 +223,10 @@ exports.deleteFeedback = (req, res) =>{
 };
 
 exports.selectVideoSubmissions = (req, res) => {
-    const {assignment_id} = req.params;
-    console.log(`Fetching video submissions for assignment_id: ${assignment_id}`);
+    console.log(`Fetching video submissions`);
 
     // Execute the SQL query to fetch all video submissions
-    Submission.selectVideoSubmissions(assignment_id, (err, results) => {
+    Submission.selectVideoSubmissions((err, results) => {
         if (err) {
             console.error(err); // Log any errors
             // Send a JSON response with error message and status code 500 (server error)
@@ -236,23 +241,53 @@ exports.selectVideoSubmissions = (req, res) => {
         }
     });
 };
-exports.selectVideoSubmissionAll = (req, res) => {
-    console.log(`Fetching video submissions`);
-    console.log(req.query);
-    
-        // Execute the SQL query to fetch all video submissions
-    Submission.selectVideoSubmissionsAll((err, results) => {
+
+
+exports.deleteUserSubmission
+
+exports.getFeedbackForSubmission = (req, res) => {
+    const { sub_id } = req.params;
+
+    // Validate the submission ID
+    if (!sub_id) {
+        return res.status(400).json({ message: "Submission ID is required." });
+    }
+
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized. User not logged in." });
+    }
+
+    const user_id = req.user.id; // Safe to access req.user.id
+
+    console.log('Fetching feedback for user:', user_id, 'and submission:', sub_id);
+
+    const feedbackQuery = `
+        SELECT f.description, f.grade
+        FROM feedback f
+        JOIN submission s ON f.sub_id = s.sub_id
+        JOIN user_on_submission u ON s.sub_id = u.sub_id
+        WHERE u.user_id = ? AND s.sub_id = ?;
+    `;
+
+    db.query(feedbackQuery, [user_id, sub_id], (err, feedbackResults) => {
         if (err) {
-            console.error(err); // Log any errors
-                // Send a JSON response with error message and status code 500 (server error)
-            return res.status(500).json({ message: "Error occurred while fetching video submissions." });
-        } else if (results.length === 0) {
-                // If no submissions are found, send a JSON response with status code 404 (not found)
-            return res.status(404).json({ message: "No video submissions found." });
-        } else {
-            console.log(results); // Log the results of the query
-                // Send the submissions data as JSON with status code 200 (success)
-            return res.status(200).json(results);
+            console.error(err);
+            return res.status(500).json({ message: "Error fetching feedback.", error: err.message });
         }
+
+        // Check if feedbackResults is empty and respond accordingly
+        if (feedbackResults.length === 0) {
+            return res.status(404).json({ message: "No feedback found for this user and submission." });
+        }
+
+        // Extract feedback and grade into an array format
+        const feedback = feedbackResults.map(result => ({
+            description: result.description, // Feedback text
+            grade: result.grade // Numeric grade
+        }));
+
+        // Ensure feedback is an array in the response
+        return res.status(200).json({ feedback });
     });
 };

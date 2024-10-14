@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 // Storage configuration
 const uploadDir = path.join(__dirname, '../uploads');
+const compressedDir = path.join(__dirname, '../compressed');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }

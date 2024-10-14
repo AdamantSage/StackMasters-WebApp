@@ -22,11 +22,12 @@ class Assignment {
         db.query('INSERT INTO user_on_assignment SET ?', {
             user_id: assignmentData.user_id,
             assignment_id: assignmentData.assignment_id,
+            module_code: assignmentData.module_code
         }, callback);
     }
 
-    static select(assignment_id, callback){
-        db.query('SELECT * FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
+    static select(assignment_id, user_id, callback){
+        db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id, user_id], callback);
     }
 
     static newSelect(module_code, callback){
@@ -53,6 +54,10 @@ class Assignment {
         db.query('DELETE FROM user_on_assignment WHERE user_id = ?, assignment_id = ?',
             [user_id, assignment_id], callback
         );
+    }
+    // Add the getAll method within the class
+    static getAll(callback) {
+        db.query('SELECT * FROM assignment', callback); // Fetch all assignments
     }
 }
 module.exports = Assignment;
