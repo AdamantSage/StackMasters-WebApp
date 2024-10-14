@@ -96,7 +96,7 @@ const handleVideoUpload = async (req, res) => {
 
         // SQL query to insert video metadata into the database
         const query = `
-            INSERT INTO videos (filename, path, mimetype, size, uploadAt, user_id, compressed_path, compressed_status, videoUrl) 
+            INSERT INTO video (filename, path, mimetype, size, uploadAt, user_id, compressed_path, compressed_status, videoUrl) 
             VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?)`;
         const values = [originalname, filePath, mimetype, size, userId, null, 0, videoUrl]; // Set compressed_path to null and compressed_status to 0
 
