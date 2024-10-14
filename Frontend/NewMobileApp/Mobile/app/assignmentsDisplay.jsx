@@ -6,7 +6,7 @@ import { getUserId } from './utils';
 import * as DocumentPicker from 'expo-document-picker';
 import Entypo from '@expo/vector-icons/Entypo';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Camera } from 'expo-camera';
+import VideoRecorder from './videoRecorder';
 
 const AssignmentsDisplay = () => {
   const router = useRouter();
@@ -208,27 +208,8 @@ const AssignmentsDisplay = () => {
     }
   };
 
-  const startRecording = async () => {
-    if (cameraRef) {
-      try {
-        const videoRecordPromise = cameraRef.recordAsync();
-        if (videoRecordPromise) {
-          const data = await videoRecordPromise;
-          setVideoUri(data.uri); // Get the video URI from the recorded video
-          setIsRecording(false); // Stop recording
-        }
-      } catch (error) {
-        console.error('Error recording video:', error);
-        Alert.alert('Error recording video');
-      }
-    }
-  };
-
-  const stopRecording = () => {
-    if (cameraRef) {
-      cameraRef.stopRecording();
-      setIsRecording(false);
-    }
+  const handleRecordingComplete = (uri) => {
+    setVideoUri(uri);
   };
 
   return (
@@ -267,12 +248,7 @@ const AssignmentsDisplay = () => {
       </View>
 
       {isRecording && (
-        <Camera
-          style={{ flex: 1 }}
-          ref={(ref) => setCameraRef(ref)}
-          type={Camera.Constants.Type.back}
-        >
-        </Camera>
+        <VideoRecorder onRecordingComplete={handleRecordingComplete} />
       )}
     </View>
   );

@@ -1,19 +1,27 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Button, StyleSheet, Alert, Text, ActivityIndicator } from 'react-native';
-import { Camera } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; // Using CameraView and useCameraPermissions
 
 const VideoRecorder = ({ onRecordingComplete }) => {
   const cameraRef = useRef(null);
-  const [hasPermission, setHasPermission] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<CameraType>('back'); // State to control camera facing
+  const [permission, requestPermission] = useCameraPermissions(); // useCameraPermissions to manage permissions
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  // Check if permissions are granted
+  if (!permission) {
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="Grant Permission" />
+      </View>
+    );
+  }
 
   const startRecording = async () => {
     if (cameraRef.current) {
@@ -37,21 +45,24 @@ const VideoRecorder = ({ onRecordingComplete }) => {
   };
 
   const stopRecording = () => {
-    if (cameraRef.current) {
+    if (cameraRef.current && isRecording) {
       cameraRef.current.stopRecording();
+      setIsRecording(false);
     }
   };
 
-  if (hasPermission === null) {
-    return <View />;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
+  const toggleCameraFacing = () => {
+    setCameraFacing((current) => (current === CameraType.back ? CameraType.front : CameraType.back));
+  };
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} ref={cameraRef} ratio="16:9">
+      <CameraView
+        style={styles.camera}
+        ref={cameraRef}
+        facing={cameraFacing} // Handle front/back camera toggle
+        ratio="16:9"
+      >
         <View style={styles.buttonContainer}>
           {loading ? (
             <ActivityIndicator size="large" color="#fff" />
@@ -61,8 +72,9 @@ const VideoRecorder = ({ onRecordingComplete }) => {
               onPress={isRecording ? stopRecording : startRecording}
             />
           )}
+          <Button title="Flip Camera" onPress={toggleCameraFacing} />
         </View>
-      </Camera>
+      </CameraView>
     </View>
   );
 };
@@ -81,6 +93,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingBottom: 20, // Add some padding
+  },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
   },
 });
 
