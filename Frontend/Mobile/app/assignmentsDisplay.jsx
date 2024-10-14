@@ -116,14 +116,40 @@ const AssignmentsDisplay = () => {
     }
   };
 
+  const getMimeTypeFromUri = (uri) => {
+    const extension = uri.split('.').pop(); // Get the file extension from the URI
+  
+    switch (extension) {
+      case 'mp4':
+        return 'video/mp4';
+      case 'mov':
+        return 'video/quicktime';
+      case 'avi':
+        return 'video/x-msvideo';
+      case 'mkv':
+        return 'video/x-matroska';
+      default:
+        return 'application/octet-stream'; // Fallback for unknown types
+    }
+  };
+
   // 3. Upload Video
   const uploadVideo = async (uri) => {
+    const videoType = getMimeTypeFromUri(videoUri);
+
     const formData = new FormData();
-    formData.append('video', {
+    formData.append('file', {
       uri: uri,
       type: videoType,
       name: videoName,
     });
+
+    formData.append('filename', videoName); // File name (optional)
+    formData.append('mimetype', videoType); // MIME type (optional)
+    formData.append('size', ''); // Size left empty (optional)
+    formData.append('path', videoUri); // Use the videoUri as the file path
+    formData.append('uploadAt', ''); // UploadAt left empty (optional)
+    formData.append('user_id', userId); // ID of the logged-in user
 
     console.log('Uploading video with FormData:', formData);
 
