@@ -19,10 +19,10 @@ const AssignmentsDisplay = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [cameraRef, setCameraRef] = useState(null);
 
-  const uploadVideoApi = 'http://192.168.0.23:5000/routes/uploads';
-  const compressVideoApi = 'http://192.168.0.23:5000/routes/test-compress';
-  const createSubmissionApi = 'http://192.168.0.23:5000/submission';
-  const createUserSubmission = 'http://192.168.0.23:5000/userSubmission';
+  const uploadVideoApi = 'http://192.168.48.255:5000/routes/uploads';
+  const compressVideoApi = 'http://192.168.48.255:5000/routes/test-compress';
+  const createSubmissionApi = 'http://192.168.48.255:5000/submission';
+  const createUserSubmission = 'http://192.168.48.255:5000/userSubmission';
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -40,7 +40,7 @@ const AssignmentsDisplay = () => {
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.0.23:5000/assignments/${assignmentId}`);
+        const response = await fetch(`http://192.168.48.255:5000/assignments/${assignmentId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
@@ -206,28 +206,6 @@ const AssignmentsDisplay = () => {
     }
   };
 
-  const chooseVideo = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'video/*',
-        multiple: false,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const selectedVideo = result.assets[0];
-        const videoUri = selectedVideo.uri;
-        const videoType = selectedVideo.mime;
-        const videoName = selectedVideo.name;
-
-        setVideoUri(videoUri);
-        setVideoType(videoType);
-        setVideoName(videoName);
-      }
-    } catch (error) {
-      console.error('Error picking video:', error);
-      Alert.alert('Error picking video');
-    }
-  };
 
   const startRecording = async () => {
     if (cameraRef) {

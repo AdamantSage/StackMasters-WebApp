@@ -13,7 +13,7 @@ const Assignments = () => {
   const { setAssignmentId } = useAssignmentContext();
 
   useEffect(() => {
-    fetch('http://192.168.0.23:5000/module').then(response => response.json()).then((data) => {
+    fetch('http://192.168.48.255:5000/module').then(response => response.json()).then((data) => {
       const FormatedModule = data.map(module => ({
         label: module.module_code,
         value: module.module_code
