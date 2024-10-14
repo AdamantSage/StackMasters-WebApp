@@ -3,9 +3,7 @@ const path = require('path');
 const { emitNotification } = require('../NotificationWebSocket.js');
 const multer = require('multer');
 const http = require('http');
-
-const { BlobServiceClient, AzureSASCredential } = require('@azure/storage-blob');
-//const { BlobServiceClient, AzureSASCredential } = require('@azure/storage-blob');
+const { BlobServiceClient } = require('@azure/storage-blob');
 require('dotenv').config(); 
 const connection = require('../config/database'); // Adjust the path as needed
 
@@ -15,14 +13,8 @@ const sasToken = process.env.SAS_TOKEN;
 const containerName = process.env.CONTAINER_NAME;
 
 // Establishing connection with Azure Blob Storage
-//const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
-//const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, new AzureSASCredential(sasToken));
-
-const connectionString = process.env.AZURE_STORAGE_CONSTR;
-const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-
-
-const containerClient = blobServiceClient.getContainerClient(containerName);
+const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net/?${sasToken}`);
+const containerClient = blobServiceClient.getContainerClient('stackblob');
 
 // Middleware to set containerClient
 const setContainerClient = (req, res, next) => {
@@ -89,19 +81,24 @@ const handleVideoUpload = async (req, res) => {
     const blobClient = req.containerClient.getBlockBlobClient(originalname);
     const videoUrl = blobClient.url; // Get the URL for the uploaded video
 
+    // Extract user_id from the request body
+    const userId = req.body.user_id;
+
+    // Ensure user_id is provided
+    if (!userId) {
+        console.error('No user ID provided.');
+        return res.status(400).send('No user ID provided.');
+    }
+
     try {
         // Upload to Azure Blob Storage
-        //await blobClient.uploadData(buffer);
-        try {
-            await blobClient.uploadData(buffer);
-        } catch (error) {
-            console.error('Azure Blob Storage upload error:', error);
-            res.status(500).send('Error uploading video to storage.');
-        }
-        
+        await blobClient.uploadData(buffer);
+
         // SQL query to insert video metadata into the database
-        const query = 'INSERT INTO videos (filename, path, mimetype, size, uploadAt, videoUrl) VALUES (?, ?, ?, ?, NOW(), ?)';
-        const values = [originalname, filePath, mimetype, size, videoUrl];
+        const query = `
+            INSERT INTO videos (filename, path, mimetype, size, uploadAt, user_id, compressed_path, compressed_status, videoUrl) 
+            VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?)`;
+        const values = [originalname, filePath, mimetype, size, userId, null, 0, videoUrl]; // Set compressed_path to null and compressed_status to 0
 
         connection.query(query, values, (err) => {
             if (err) {
@@ -127,36 +124,9 @@ const handleVideoUpload = async (req, res) => {
 };
 
 
-const downloadVideo = async (req, res) => {
-    const filename = req.params.filename;
-    const filePath = path.join(__dirname, '../compressed', filename); // Adjust path as needed
 
-    try {
-        // Check if the file exists using promises and async/await
-        await fs.access(filePath, constants.F_OK);
 
-        // Set headers to trigger download
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', 'video/mp4'); // Adjust Content-Type based on your video format
 
-        // Stream the file to the response
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res).on('error', (err) => {
-            console.error(`Error streaming file: ${filename}`, err);
-            res.status(500).send({
-                message: 'Error streaming file',
-                error: err.message
-            });
-        });
-
-    } catch (err) {
-        console.error(`File not found: ${filePath}`, err);
-        res.status(404).send({
-            message: 'File not found',
-            error: err.message
-        });
-    }
-};
 // Retrieve Video
 const retrieveVideo = async (req, res) => {
     try {
@@ -233,4 +203,4 @@ const multerErrorHandler = (err, req, res, next) => {
     next();
 };
 
-module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,downloadVideo,containerClient,setContainerClient};
+module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,containerClient,setContainerClient};

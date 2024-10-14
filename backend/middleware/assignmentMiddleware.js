@@ -3,7 +3,6 @@ const validAssignmentInfo = (req, res, next) => {
     console.log(req.body);// Log the data sent by the client
     // Extract specific fields from the request body
     const {
-        assignment_id,
         module_code,
         assign_name,
         upload_date,
@@ -11,14 +10,14 @@ const validAssignmentInfo = (req, res, next) => {
         assign_desc,
         user_id
     } = req.body;
-    if(!assignment_id || !module_code || !assign_name || !upload_date ||
+    if(!module_code || !assign_name || !upload_date ||
         !due_date || !assign_desc || !user_id){
             //returns a JSON response that there are missing fields
             return res.status(400).json({message: 'Missing required fields'});
         }
     next();
 }
-//Change from user id to fetch user role from user table
+
 const authorizeAssignmentAccess = (req, res, next) => {
     const assignment_id = req.params.id; // Get assignment ID from request parameters
     const user_id = req.user.id; // Get user ID from authenticated user
@@ -30,8 +29,8 @@ const authorizeAssignmentAccess = (req, res, next) => {
         } else if (results.length === 0) {
             return res.status(404).json({ message: 'Assignment not found or access denied.' });
         } else {
-            // Assignment belongs to the user, proceed to next middleware/controller
-            next();
+            console.log("Assignment access confirmed:", results); // Log successful access confirmation
+            next(); // Assignment belongs to the user, proceed to the next middleware/controller
         }
     });
 };
