@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = ({ loggedInUserId }) => {
   const router = useRouter();
@@ -14,20 +15,18 @@ const Home = ({ loggedInUserId }) => {
   };
 
   const goToSubmissions = () => {
-    router.push('/submissions');
+    router.push('/submission');
   };
 
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      {
-        text: "Cancel",
-        style: "cancel"
-      },
-      {
-        text: "Logout",
-        onPress: () => router.push('/login') // Adjust according to your routing
-      }
-    ]);
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('jwt'); // Remove the JWT token
+      await AsyncStorage.removeItem('userId'); // Remove the user ID
+      router.push('/sign-in');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'Unable to log out, please try again.');
+    }
   };
 
   return (
