@@ -32,7 +32,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/users/create', {
+      const response = await fetch('http://192.168.0.23:5000/users/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
