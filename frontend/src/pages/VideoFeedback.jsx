@@ -37,7 +37,9 @@ const VideoFeedback = () => {
         <div className="container">
           <h1 className="page-heading">Watch Video and Provide Feedback</h1>
           <ul className="linksList">
-            {/* Other links can go here */}
+            <li>
+              <Link to="/list-videos">List Video</Link>
+            </li>
           </ul>
         </div>
       </header>

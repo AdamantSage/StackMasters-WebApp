@@ -30,14 +30,20 @@ const ListVideos = () => {
     fetchVideos();
   }, []);
 
+  // Reset visible count when the selected assignment changes
+  useEffect(() => {
+    setVisibleCount(3); // Reset to show 3 when assignment is changed
+    setShowMore(false); // Reset the 'Show More' state
+  }, [selectedAssignment]);
+
   const toggleShowMore = () => {
     setShowMore(!showMore);
-    setVisibleCount(showMore ? 3 : videos.length);
+    setVisibleCount(showMore ? 3 : filteredVideos.length); // Show all or reset to 3
   };
 
   // Filter videos by selected assignment name
-  const filteredVideos = videos.filter(video =>
-    selectedAssignment ? video.assign_name === selectedAssignment : true
+  const filteredVideos = videos.filter(video => 
+    selectedAssignment === '' || video.assign_name?.toLowerCase().trim() === selectedAssignment.toLowerCase().trim()
   );
 
   return (
@@ -46,7 +52,6 @@ const ListVideos = () => {
         <div className="container">
           <h1 className="page-heading">List of Video Submissions</h1>
           <ul className="linksList">
-            
             <li>
               <Link to="/" className="link">Landing Page</Link>
             </li>
@@ -82,37 +87,49 @@ const ListVideos = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
+                <TableCell><strong>Submission ID</strong></TableCell>
                 <TableCell><strong>Assignment Name</strong></TableCell>
                 <TableCell><strong>Submitted By (User ID)</strong></TableCell>
                 <TableCell><strong>Time Submitted</strong></TableCell>
                 <TableCell><strong>Assignment ID</strong></TableCell>
-                <TableCell><strong>Action</strong></TableCell> {/* Changed the header for clarity */}
+                <TableCell><strong>Action</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredVideos.slice(0, visibleCount).map((video) => (
-                <TableRow key={video.videoId}>
-                  <TableCell>{video.assign_name}</TableCell>
-                  <TableCell>{video.user_id}</TableCell>
-                  <TableCell>{new Date(video.upload_date).toLocaleString()}</TableCell>
-                  <TableCell>{video.assignment_id}</TableCell>
-                  <TableCell>
-                    <Link 
-                      to={`/watch-feedback/${encodeURIComponent(video.videoUrl)}`} // Use encodeURIComponent for safety
-                      onClick={() => console.log(video.videoUrl)} // Log the video URL for debugging
-                    >
-                      Watch Video
-                    </Link>
+              {filteredVideos.length > 0 ? (
+                filteredVideos.slice(0, visibleCount).map((video) => (
+                  <TableRow key={video.sub_id}>
+                    <TableCell>{video.sub_id}</TableCell>
+                    <TableCell>{video.assign_name}</TableCell>
+                    <TableCell>{video.user_id}</TableCell>
+                    <TableCell>{new Date(video.upload_date).toLocaleString()}</TableCell>
+                    <TableCell>{video.assignment_id}</TableCell>
+                    <TableCell>
+                      <Link 
+                        to={`/watch-feedback/${encodeURIComponent(video.videoUrl)}`}
+                        onClick={() => console.log(video.videoUrl)}
+                      >
+                        Watch Video
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} style={{ textAlign: 'center' }}>
+                    No videos found for this assignment.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        <button className="get-started-button" onClick={toggleShowMore}>
-          {showMore ? 'Show Less' : 'Show More'}
-        </button>
+        {filteredVideos.length > visibleCount && (
+          <button className="get-started-button" onClick={toggleShowMore}>
+            {showMore ? 'Show Less' : 'Show More'}
+          </button>
+        )}
       </div>
     </div>
   );
