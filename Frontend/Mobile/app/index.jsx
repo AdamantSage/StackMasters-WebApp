@@ -29,6 +29,7 @@ export default function Index() {
               exportMarks     
           </Text>
         </Link>
+
       </ScrollView>
     </SafeAreaView>
   );
