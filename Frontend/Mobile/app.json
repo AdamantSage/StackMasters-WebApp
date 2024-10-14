@@ -24,7 +24,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.adamantsage.hms"
     },
     "web": {
       "bundler": "metro",
@@ -44,6 +49,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "dc3832bd-28b5-427e-a1c7-beb61046751f"
+      }
     }
   }
 }
