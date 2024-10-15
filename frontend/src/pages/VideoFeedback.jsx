@@ -38,7 +38,7 @@ const VideoFeedback = () => {
           <h1 className="page-heading">Watch Video and Provide Feedback</h1>
           <ul className="linksList">
             <li>
-              <Link to="/list-videos">List Video</Link>
+              <Link to="/list-videos"className="link">Back to List Video Submission</Link>
             </li>
           </ul>
         </div>
@@ -47,7 +47,7 @@ const VideoFeedback = () => {
       <div className="page-Container">
         {/* Video Player */}
         {id ? (
-          <video width="640" height="360" controls autoPlay>
+          <video width="640" height="360" controls autoPlay className="video">
             <source src={decodeURIComponent(id)} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -58,17 +58,15 @@ const VideoFeedback = () => {
         {/* Feedback Form */}
         <form onSubmit={handleSubmitFeedback} className="feedback-form">
           <div className="form-group">
-            <label htmlFor="assignment_id">Assignment ID:</label> {/* Updated id */}
+          <label htmlFor="sub_id">Submission ID:</label> {/* Updated id */}
             <input
               type="text"
-              id="assignment_id" // Updated id
-              value={assignment_id} // Updated state variable
-              onChange={(e) => setAssignmentId(e.target.value)}
+              id="sub_id" // Updated id
+              value={sub_id} // Updated state variable
+              onChange={(e) => setSubId(e.target.value)}
               required
-              placeholder="Enter assignment ID"
+              placeholder="Enter submission ID"
             />
-          </div>
-          <div className="form-group">
             <label htmlFor="user_id">User ID:</label> {/* Updated id */}
             <input
               type="text"
@@ -80,17 +78,15 @@ const VideoFeedback = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="sub_id">Submission ID:</label> {/* Updated id */}
+          <label htmlFor="assignment_id">Assignment ID:</label> {/* Updated id */}
             <input
               type="text"
-              id="sub_id" // Updated id
-              value={sub_id} // Updated state variable
-              onChange={(e) => setSubId(e.target.value)}
+              id="assignment_id" // Updated id
+              value={assignment_id} // Updated state variable
+              onChange={(e) => setAssignmentId(e.target.value)}
               required
-              placeholder="Enter submission ID"
+              placeholder="Enter assignment ID"
             />
-          </div>
-          <div className="form-group">
             <label htmlFor="grade">Grade:</label>
             <input
               type="number"
@@ -111,6 +107,7 @@ const VideoFeedback = () => {
               onChange={(e) => setFeedbackDescription(e.target.value)}
               required
               placeholder="Enter your feedback here"
+              className="assign-Input-Des"
             ></textarea>
           </div>
           <button type="submit" className="feedback-Sub">Submit Feedback</button>

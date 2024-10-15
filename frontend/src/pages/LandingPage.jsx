@@ -35,6 +35,9 @@ function LandingPage() {
               <Link to="/user-lecturer">Lecturer</Link>
             </li>
             <li>
+              <Link to="/create-assignment">Create Assignments</Link>
+            </li>
+            <li>
               <Link to="/about">About Us</Link>
             </li>
             <li>
