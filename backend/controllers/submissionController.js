@@ -32,6 +32,7 @@ exports.createUserSubmission = (req, res) =>{
     const{
         user_id,
         sub_id,
+        module_code
     } = req.body;
 
     if (!sub_id) {

@@ -12,6 +12,7 @@ class Submission{
         db.query('INSERT INTO user_on_submission SET ?', {
             user_id: submissionData.user_id,
             sub_id: submissionData.sub_id,
+            module_code: submissionData.module_code
         }, callback);
 
     }
