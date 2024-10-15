@@ -40,13 +40,11 @@ exports.createUserAssignment = (req, res) => {
     const {
         user_id,
         assignment_id,
-        module_code
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.createUserAssignment({
         user_id,
         assignment_id,
-        module_code
     }, (err, results) => {
         if (err) {
             console.log(err); // Log any errors

@@ -242,9 +242,6 @@ exports.selectVideoSubmissions = (req, res) => {
     });
 };
 
-
-exports.deleteUserSubmission
-
 exports.getFeedbackForSubmission = (req, res) => {
     const { sub_id } = req.params;
 

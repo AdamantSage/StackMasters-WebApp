@@ -22,7 +22,6 @@ class Assignment {
         db.query('INSERT INTO user_on_assignment SET ?', {
             user_id: assignmentData.user_id,
             assignment_id: assignmentData.assignment_id,
-            module_code: assignmentData.module_code
         }, callback);
     }
 
