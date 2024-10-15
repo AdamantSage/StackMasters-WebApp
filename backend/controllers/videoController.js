@@ -6,6 +6,7 @@ const http = require('http');
 const { BlobServiceClient } = require('@azure/storage-blob');
 require('dotenv').config(); 
 const connection = require('../config/database'); // Adjust the path as needed
+const compressVideo = require('../videoCompression.js');
 
 // Setup environment variables
 const accountName = process.env.ACCOUNT_NAME;
@@ -67,7 +68,7 @@ const streamVideo = async (req, res) => {
     });
 };
 
-// Handle Video Upload
+//upload video
 const handleVideoUpload = async (req, res) => {
     console.log('Request body:', req.body);
 
@@ -122,10 +123,6 @@ const handleVideoUpload = async (req, res) => {
         res.status(500).send('Error uploading video to storage.');
     }
 };
-
-
-
-
 
 // Retrieve Video
 const retrieveVideo = async (req, res) => {

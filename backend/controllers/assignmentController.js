@@ -216,7 +216,7 @@ exports.getAssignmentCountsByModule = (req, res) => {
             COUNT(a.assignment_id) AS total_created,
             COUNT(s.sub_id) AS total_submitted
         FROM 
-            assignments AS a
+            assignment AS a
         LEFT JOIN 
             user_on_assignment AS ua ON a.assignment_id = ua.assignment_id
         LEFT JOIN 
