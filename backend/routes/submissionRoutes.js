@@ -32,7 +32,7 @@ router.get('/video-submissions',SubmissionController.selectVideoSubmissions);
 router.get('/feedback/:sub_id',authMiddleware, SubmissionController.getFeedbackForSubmission);
 
 // Define the route for grade distribution
-router.get('/grades-distribution', submissionController.getGradeDistribution);
+router.get('/grades-distribution', SubmissionController.getGradeDistribution);
 
 
 module.exports = router;
