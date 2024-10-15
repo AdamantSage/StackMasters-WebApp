@@ -3,19 +3,14 @@ const db = require('../config/database'); // Assuming you have a db connection f
 class Assignment {
     static create(assignmentData, callback) {
         db.query('INSERT INTO assignment SET ?', {
+            assignment_id: assignmentData.assignment_id,
             module_code: assignmentData.module_code, 
             assign_name: assignmentData.assign_name,
             upload_date: assignmentData.upload_date,
             due_date: assignmentData.due_date,
             assign_desc: assignmentData.assign_desc,
             user_id: assignmentData.user_id
-        }, (err, results) => {
-            if(err){
-                console.log(err);
-                return callback(err);
-            }
-            return callback(null, {assignment_id: results.insertId })
-    });
+        }, callback);
     }
 
     static createUserAssignment(assignmentData, callback){
@@ -26,8 +21,8 @@ class Assignment {
         }, callback);
     }
 
-    static select(assignment_id, callback){
-        db.query('SELECT * FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
+    static select(assignment_id, user_id, callback){
+        db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id, user_id], callback);
     }
 
     static newSelect(module_code, callback){

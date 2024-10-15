@@ -6,6 +6,7 @@ exports.createAssignment = (req, res) => {
     console.log(req.body); // Log the data sent by the client
     // Extract specific fields from the request body
     const {
+        assignment_id,
         module_code,
         assign_name,
         upload_date,
@@ -15,6 +16,7 @@ exports.createAssignment = (req, res) => {
     } = req.body;
     // Execute the SQL query to insert a new assignment into the database
     Assignment.create({
+        assignment_id,
         module_code,
         assign_name,
         upload_date,
@@ -29,7 +31,7 @@ exports.createAssignment = (req, res) => {
         } else {
             console.log(results); // Log the results of the query
             // Send a JSON response with success message and status code 201 which means it create the assignment
-            return res.status(201).json({ message: "Assignment created successfully." , assignment_id: results.assignment_id});
+            return res.status(201).json({ message: "Assignment created successfully." });
         }
     });
 };
@@ -81,10 +83,10 @@ exports.getAssignment = (req, res) => {
     });
 };
 exports.getAssignmentID = (req, res) => {
-    const {assignment_id} = req.params; // Retrieve the IDs from the URL
-    console.log(`Fetching assignment with module_code: ${assignment_id}`);
+    const {assignment_id, user_id} = req.params; // Retrieve the IDs from the URL
+    console.log(`Fetching assignment with module_code: ${assignment_id}, ${user_id}`);
     // Execute the SQL query to fetch the assignment with the given IDs from the model
-    Assignment.select(assignment_id, (err, results) => {
+    Assignment.select(assignment_id, user_id, (err, results) => {
         if (err) {
             console.log(err); // Log any errors
             // Send a JSON response with error message and status code 500 which is a server error
@@ -204,6 +206,38 @@ exports.getAllAssignments = (req, res) => {
         } else {
             console.log("Fetched assignments:", results); // Log the results of the query
             return res.status(200).json(results); // Send the results back to the client
+        }
+    });
+};
+
+// Calculate total assignments created and submitted by module code
+exports.getAssignmentCountsByModule = (req, res) => {
+    console.log("Fetching assignment counts by module");
+
+    const query = `
+        SELECT 
+            a.module_code,
+            COUNT(a.assignment_id) AS total_created,
+            COUNT(s.sub_id) AS total_submitted
+        FROM 
+            assignments AS a
+        LEFT JOIN 
+            user_on_assignment AS ua ON a.assignment_id = ua.assignment_id
+        LEFT JOIN 
+            user_on_submission AS s ON ua.user_id = s.user_id AND a.assignment_id = s.sub_id
+        GROUP BY 
+            a.module_code;
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ message: "Error occurred while fetching assignment counts." });
+        } else if (results.length === 0) {
+            return res.status(404).json({ message: "No assignments found." });
+        } else {
+            console.log("Fetched assignment counts:", results);
+            return res.status(200).json(results);
         }
     });
 };

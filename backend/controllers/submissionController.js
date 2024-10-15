@@ -6,11 +6,13 @@ exports.createSubmission = (req, res) =>{
     console.log(req.body);// Log the data sent by the client
     // Extract specific fields from the request body
     const{
+        sub_id,
         sub_date,
         assignment_id
     } = req.body;
     // Execute the SQL query to insert a new submission into the database
     Submission.create({
+        sub_id,
         sub_date,
         assignment_id
         }, (err, results) => {
@@ -21,7 +23,7 @@ exports.createSubmission = (req, res) =>{
         }else{
             console.log(results); // Log the results of the query
             // Send a JSON response with success message and status code 201 which means the request is successful
-            return res.status(201).json({ message: "Submission created successfully.", sub_id: results.sub_id });
+            return res.status(201).json({ message: "Submission created successfully." });
         }
     });
 };
@@ -31,11 +33,13 @@ exports.createUserSubmission = (req, res) =>{
     const{
         user_id,
         sub_id,
+        module_code,
     } = req.body;
     // Execute the SQL query to insert a new submission into the database
     Submission.createUserSubmission({
         user_id,
         sub_id,
+        module_code,
         }, (err, results) => {
         if(err){
             console.log(err); // Log any errors
