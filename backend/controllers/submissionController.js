@@ -20,8 +20,9 @@ exports.createSubmission = (req, res) =>{
             return res.status(500).json({ message: "Error occurred while creating submission."});
         }else{
             console.log(results); // Log the results of the query
+            const sub_id = results.insertId; // Get the generated sub_id
             // Send a JSON response with success message and status code 201 which means the request is successful
-            return res.status(201).json({ message: "Submission created successfully." });
+            return res.status(201).json({ message: "Submission created successfully.", sub_id: sub_id});
         }
     });
 };
@@ -32,6 +33,10 @@ exports.createUserSubmission = (req, res) =>{
         user_id,
         sub_id,
     } = req.body;
+
+    if (!sub_id) {
+        return res.status(400).json({ message: "sub_id is required." });
+    }
     // Execute the SQL query to insert a new submission into the database
     Submission.createUserSubmission({
         user_id,

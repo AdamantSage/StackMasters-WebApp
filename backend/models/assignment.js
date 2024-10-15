@@ -20,7 +20,7 @@ class Assignment {
     }
 
     static select(assignment_id, callback){
-        db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id], callback);
+        db.query('SELECT * FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
     }
 
     static newSelect(module_code, callback){
