@@ -21,10 +21,6 @@ router.get('/controllers/:id', videoController.retrieveVideo);
 // Route to stream a video by IDs
 router.get('/stream/:id', videoController.streamVideo);
 
-// Route to get user counts
-router.get('/counts', UserController.getUserCounts);
-
-
 router.post('/test-compress/:id', async (req, res) => {
     const videoId = req.params.id;
 
@@ -124,7 +120,5 @@ router.get('/download/:vid_id', downloadVideo);
 
 //get all assignments
 router.get('/assignments', assignmentController.getAllAssignments);
-// Route to get video counts by hour 
-router.get('/counts/hour', fetchVideoCountsByHour);
 
 module.exports = router;
