@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import axios from 'axios';
+import { Bar } from 'react-chartjs-2'; 
 
 Chart.register(...registerables);
 
-export const AdminDashboard = () => {
-    const [dashboardData, setDashboardData] = useState({
-        videosUploaded: 0,
-        assignmentsCreated: 0,
-        assignmentsSubmitted: 0,
-        users: { students: 0, lecturers: 0 },
-        activeUsers: 0,
-    });
+const AdminDashboard = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [users, setUsers] = useState([]);
 
+    const [assignmentCounts, setAssignmentCounts] = useState({ created: 0, submitted: 0 });
+    const [gradeData, setGradeData] = useState({ labels: [], datasets: [] });
+    const [userCounts, setUserCounts] = useState({ lecturers: 0, students: 0 });
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [
@@ -26,273 +27,395 @@ export const AdminDashboard = () => {
         ],
     });
 
-    const [activeUserChartData, setActiveUserChartData] = useState({
-        labels: [], // Will hold time slots (e.g., hours of the day)
-        datasets: [
-            {
-                label: 'Active Users',
-                data: [], // Will hold the number of active users at each time slot
-                fill: false,
-                backgroundColor: 'rgba(255, 99, 132, 1)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-            },
-        ],
-    });
+    const fetchAssignmentCounts = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/assignment/counts');
+            setAssignmentCounts(response.data); // Assuming response data has { created, submitted }
+        } catch (error) {
+            console.error('Error fetching assignment counts:', error);
+        }
+    };
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [showActiveUserChart, setShowActiveUserChart] = useState(false);
+    const fetchUserCounts = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/users/counts');
+            setUserCounts(response.data);
+        } catch (error) {
+            console.error('Error fetching user counts:', error);
+        }
+    };
 
-    useEffect(() => {
-        const fetchData = () => {
-            const simulatedData = {
-                videosUploaded: 10,
-                assignmentsCreated: 5,
-                assignmentsSubmitted: 4,
-                users: { students: 30, lecturers: 10 },
-                activeUsers: 15,
-            };
-            setDashboardData(simulatedData);
-
-            const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-            const dataPoints = [10, 20, 15, 30, 25, 35, 40];
+    const fetchVideoCountsByHour = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/videos/counts/hour');
+            const hours = response.data.map(item => item.upload_hour);
+            const counts = response.data.map(item => item.video_count);
 
             setChartData({
-                labels: labels,
+                labels: hours,
                 datasets: [
                     {
                         label: 'Videos Uploaded',
-                        data: dataPoints,
+                        data: counts,
                         fill: false,
                         backgroundColor: 'rgba(75, 192, 192, 1)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                     },
                 ],
             });
-        };
-
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-            const response = await fetch('/api/users'); // Adjust this endpoint to your actual API
-            const userData = await response.json();
-            setUsers(userData);
-        };
-
-        fetchUsers();
-    }, []);
-
-    useEffect(() => {
-        const filtered = users.filter(user =>
-            `${user.name} ${user.surname}`.toLowerCase().includes(searchTerm.toLowerCase()) && user.submissions.length > 0
-        );
-        setFilteredUsers(filtered);
-    }, [searchTerm, users]);
-
-    // Fetch active user data for the chart
-    const fetchActiveUserData = () => {
-        // Simulated data for active users throughout the day
-        const times = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
-        const activeUserCounts = [1, 2, 3, 5, 6, 4, 7, 8, 10, 12, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2]; // Example counts
-
-        setActiveUserChartData({
-            labels: times,
-            datasets: [
-                {
-                    label: 'Active Users',
-                    data: activeUserCounts,
-                    fill: false,
-                    backgroundColor: 'rgba(255, 99, 132, 1)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                },
-            ],
-        });
+        } catch (error) {
+            console.error('Error fetching video counts:', error);
+        }
     };
 
-    const handleActiveUsersClick = () => {
-        fetchActiveUserData(); // Fetch data when the box is clicked
-        setShowActiveUserChart(true); // Show the chart
-    };
-
-    return (
-        <div className="user-dashboard">
-            <h2>Dashboard Overview</h2>
-            
-            {/* Dashboard Summary in Boxes */}
-            <div className="dashboard-summary">
-                <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
-                <div className="summary-box">Assignments Created: {dashboardData.assignmentsCreated}</div>
-                <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
-                <div className="summary-box">Students: {dashboardData.users.students}</div>
-                <div className="summary-box" onClick={handleActiveUsersClick} style={{ cursor: 'pointer' }}>
-                    Active Users: {dashboardData.activeUsers}
-                </div>
-            </div>
-
-            {/* Search Bar */}
-<div className="search-bar-container">
-    <input 
-        type="text" 
-        placeholder="Search by name or surname" 
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)} 
-        className="search-bar" // Add a class for styling
-    />
-</div>
-
-
-     
-
-            {/* Active Users Chart */}
-            {showActiveUserChart && (
-                <div>
-                    <h3>Active Users Throughout the Day</h3>
-                    <Line data={activeUserChartData} options={{ scales: { y: { beginAtZero: true } } }} />
-                </div>
-            )}
-
-            <h3>Videos Uploaded Over Time</h3>
-            <Line data={chartData} options={{ scales: { y: { beginAtZero: true } } }} />
-        </div>
-    );
-
-    
-};
-
-export const StudentDashboard = () => {
-
-    
-        const [dashboardData, setDashboardData] = useState({
-            videosUploaded: 0,
-            assignmentsCreated: 0,
-            assignmentsSubmitted: 0,
-            
-        });
-
-        return (
-            <div className="user-dashboard"> {/* Corrected this line */}
-                <h2>Dashboard Overview</h2>
-                <div className="dashboard-summary">
-                    <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
-                    <div className="summary-box">Video Feedback: {dashboardData.videoFeedback}</div>
-                    <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
-                </div>
-            </div>
-        );
-
-};
-
-export const LecturerDashboard = () => {
-    const [dashboardData, setDashboardData] = useState({
-        videosUploaded: 0,
-        assignmentsCreated: 0,
-        assignmentsSubmitted: 0,
-        
-    });
-
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Videos Uploaded',
-                data: [],
-                fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 1)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-            },
-        ],
-    });
-
-   
-
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [users, setUsers] = useState([]);
-   
-
-    useEffect(() => {
-        const fetchData = () => {
-            const simulatedData = {
-                videosUploaded: 10,
-                assignmentsCreated: 5,
-                assignmentsSubmitted: 4,
-               
+    const fetchGradeDistribution = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/feedback/grades-distribution');
+            const modules = response.data.map(item => `Module ${item.assignment_id}`);
+            const gradeRanges = {
+                '0-50': response.data.map(item => item['0-50']),
+                '51-70': response.data.map(item => item['51-70']),
+                '71-85': response.data.map(item => item['71-85']),
+                '86-100': response.data.map(item => item['86-100']),
             };
-            setDashboardData(simulatedData);
 
-            const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-            const dataPoints = [10, 20, 15, 30, 25, 35, 40];
-
-            setChartData({
-                labels: labels,
+            setGradeData({
+                labels: modules,
                 datasets: [
                     {
-                        label: 'Videos Uploaded',
-                        data: dataPoints,
-                        fill: false,
-                        backgroundColor: 'rgba(75, 192, 192, 1)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        label: '0-50%',
+                        data: gradeRanges['0-50'],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    },
+                    {
+                        label: '51-70%',
+                        data: gradeRanges['51-70'],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    },
+                    {
+                        label: '71-85%',
+                        data: gradeRanges['71-85'],
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                    },
+                    {
+                        label: '86-100%',
+                        data: gradeRanges['86-100'],
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     },
                 ],
             });
-        };
+        } catch (error) {
+            console.error('Error fetching grade distribution:', error);
+        }
+    };
 
-        fetchData();
+    useEffect(() => {
+        fetchAssignmentCounts();
+        fetchUserCounts();
+        fetchVideoCountsByHour();
+        fetchGradeDistribution();
     }, []);
 
-    
     useEffect(() => {
-        const filtered = users.filter(user =>
-            `${user.name} ${user.surname}`.toLowerCase().includes(searchTerm.toLowerCase()) && user.submissions.length > 0
-        );
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        const filtered = users.filter(user => {
+            const fullName = `${user.name} ${user.surname}`.toLowerCase();
+            return (
+                user.user_id.toString().includes(lowercasedSearchTerm) || // Search by user ID
+                fullName.includes(lowercasedSearchTerm) // Search by full name
+            );
+        });
         setFilteredUsers(filtered);
     }, [searchTerm, users]);
 
-    // Fetch active user data for the chart
-    
-
-    
+    // Function to highlight the search term
+    const highlightSearchTerm = (text) => {
+        const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+        return parts.map((part, index) => (
+            part.toLowerCase() === searchTerm.toLowerCase() ? (
+                <span key={index} className="highlight">{part}</span>
+            ) : (
+                part
+            )
+        ));
+    };
 
     return (
         <div className="user-dashboard">
-            <h2>Dashboard Overview</h2>
-            
-            {/* Dashboard Summary in Boxes */}
+            <h2>Admin Dashboard Overview</h2>
+
             <div className="dashboard-summary">
-                <div className="summary-box">Videos Uploaded: {dashboardData.videosUploaded}</div>
-                <div className="summary-box">Assignments Created: {dashboardData.assignmentsCreated}</div>
-                <div className="summary-box">Assignments Submitted: {dashboardData.assignmentsSubmitted}</div>
-                
-              
-                    
-                
+                <div className="summary-box">
+                    <h2>Assignment Summary</h2>
+                    <p>Assignments Created: {assignmentCounts.created}</p>
+                    <p>Assignments Submitted: {assignmentCounts.submitted}</p>
+                </div>
+                <div className="summary-box">
+                    <h3>Lecturers</h3>
+                    <p>{userCounts.lecturers}</p>
+                </div>
+                <div className="summary-box">
+                    <h3>Students</h3>
+                    <p>{userCounts.students}</p>
+                </div>
             </div>
 
-            {/* Search Bar */}
-<div className="search-bar-container">
-    <input 
-        type="text" 
-        placeholder="Search by name or surname" 
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)} 
-        className="search-bar" // Add a class for styling
-    />
-</div>
+            <input
+                className="search-bar" // Add this class for styling
+                type="text"
+                placeholder="Search by User ID or Name/Surname"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+            />
 
+            <ul className="user-list">
+                {filteredUsers.map(user => (
+                    <li key={user.user_id}>
+                        {highlightSearchTerm(`${user.name} ${user.surname}`)} (ID: {user.user_id})
+                    </li>
+                ))}
+            </ul>
 
-     
+            <div>
+                <h2>Video Upload Counts by Hour</h2>
+                <Bar
+                    data={chartData}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    }}
+                />
+            </div>
 
-           
-
-            <h3>Videos Uploaded Over Time</h3>
-            <Line data={chartData} options={{ scales: { y: { beginAtZero: true } } }} />
+            <div>
+                <h2>Grade Distribution by Module</h2>
+                <Bar
+                    data={gradeData}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Students',
+                                },
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Modules',
+                                },
+                            },
+                        },
+                    }}
+                />
+            </div>
         </div>
     );
 };
-    
 
+const LecturerDashboard = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredStudents, setFilteredStudents] = useState([]);
+    const [students, setStudents] = useState([]);
 
-export default {AdminDashboard, StudentDashboard,LecturerDashboard};
+    const [assignmentCounts, setAssignmentCounts] = useState({ created: 0, submitted: 0 });
+    const [videoCounts, setVideoCounts] = useState({ labels: [], datasets: [] });
+    const [gradeData, setGradeData] = useState({ labels: [], datasets: [] });
+
+    // Fetch Assignment Counts
+    const fetchAssignmentCounts = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/assignment/counts');
+            setAssignmentCounts(response.data);
+        } catch (error) {
+            console.error('Error fetching assignment counts:', error);
+        }
+    };
+
+    // Fetch Video Upload Counts by Hour
+    const fetchVideoCountsByHour = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/videos/upload-counts-by-hour');
+            const hours = response.data.map(item => `${item.hour}:00`);
+            const videoUploads = response.data.map(item => item.uploadCount);
+
+            setVideoCounts({
+                labels: hours,
+                datasets: [
+                    {
+                        label: 'Videos Uploaded',
+                        data: videoUploads,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                    },
+                ],
+            });
+        } catch (error) {
+            console.error('Error fetching video counts by hour:', error);
+        }
+    };
+
+    // Fetch Grade Distribution
+    const fetchGradeDistribution = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/feedback/grades-distribution');
+            const modules = response.data.map(item => `Module ${item.assignment_id}`);
+            const gradeRanges = {
+                '0-50': response.data.map(item => item['0-50']),
+                '51-70': response.data.map(item => item['51-70']),
+                '71-85': response.data.map(item => item['71-85']),
+                '86-100': response.data.map(item => item['86-100']),
+            };
+
+            setGradeData({
+                labels: modules,
+                datasets: [
+                    {
+                        label: '0-50%',
+                        data: gradeRanges['0-50'],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    },
+                    {
+                        label: '51-70%',
+                        data: gradeRanges['51-70'],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    },
+                    {
+                        label: '71-85%',
+                        data: gradeRanges['71-85'],
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                    },
+                    {
+                        label: '86-100%',
+                        data: gradeRanges['86-100'],
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    },
+                ],
+            });
+        } catch (error) {
+            console.error('Error fetching grade distribution:', error);
+        }
+    };
+
+    // Fetch students for searching
+    const fetchStudents = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/users/students');
+            setStudents(response.data);
+        } catch (error) {
+            console.error('Error fetching students:', error);
+        }
+    };
+
+    // Handle Search for Students by User ID
+    useEffect(() => {
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        const filtered = students.filter(user => 
+            user.user_id.toString().includes(lowercasedSearchTerm)
+        );
+        setFilteredStudents(filtered);
+    }, [searchTerm, students]);
+
+    // Fetch data on initial load
+    useEffect(() => {
+        fetchAssignmentCounts();
+        fetchVideoCountsByHour();
+        fetchGradeDistribution();
+        fetchStudents();
+    }, []);
+
+    const highlightSearchTerm = (text) => {
+        const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+        return parts.map((part, index) => (
+            part.toLowerCase() === searchTerm.toLowerCase() ? (
+                <span key={index} className="highlight">{part}</span>
+            ) : (
+                part
+            )
+        ));
+    };
+
+    return (
+        <div className="lecturer-dashboard">
+            <h2>Lecturer Dashboard Overview</h2>
+
+            <div className="dashboard-summary">
+                <div className="summary-box">
+                    <h2>Assignment Summary</h2>
+                    <p>Assignments Created: {assignmentCounts.created}</p>
+                    <p>Assignments Submitted: {assignmentCounts.submitted}</p>
+                </div>
+            </div>
+
+            <input
+                className="search-bar"
+                type="text"
+                placeholder="Search by User ID or Name/Surname"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+            />
+
+            <ul className="user-list">
+                {filteredStudents.map(user => (
+                    <li key={user.user_id}>
+                        {highlightSearchTerm(`${user.name} ${user.surname}`)} (ID: {user.user_id})
+                    </li>
+                ))}
+            </ul>
+
+            <div>
+                <h2>Video Upload Counts by Hour</h2>
+                <Bar
+                    data={videoCounts}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Videos',
+                                },
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time of Day (Hour)',
+                                },
+                            },
+                        },
+                    }}
+                />
+            </div>
+
+            <div>
+                <h2>Grade Distribution by Module</h2>
+                <Bar
+                    data={gradeData}
+                    options={{
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Students',
+                                },
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Modules',
+                                },
+                            },
+                        },
+                    }}
+                />
+            </div>
+        </div>
+    );
+};
+
+export { AdminDashboard, LecturerDashboard };

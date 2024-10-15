@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import io from 'socket.io-client';
+
 
 const CreateAssignment = ({ userId }) => {
     const [moduleCode, setModuleCode] = useState('');
@@ -25,7 +27,7 @@ const CreateAssignment = ({ userId }) => {
 
         fetchModuleCodes();
     }, []); // Empty dependency array ensures this runs once on component mount
-
+    const socket = io('http://localhost:8000'); // Connect to our Socket.IO server
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Form submitted');
@@ -43,6 +45,10 @@ const CreateAssignment = ({ userId }) => {
         };
 
         try {
+
+             // Emit the 'createAssignment' event to the server
+             socket.emit('createAssignment', assignmentData);
+             
             const response = await axios.post('http://localhost:5000/assignment', assignmentData);
             console.log('Assignment created successfully:', response.data);
             if (response.status === 201) {

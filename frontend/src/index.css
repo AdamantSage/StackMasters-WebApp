@@ -937,16 +937,24 @@ table th {
   padding: 1px;
 }
 
-
-
-
-
-
-
-
-
-
 /*Dashboard*/
+
+.notification-area {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  max-width: 300px;
+  z-index: 1000;
+}
+
+.notification {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
 
 
 
