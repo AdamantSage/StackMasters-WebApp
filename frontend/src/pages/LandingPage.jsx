@@ -29,6 +29,9 @@ function LandingPage() {
               <Link to="/list-assignments">List Assignments</Link>
             </li>
             <li>
+              <Link to="/create-assignment">Create Assignments</Link>
+            </li>
+            <li>
               <Link to="/about">About Us</Link>
             </li>
             <li>

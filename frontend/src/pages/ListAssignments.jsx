@@ -48,8 +48,9 @@ const ListAssignments = () => {
         <div className="container">
           <h1 className="page-heading">List of Assignments</h1>
           <ul className="linksList">
-            
-            
+            <li>
+              <Link to="/" className="link">Landing Page</Link>
+            </li>
           </ul>
         </div>
       </header>

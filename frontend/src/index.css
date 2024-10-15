@@ -490,10 +490,12 @@ ul {
 
 .page header{
   position: sticky;
-  top:0;
   width: 100%;
-  background-color:rgb(186, 204, 50);
+  background-color: #673AB7;
   z-index: 10; /* Ensure the header stays on top */
+  color: #F5F5F5;
+  padding-top: 20px;
+  height: 100px;
   
 }
 
@@ -502,12 +504,11 @@ ul {
   margin-bottom: 20px; /* Space below the heading */
 }
 
-.page-Container {
+.page-Container{
   display: flex;
   flex-direction: column;
   align-items: center; /* Center the content horizontally */
   justify-content: center; /* Center the content vertically */
-  height: vh; /* Full height of the viewport */
   padding-top: 50px; 
   padding-left: 20px;
   padding-right: 20px;
@@ -519,12 +520,6 @@ ul {
 .container {
   width: 100%; /* Full width of the container */
   margin: 0 auto; /* Center the container */
-}
-
-.creatAssignForm {
-  width: 100%; /* Ensure the form is responsive */
-  margin-top: 20px; /* Add a bit of space between the form and header */
-  height: 100%;
 }
 
 .linksList {
@@ -563,6 +558,13 @@ table th {
   max-height: 400px; /* Set a fixed height for the table container */
   overflow-y: auto; /* Enable vertical scrolling */
   overflow-x: hidden; /* Prevent horizontal scrolling  */
+  background-color: #d6d6d6;
+  border-radius: 30px;
+}
+
+
+.fixed-table-container table {
+  width: 100%; /* Ensure the table takes up the full width */
 }
 
 .scrollable-body {
@@ -571,9 +573,6 @@ table th {
   overflow-y: auto; /* Enable vertical scrolling */
 }
 
-.fixed-table-container table {
-  width: 100%; /* Ensure the table takes up the full width */
-}
 
 .list {
   list-style: none; /* Remove list styles */
@@ -591,21 +590,44 @@ table th {
 .form-label{
   display: flex;
   padding-right: 200px;
+  
 }
 
-.assign-Input{
+.assign-Input,.assign-Input-Des{
   padding-right: 200px;
   padding-bottom: 200px;
   padding-block-end: 5%;
   border: 20px;
   
 }
+.assign-Input-Des {
+
+  height: 100px; /* Fixed height */
+  resize: none; /* Disable resizing */
+  margin-right: 20px;
+  overflow-y: auto; /* Add a scrollbar if the content exceeds the height */
+  border: 1px solid #ccc; /* Border style */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+.video{
+  border: 5px solid #673AB7; /* Customize the border color and thickness */
+  border-radius: 10px; /* Optional: to round the corners */
+}
+
 .inputContainer{
-  margin-bottom: px;
+  margin-bottom: 10px;
 }
 .creatAssignForm {
   width: 100%; /* Ensure the form is responsive */
-  margin-top: 1px; /* Space between the form and header */
+  top :0;
+  height: 100%;
+  align-content: center;
+  padding-top: 20px;
+  padding-bottom:20px;
+  border-radius: 30px;
+  background-color:#b5b2b2;
+  padding-left: 50px;
+
 }
 .feedback-form{
 
@@ -907,7 +929,13 @@ table th {
 .search-bar:focus {
   border-color: #5E35B1; /* Darker shade on focus */
 }
-
+.close-button{
+  background-color:rgb(245, 246, 242);
+  color: #212121;
+  border: #212121;
+  border-width: 2px;
+  padding: 1px;
+}
 
 
 

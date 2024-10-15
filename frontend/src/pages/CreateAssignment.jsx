@@ -1,42 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-const CreateAssignment = ({ userId }) => { // Accept userId as a prop
+const CreateAssignment = ({ userId }) => {
     const [moduleCode, setModuleCode] = useState('');
     const [assignName, setAssignName] = useState('');
     const [uploadDate, setUploadDate] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [assignDesc, setAssignDesc] = useState('');
-    const [notification, setNotification] = useState(''); // Notification state
+    const [notification, setNotification] = useState('');
+    const [moduleCodes, setModuleCodes] = useState([]); // State to store module codes
+
+    // Fetch distinct module codes from the API
+    useEffect(() => {
+        const fetchModuleCodes = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/assignment'); // Adjust API endpoint as needed
+                const distinctModules = [...new Set(response.data.map(module => module.module_code))]; // Ensure distinct values
+                setModuleCodes(distinctModules); // Set the distinct module codes
+            } catch (error) {
+                console.error('Error fetching module codes:', error);
+            }
+        };
+
+        fetchModuleCodes();
+    }, []); // Empty dependency array ensures this runs once on component mount
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Form submitted');
 
-        // Format dates to SQL datetime format
         const formattedUploadDate = new Date(uploadDate).toISOString().slice(0, 19).replace('T', ' ');
         const formattedDueDate = new Date(dueDate).toISOString().slice(0, 19).replace('T', ' ');
 
         const assignmentData = {
             module_code: moduleCode,
             assign_name: assignName,
-            upload_date: formattedUploadDate, // Use formatted date
-            due_date: formattedDueDate,       // Use formatted date
+            upload_date: formattedUploadDate,
+            due_date: formattedDueDate,
             assign_desc: assignDesc,
-            user_id: userId || 1, // Include user_id
+            user_id: userId || 1,
         };
 
         try {
             const response = await axios.post('http://localhost:5000/assignment', assignmentData);
             console.log('Assignment created successfully:', response.data);
-            if (response.status === 201) { // Check for successful creation
+            if (response.status === 201) {
                 setNotification('Assignment created successfully!');
             } else {
                 setNotification('Unexpected response. Please try again.');
             }
 
-            // Optionally clear the form after successful submission
             setModuleCode('');
             setAssignName('');
             setUploadDate('');
@@ -49,7 +63,7 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
     };
 
     const handleCloseNotification = () => {
-        setNotification(''); // Clear notification
+        setNotification('');
     };
 
     return (
@@ -58,7 +72,9 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
                 <div className="container">
                     <h1 className="page-heading">Create Assignment</h1>
                     <ul className="linksList">
-                       
+                        <li>
+                            <Link to="/" className="link">Landing Page</Link>
+                        </li>
                     </ul>
                 </div>
             </header>
@@ -68,15 +84,20 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
                         <label className="form-label" htmlFor="moduleCode">
                             Module Code
                         </label>
-                        <input
-                            type="text"
+                        <select
                             id="moduleCode"
-                            placeholder="Enter module code"
                             value={moduleCode}
                             onChange={(e) => setModuleCode(e.target.value)}
                             className="assign-Input"
                             required
-                        />
+                        >
+                            <option value="">Select Code</option>
+                            {moduleCodes.map((code, index) => (
+                                <option key={index} value={code}>
+                                    {code}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="inputContainer">
                         <label className="form-label" htmlFor="assignName">
@@ -127,7 +148,7 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
                             placeholder="Enter description"
                             value={assignDesc}
                             onChange={(e) => setAssignDesc(e.target.value)}
-                            className="assign-Input"
+                            className="assign-Input-Des"
                             required
                         />
                     </div>
@@ -135,10 +156,10 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
                         Create Assignment
                     </button>
                     {notification && (
-                      <div className="notification">
-                          {notification}
-                          <button onClick={handleCloseNotification} className="close-button"></button>
-                      </div>
+                        <div className="notification">
+                            {notification}
+                            <button onClick={handleCloseNotification} className="close-button">X</button>
+                        </div>
                     )}
                 </form>
             </div>
