@@ -4,6 +4,8 @@ import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
 import ExportMarks from './exportMarks';
 import { AdminDashboard } from './Dashboard';
+import UserManagement from './UserManagement';
+import AssignmentManagement from './AssignmentManagement';
 
 import io from 'socket.io-client';
 
@@ -12,6 +14,8 @@ const socket = io('http://localhost:5000'); // Connect to your backend socket se
 const UserAdminPage = ({ user }) => {  // Accept user prop here
     const [activeSection, setActiveSection] = useState('dashboard'); // Default section
     const [notifications, setNotifications] = useState([]); // State to track notifications
+
+    const userName = localStorage.getItem('userName');
 
     const handleLogout = () => {
         window.location.href = "/"; // Redirect to landing page on logout
@@ -50,20 +54,12 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                 return <ListAssignments />;
             case 'export-marks':
                 return <ExportMarks />;
-            case 'system-monitoring':
-                return (
-                    <section className="system-monitoring">
-                        <h2>System Monitoring</h2>
-                        {/* Monitoring graphs here */}
-                    </section>
-                );
-            case 'settings':
-                return (
-                    <section className="settings">
-                        <h2>Settings</h2>
-                        {/* Settings content here */}
-                    </section>
-                );
+                case 'assignment-management':
+                    return <AssignmentManagement />;
+            
+            case 'user-management':
+                return <UserManagement />;
+              
             default:
                 return <AdminDashboard />;
         }
@@ -76,7 +72,7 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                 <div className="profile-section">
                     <img src="admin-profile-pic.jpg" alt="Admin" className="profile-pic" />
                     {user ? (
-                        <p className="user-name">{user.name} {user.surname}</p>
+                         <p>Welcome, {userName ? userName : 'Guest'}!</p>
                     ) : (
                         <p className="user-name">Guest</p> // Fallback if no user is logged in
                     )}
@@ -87,8 +83,8 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
                         <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
-                        <li><button onClick={() => setActiveSection('system-monitoring')}>System Monitoring</button></li>
-                        <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
+                        <li><button onClick={() => setActiveSection('assignment-management')}>Assignment Management</button></li>
+                        <li><button onClick={() => setActiveSection('user-management')}>User Management</button></li>
                     </ul>
                 </nav>
                 {/* Logout Button */}

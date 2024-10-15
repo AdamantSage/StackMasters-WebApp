@@ -97,57 +97,65 @@ const LoginPage = () => {
     setError(''); // Clear previous errors
 
     if (!usernameLogin || !passwordLogin) {
-      setError('Please fill in both username and password!');
-      return;
+        setError('Please fill in both username and password!');
+        return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(usernameLogin)) {
-      setError('Please enter a valid email address!');
-      return;
+        setError('Please enter a valid email address!');
+        return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: usernameLogin, password: passwordLogin }),
-      });
+        const response = await fetch('http://localhost:5000/users/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: usernameLogin, password: passwordLogin }),
+        });
 
-      const data = await response.json();
-      console.log(data); // Log the response data
+        const data = await response.json();
+        console.log(data); // Log the response data
 
-      if (response.ok) {
-        if (data.userId) {
-          localStorage.setItem('jwt', data.token);
-          localStorage.setItem('userId', JSON.stringify(data.userId));
+        if (response.ok) {
+            if (data.userId) {
+                localStorage.setItem('jwt', data.token);
+                localStorage.setItem('userId', JSON.stringify(data.userId));
+                localStorage.setItem('userName', data.name); // Store the user's name
 
-          const userRole = data.role;
-          if (userRole === 'Admin') {
-            navigate('/user-admin');
-          } else if (userRole === 'Lecturer') {
-            navigate('/user-lecturer');
-          } else if (userRole === 'Student') {
-            navigate('/user-student');
-          }
+                const userRole = data.role;
+                switch (userRole) {
+                    case 'Admin':
+                        navigate('/user-admin');
+                        break;
+                    case 'Lecturer':
+                        navigate('/user-lecturer');
+                        break;
+                    case 'Student':
+                        navigate('/profile'); // Redirect to profile page for Student
+                        break;
+                    default:
+                        setError('Role is not recognized.');
+                }
+            } else {
+                setError('User ID is not available.');
+            }
         } else {
-          setError('User ID is not available.');
+            // Check for specific error messages based on response status
+            if (response.status === 401) {
+                setError('Incorrect username or password.');
+            } else {
+                setError(data.message || 'An unexpected error occurred.');
+            }
         }
-      } else {
-        // Check for specific error messages based on response status
-        if (response.status === 401) {
-          setError('Incorrect username or password.');
-        } else {
-          setError(data.message || 'An unexpected error occurred.');
-        }
-      }
     } catch (error) {
-      console.error('Error occurred:', error);
-      setError('Unable to connect. Please check your internet connection and try again.');
+        console.error('Error occurred:', error);
+        setError('Unable to connect. Please check your internet connection and try again.');
     }
-  };
+};
+
 
   const goToSignUp = () => {
     document.getElementById('slideBox').style.marginLeft = '0';

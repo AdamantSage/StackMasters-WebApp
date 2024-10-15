@@ -6,10 +6,13 @@ import VideoFeedback from './VideoFeedback';
 import CreateAssignment from './CreateAssignment';
 import ExportMarks from './exportMarks';
 import { LecturerDashboard } from './Dashboard'; 
+import AssignmentManagement from './AssignmentManagement';
 
-const LecturerPage = () => {
+const LecturerPage = ({user}) => {
     const [activeSection, setActiveSection] = useState('dashboard-overview'); 
     const [selectedVideoId, setSelectedVideoId] = useState(null);
+
+    const userName = localStorage.getItem('userName');
 
     const handleLogout = () => {
         window.location.href = "/"; 
@@ -29,6 +32,8 @@ const LecturerPage = () => {
                 return <CreateAssignment />;
                 case 'export-marks':
                     return <ExportMarks/>;
+                    case 'assignment-management':
+                        return <AssignmentManagement/>;
                 
 
                 case 'settings':
@@ -47,8 +52,12 @@ const LecturerPage = () => {
         <div className="user-page">
             <aside className="sidebar">
                 <div className="profile-section">
-                    <img src="lecturer-profile-pic.jpg" alt="Admin" className="profile-pic" />
-                    <p className="user-name">John Doe</p>
+                    <img src="lecturer-profile-pic.jpg" alt="Lecturer" className="profile-pic" />
+                    {user ? (
+                         <p>Welcome, {userName ? userName : 'Guest'}!</p>
+                    ) : (
+                        <p className="user-name">Guest</p> // Fallback if no user is logged in
+                    )}
                 </div>
                 <nav className='nav-menu'>
                     <ul>
@@ -58,6 +67,7 @@ const LecturerPage = () => {
                         <li><button onClick={() => setActiveSection('create-assignment')}>Create Assignment</button></li>
                         <li><button onClick={() => setActiveSection('watch-feedback')}>Video Feedback</button></li>
                         <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
+                        <li><button onClick={() => setActiveSection('assignment-management')}>Assignment Management</button></li>
                         <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
                     </ul>
                 </nav>
