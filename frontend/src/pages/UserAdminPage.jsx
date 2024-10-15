@@ -3,14 +3,13 @@ import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
 import ExportMarks from './exportMarks';
-import {AdminDashboard} from './Dashboard';
-
+import { AdminDashboard } from './Dashboard';
 
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000');  // Connect to your backend socket server
+const socket = io('http://localhost:5000'); // Connect to your backend socket server
 
-const UserAdminPage = () => {
+const UserAdminPage = ({ user }) => {  // Accept user prop here
     const [activeSection, setActiveSection] = useState('dashboard'); // Default section
     const [notifications, setNotifications] = useState([]); // State to track notifications
 
@@ -77,10 +76,10 @@ const UserAdminPage = () => {
                 <div className="profile-section">
                     <img src="admin-profile-pic.jpg" alt="Admin" className="profile-pic" />
                     {user ? (
-                <p className="user-name">{user.name} {user.surname}</p>
-            ) : (
-                <p className="user-name">Guest</p> // Fallback if no user is logged in
-            )}
+                        <p className="user-name">{user.name} {user.surname}</p>
+                    ) : (
+                        <p className="user-name">Guest</p> // Fallback if no user is logged in
+                    )}
                 </div>
                 <nav className="nav-menu">
                     <ul>
