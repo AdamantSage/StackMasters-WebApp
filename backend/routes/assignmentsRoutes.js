@@ -20,7 +20,8 @@ router.put('/assignment/:id', AssignmentController.updateAssignment);
 router.delete('/assignment/:assignment_id', AssignmentController.deleteAssignment);
 router.delete('/userAssignment/:user_id/:assignment_id', AssignmentController.deleteUserAssignment);
 //This is to export the router
-
+// New route for fetching assignment counts by module
+ router.get('/assignment/counts', AssignmentController.getAssignmentCountsByModule);
 
 router.get('/assignment', AssignmentController.getAllAssignments);
 

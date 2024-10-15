@@ -21,6 +21,10 @@ router.delete('/delete/:id', authenticateToken, checkRole(['admin','lecturer', '
 // Login
 router.post('/login', usersController.login);
 
+// Route to get user counts
+router.get('/counts', UserController.getUserCounts);
+
+
 // Example protected route
 //will send users to their soecific dashboard content
 // Protected route example (only accessible by logged-in users)
@@ -44,5 +48,8 @@ router.get('/exportMarks', authenticateToken, checkRole(['admin', 'lecturer']), 
         res.status(500).send('Error exporting marks data.');
     }
 });
+
+
+
 
 module.exports = router;

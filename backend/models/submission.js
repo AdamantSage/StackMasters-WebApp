@@ -70,12 +70,12 @@ class Submission{
         );
     }
 
-    static selectVideoSubmissions(assignment_id, callback) {
-        const query = `
+    static selectVideoSubmissions(callback) {
+        const query =`
             SELECT 
                 s.sub_id, a.assign_name, u.user_id, a.upload_date, a.assignment_id, v.videoUrl
             FROM 
-                video v
+                videos v
             JOIN 
                 users u ON v.user_id = u.user_id
             JOIN 

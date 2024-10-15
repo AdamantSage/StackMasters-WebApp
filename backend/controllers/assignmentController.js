@@ -209,3 +209,35 @@ exports.getAllAssignments = (req, res) => {
         }
     });
 };
+
+// Calculate total assignments created and submitted by module code
+exports.getAssignmentCountsByModule = (req, res) => {
+    console.log("Fetching assignment counts by module");
+
+    const query = `
+        SELECT 
+            a.module_code,
+            COUNT(a.assignment_id) AS total_created,
+            COUNT(s.sub_id) AS total_submitted
+        FROM 
+            assignments AS a
+        LEFT JOIN 
+            user_on_assignment AS ua ON a.assignment_id = ua.assignment_id
+        LEFT JOIN 
+            user_on_submission AS s ON ua.user_id = s.user_id AND a.assignment_id = s.sub_id
+        GROUP BY 
+            a.module_code;
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ message: "Error occurred while fetching assignment counts." });
+        } else if (results.length === 0) {
+            return res.status(404).json({ message: "No assignments found." });
+        } else {
+            console.log("Fetched assignment counts:", results);
+            return res.status(200).json(results);
+        }
+    });
+};

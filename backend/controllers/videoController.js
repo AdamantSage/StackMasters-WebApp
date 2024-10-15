@@ -203,4 +203,23 @@ const multerErrorHandler = (err, req, res, next) => {
     next();
 };
 
-module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,containerClient,setContainerClient};
+// Function to fetch video uploads by hour in videocontroller
+const fetchVideoCountsByHour = (req, res) => {
+    const query = `
+        SELECT HOUR(uploadAt) AS upload_hour, COUNT(*) AS video_count
+        FROM video
+        GROUP BY upload_hour
+        ORDER BY upload_hour
+    `;
+
+    db.query(query, (error, results) => {
+        if (error) {
+            console.error('Error fetching video counts by hour:', error);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.json(results); // Send back the counts per hour
+    });
+};
+
+
+module.exports = { retrieveVideo, streamVideo, multerErrorHandler, handleVideoUpload ,containerClient,setContainerClient,fetchVideoCountsByHour};
