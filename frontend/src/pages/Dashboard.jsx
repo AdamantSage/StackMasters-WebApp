@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
     const fetchGradeDistribution = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/feedback/grades-distribution');
+            const response = await axios.get('http://localhost:5000/submission/grades-distribution');
             const modules = response.data.map(item => `Module ${item.assignment_id}`);
             const gradeRanges = {
                 '0-50': response.data.map(item => item['0-50']),
@@ -262,7 +262,7 @@ const LecturerDashboard = () => {
     // Fetch Grade Distribution
     const fetchGradeDistribution = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/feedback/grades-distribution');
+            const response = await axios.get('http://localhost:5000/submission/grades-distribution');
             const modules = response.data.map(item => `Module ${item.assignment_id}`);
             const gradeRanges = {
                 '0-50': response.data.map(item => item['0-50']),

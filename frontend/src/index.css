@@ -834,7 +834,7 @@ table th {
 .nav-menu ul li button {
   width: 100%;
   padding: 10px;
-  background-color:rgb(186, 204, 50);
+  background-color:rgb(210, 199, 206);
   color: white;
   border: none;
   cursor: pointer;
@@ -877,7 +877,7 @@ table th {
   padding: 20px;
   height: 100vh; /* Set height to full viewport */
   box-sizing: border-box;
-  background-color:rgb(186, 204, 50);
+  background-color: #d2e8f3;
 }
 /* User Admin Page */
 
