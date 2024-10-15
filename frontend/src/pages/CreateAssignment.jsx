@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
+
+
 const CreateAssignment = ({ userId }) => { // Accept userId as a prop
     const [moduleCode, setModuleCode] = useState('');
     const [assignName, setAssignName] = useState('');
@@ -9,7 +11,7 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
     const [dueDate, setDueDate] = useState('');
     const [assignDesc, setAssignDesc] = useState('');
     const [notification, setNotification] = useState(''); // Notification state
-
+    const socket = io('http://localhost:8000'); // Connect to our Socket.IO server
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Form submitted');
@@ -28,6 +30,10 @@ const CreateAssignment = ({ userId }) => { // Accept userId as a prop
         };
 
         try {
+
+             // Emit the 'createAssignment' event to the server
+             socket.emit('createAssignment', assignmentData);
+             
             const response = await axios.post('http://localhost:5000/assignment', assignmentData);
             console.log('Assignment created successfully:', response.data);
             if (response.status === 201) { // Check for successful creation

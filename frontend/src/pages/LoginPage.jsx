@@ -2,14 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import paper from 'paper';
 import '../index.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing eye icons
 
 const LoginPage = () => {
   const [usernameLogin, setUsernameLogin] = useState('');
   const [passwordLogin, setPasswordLogin] = useState('');
-  const [usernameSignup, setUsernameSignup] = useState('');
   const [emailSignup, setEmailSignup] = useState('');
+  const [usernameSignup, setUsernameSignup] = useState(''); // Added username for signup
   const [passwordSignup, setPasswordSignup] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // Confirm password state
+  const [role, setRole] = useState('admin'); // Default role
   const [error, setError] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [loginPasswordVisible, setLoginPasswordVisible] = useState(false); // State for login password visibility
   const navigate = useNavigate(); // For navigation
 
   useEffect(() => {
@@ -45,73 +51,102 @@ const LoginPage = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
-    // Handle signup logic (replace with your API logic)
-    console.log('Sign Up form submitted', { emailSignup, usernameSignup, passwordSignup });
-    
-    // Mock API response for signup (replace with real API call)
-    const response = await mockApiSignUp(emailSignup, usernameSignup, passwordSignup);
-    
-    if (response.success) {
-      console.log('Signup successful');
-      // Optionally navigate or provide feedback
-    } else {
-      setError('Signup failed');
+
+    // Check for empty fields
+    if (!emailSignup || !passwordSignup || !confirmPassword || !usernameSignup) {
+      setError('Please fill in all fields!');
+      return;
+    }
+
+    // Validate password confirmation
+    if (passwordSignup !== confirmPassword) {
+      setError('Passwords do not match!');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailSignup,
+          username: usernameSignup,
+          password: passwordSignup,
+          role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Signup successful');
+        navigate('/login'); // Redirect to login page after successful signup
+      } else {
+        setError(data.message || 'Signup failed');
+      }
+    } catch (error) {
+      console.error('Error occurred:', error);
+      setError('An unexpected error occurred. Please try again later.');
     }
   };
-
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(''); // Clear previous errors
 
-    // Mock API request to verify login (replace this with actual API call)
-    const response = await mockApiLogin(usernameLogin, passwordLogin);  // Use a real API call here
-
-    if (response.success) {
-      const userRole = response.role; // Get the role from the response (Admin, Lecturer, Student)
-      
-      // Navigate based on user role
-      if (userRole === 'Admin') {
-        navigate('/user-admin');
-      } else if (userRole === 'Lecturer') {
-        navigate('/user-lecturer'); // page for Lecturer
-      } else if (userRole === 'Student') {
-        navigate('/user-student'); // page for Student
-      }
-    } else {
-      setError('Invalid username or password');
+    if (!usernameLogin || !passwordLogin) {
+      setError('Please fill in both username and password!');
+      return;
     }
-  };
 
-  // Mock API call for login - replace this with a real API call
-  const mockApiLogin = (username, password) => {
-    // Replace this logic with your backend API request
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (username === 'admin' && password === 'admin') {
-          resolve({ success: true, role: 'Admin' });
-        } else if (username === 'lecturer' && password === 'lecturer') {
-          resolve({ success: true, role: 'Lecturer' });
-        } else if (username === 'student' && password === 'student') {
-          resolve({ success: true, role: 'Student' });
-        } else {
-          resolve({ success: false });
-        }
-      }, 1000);
-    });
-  };
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(usernameLogin)) {
+      setError('Please enter a valid email address!');
+      return;
+    }
 
-   // Mock API call for signup - replace this with a real API call
-   const mockApiSignUp = (email, username, password) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (email && username && password) {
-          resolve({ success: true });
+    try {
+      const response = await fetch('http://localhost:5000/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: usernameLogin, password: passwordLogin }),
+      });
+
+      const data = await response.json();
+      console.log(data); // Log the response data
+
+      if (response.ok) {
+        if (data.userId) {
+          localStorage.setItem('jwt', data.token);
+          localStorage.setItem('userId', JSON.stringify(data.userId));
+
+          const userRole = data.role;
+          if (userRole === 'Admin') {
+            navigate('/user-admin');
+          } else if (userRole === 'Lecturer') {
+            navigate('/user-lecturer');
+          } else if (userRole === 'Student') {
+            navigate('/user-student');
+          }
         } else {
-          resolve({ success: false });
+          setError('User ID is not available.');
         }
-      }, 1000);
-    });
+      } else {
+        // Check for specific error messages based on response status
+        if (response.status === 401) {
+          setError('Incorrect username or password.');
+        } else {
+          setError(data.message || 'An unexpected error occurred.');
+        }
+      }
+    } catch (error) {
+      console.error('Error occurred:', error);
+      setError('Unable to connect. Please check your internet connection and try again.');
+    }
   };
 
   const goToSignUp = () => {
@@ -123,8 +158,6 @@ const LoginPage = () => {
     document.getElementById('slideBox').style.marginLeft = window.innerWidth > 769 ? '50%' : '20%';
     document.querySelector('.topLayer').style.marginLeft = '0';
   };
-
-  
 
   return (
     <div id="back">
@@ -162,20 +195,47 @@ const LoginPage = () => {
                 </div>
                 <div className="form-element form-stack">
                   <label htmlFor="password-signup" className="form-label">Password</label>
-                  <input
-                    id="password-signup"
-                    type="password"
-                    name="password"
-                    required
-                    value={passwordSignup}
-                    onChange={(e) => setPasswordSignup(e.target.value)}
-                  />
+                  <div className="password-input">
+                    <input
+                      id="password-signup"
+                      type={passwordVisible ? 'text' : 'password'}
+                      name="password"
+                      required
+                      value={passwordSignup}
+                      onChange={(e) => setPasswordSignup(e.target.value)}
+                    />
+                    <span onClick={() => setPasswordVisible(!passwordVisible)}>
+                      {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
                 </div>
-                <div className="form-element form-checkbox">
-                  <input id="confirm-terms" type="checkbox" name="confirm" value="yes" className="checkbox" required />
-                  <label htmlFor="confirm-terms">
-                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                  </label>
+                <div className="form-element form-stack">
+                  <label htmlFor="confirm-password" className="form-label">Confirm Password</label>
+                  <div className="password-input">
+                    <input
+                      id="confirm-password"
+                      type={confirmPasswordVisible ? 'text' : 'password'}
+                      name="confirmPassword"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    <span onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+                      {confirmPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
+                </div>
+                <div className="form-element form-stack">
+                  <label htmlFor="role" className="form-label">Role</label>
+                  <select
+                    id="role"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    required
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="lecturer">Lecturer</option>
+                  </select>
                 </div>
                 <div className="form-element form-submit">
                   <button id="signUp" className="signup" type="submit" name="signup">Sign up</button>
@@ -202,22 +262,26 @@ const LoginPage = () => {
                 </div>
                 <div className="form-element form-stack">
                   <label htmlFor="password-login" className="form-label">Password</label>
-                  <input
-                    id="password-login"
-                    type="password"
-                    name="password"
-                    required
-                    value={passwordLogin}
-                    onChange={(e) => setPasswordLogin(e.target.value)}
-                  />
+                  <div className="password-input">
+                    <input
+                      id="password-login"
+                      type={loginPasswordVisible ? 'text' : 'password'}
+                      name="password"
+                      required
+                      value={passwordLogin}
+                      onChange={(e) => setPasswordLogin(e.target.value)}
+                    />
+                    <span onClick={() => setLoginPasswordVisible(!loginPasswordVisible)}>
+                      {loginPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
                 </div>
                 <div className="form-element form-submit">
-                  <button id="logIn" className="login" type="submit" name="login">Log In</button>
+                  <button id="login" className="login" type="submit" name="login">Log in</button>
                   <button type="button" id="goRight" className="login off" onClick={goToSignUp}>Sign Up</button>
                 </div>
               </form>
               {error && <p style={{ color: 'red' }}>{error}</p>}
-              
             </div>
           </div>
         </div>
