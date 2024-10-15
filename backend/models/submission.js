@@ -5,13 +5,7 @@ class Submission{
         db.query('INSERT INTO submission SET ?',{
             sub_date: submissionData.sub_date,
             assignment_id: submissionData.assignment_id,
-        },  (err, results) => {
-            if(err){
-                console.log(err);
-                return callback(err);
-            }
-            return callback(null, {sub_id: results.insertId })
-    });
+        }, callback);
     }
 
     static createUserSubmission(submissionData, callback){
@@ -27,7 +21,7 @@ class Submission{
             [sub_id, user_id], callback);
     }
 
-    static selectSubmission(sub_id, user_id, callback){
+    static selectSubmission(sub_id, callback){
         db.query('SELECT * FROM submission WHERE sub_id = ?',
             [sub_id], callback);
     }
@@ -44,6 +38,7 @@ class Submission{
     static createLectureFeedback(feedbackData, callback){
         db.query('INSERT INTO feedback SET ?',
             {
+                feed_id: feedbackData.feed_id,
                 user_id: feedbackData.user_id,
                 assignment_id: feedbackData.assignment_id,
                 description: feedbackData.description,
@@ -74,24 +69,24 @@ class Submission{
         );
     }
 
-    static selectVideoSubmissions(assignment_id,callback) {
-        db.query(`
+    static selectVideoSubmissions(callback) {
+        const query =`
             SELECT 
-                v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,
-                a.assignment_id, a.assign_name, a.upload_date, a.due_date,
-                u.user_id, u.name
+                s.sub_id, a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
             FROM 
-                video v
+                videos v
             JOIN 
                 users u ON v.user_id = u.user_id
             JOIN 
                 assignment a ON a.user_id = u.user_id
-            WHERE 
-                v.user_id = a.user_id AND a.user_id = u.user_id AND a.assignment_id = ?`,
-            
-        [assignment_id], callback);
+            JOIN 
+                submission s ON s.assignment_id= a.assignment_id;`;
+          
+        db.query(query, callback);
     }
-
+    //selectVideoSubmissions and selectVideoSubmissions all, is not the same?
+    //Dont alter selectVideoSubmissions.
+    
     static selectVideoSubmissionsAll(callback) {
         db.query(`SELECT 
                 v.filename, v.size, v.uploadAt, v.compressed_status, v.videoUrl,

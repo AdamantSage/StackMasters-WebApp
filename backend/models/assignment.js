@@ -9,13 +9,7 @@ class Assignment {
             due_date: assignmentData.due_date,
             assign_desc: assignmentData.assign_desc,
             user_id: assignmentData.user_id
-        }, (err, results) => {
-            if(err){
-                console.log(err);
-                return callback(err);
-            }
-            return callback(null, {assignment_id: results.insertId })
-    });
+        }, callback);
     }
 
     static createUserAssignment(assignmentData, callback){
@@ -26,7 +20,7 @@ class Assignment {
     }
 
     static select(assignment_id, callback){
-        db.query('SELECT * FROM assignment WHERE assignment_id = ?', [assignment_id], callback);
+        db.query('SELECT * FROM assignment WHERE assignment_id = ? AND user_id = ?', [assignment_id], callback);
     }
 
     static newSelect(module_code, callback){

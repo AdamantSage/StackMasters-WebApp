@@ -21,7 +21,7 @@ exports.createSubmission = (req, res) =>{
         }else{
             console.log(results); // Log the results of the query
             // Send a JSON response with success message and status code 201 which means the request is successful
-            return res.status(201).json({ message: "Submission created successfully.", sub_id: results.sub_id });
+            return res.status(201).json({ message: "Submission created successfully." });
         }
     });
 };
