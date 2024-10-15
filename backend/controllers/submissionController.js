@@ -295,3 +295,25 @@ exports.getFeedbackForSubmission = (req, res) => {
         return res.status(200).json({ feedback });
     });
 };
+
+// In your submissionController.js or similar file
+
+exports.getGradeDistribution = async (req, res) => {
+    try {
+        const query = `
+            SELECT assignment_id,
+                SUM(CASE WHEN grade BETWEEN 0 AND 50 THEN 1 ELSE 0 END) as '0-50',
+                SUM(CASE WHEN grade BETWEEN 51 AND 70 THEN 1 ELSE 0 END) as '51-70',
+                SUM(CASE WHEN grade BETWEEN 71 AND 85 THEN 1 ELSE 0 END) as '71-85',
+                SUM(CASE WHEN grade BETWEEN 86 AND 100 THEN 1 ELSE 0 END) as '86-100'
+            FROM feedback
+            GROUP BY assignment_id;
+        `;
+
+        const [results] = await db.query(query); // Ensure you have db defined
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching grade distribution:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};

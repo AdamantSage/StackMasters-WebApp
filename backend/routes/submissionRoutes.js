@@ -31,5 +31,8 @@ router.get('/video-submissions',SubmissionController.selectVideoSubmissions);
 // Get feedback via user_id and assignment_id
 router.get('/feedback/:sub_id',authMiddleware, SubmissionController.getFeedbackForSubmission);
 
+// Define the route for grade distribution
+router.get('/grades-distribution', submissionController.getGradeDistribution);
+
 
 module.exports = router;
