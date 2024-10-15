@@ -81,11 +81,9 @@ class Submission{
             JOIN 
                 assignment a ON a.user_id = u.user_id
             JOIN 
-                submission s ON s.assignment_id = a.assignment_id
-            WHERE 
-                a.assignment_id = ?`; // Added WHERE clause to filter by assignment_id
+                submission s ON s.assignment_id = a.assignment_id`; // Added WHERE clause to filter by assignment_id
     
-        db.query(query, [assignment_id], callback);
+        db.query(query, callback);
     }
     
 }
