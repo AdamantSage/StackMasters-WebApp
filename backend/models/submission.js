@@ -70,10 +70,10 @@ class Submission{
         );
     }
 
-    static selectVideoSubmissions(assignment_id,callback) {
-        db.query(`
+    static selectVideoSubmissions(assignment_id, callback) {
+        const query = `
             SELECT 
-                s.sub_id, a.assign_name,u.user_id,a.upload_date,a.assignment_id, v.videoUrl
+                s.sub_id, a.assign_name, u.user_id, a.upload_date, a.assignment_id, v.videoUrl
             FROM 
                 video v
             JOIN 
@@ -81,10 +81,13 @@ class Submission{
             JOIN 
                 assignment a ON a.user_id = u.user_id
             JOIN 
-                submission s ON s.assignment_id= a.assignment_id;`;
-          
-        db.query(query, callback);
+                submission s ON s.assignment_id = a.assignment_id
+            WHERE 
+                a.assignment_id = ?`; // Added WHERE clause to filter by assignment_id
+    
+        db.query(query, [assignment_id], callback);
     }
+    
 }
 
 module.exports = Submission;
