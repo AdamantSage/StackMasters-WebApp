@@ -55,42 +55,58 @@ const LoginPage = () => {
 
     // Validation checks
     if (!emailSignup || !passwordSignup || !confirmPassword || !usernameSignup) {
-      setError('Please fill in all fields!');
-      return;
+        setError('Please fill in all fields!');
+        return;
     }
 
     if (passwordSignup !== confirmPassword) {
-      setError('Passwords do not match!');
-      return;
+        setError('Passwords do not match!');
+        return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: emailSignup,
-          username: usernameSignup,
-          password: passwordSignup,
-          role,
-        }),
-      });
+        const response = await fetch('http://localhost:5000/users/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: usernameSignup,
+                role: role,
+                email: emailSignup,
+                password: passwordSignup,
+                passwordConfirm: confirmPassword,
+            }),
+        });
 
-      const data = await response.json();
+        // Check if the response is okay (status 200-299)
+        if (!response.ok) {
+            const errorData = await response.text(); // Get the response text
+            console.error('Error response:', errorData); // Log for debugging
 
-      if (response.ok) {
-        console.log('Signup successful');
+            // Check if the error response is JSON
+            try {
+                const jsonData = JSON.parse(errorData);
+                setError(jsonData.message || 'Signup failed'); // Use the error message from the server
+            } catch (e) {
+                setError('Error creating user: ' + errorData); // Fallback for non-JSON errors
+            }
+            return;
+        }
+
+        const data = await response.json();
+        console.log('Signup successful:', data);
+        alert('User has been created successfully!'); // Show pop-up notification
+        window.location.reload(); // Refresh the page
         navigate('/login'); // Redirect to login after signup
-      } else {
-        setError(data.message || 'Signup failed');
-      }
+
     } catch (error) {
-      console.error('Error occurred:', error);
-      setError('An unexpected error occurred. Please try again later.');
+        console.error('Error occurred:', error);
+        setError('An unexpected error occurred. Please try again later.');
     }
-  };
+};
+
+
 
   // Login handler
   const handleLogin = async (e) => {
@@ -103,7 +119,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users', {
+      const response = await fetch('http://localhost:5000/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,13 +140,13 @@ const LoginPage = () => {
           const userRole = data.role;
           // Role-based redirection
           switch (userRole) {
-            case 'Admin':
+            case 'admin':
               navigate('/user-admin');
               break;
-            case 'Lecturer':
+            case 'lecturer':
               navigate('/user-lecturer');
               break;
-            case 'Student':
+            case 'student':
               navigate('/profile');
               break;
             default:

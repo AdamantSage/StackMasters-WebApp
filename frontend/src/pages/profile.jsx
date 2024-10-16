@@ -48,7 +48,7 @@ const ProfilePage = () => {
         return;
       }
 
-      const response = await fetch(`http://192.168.48.255:5000/users/users/${userId}`, {
+      const response = await fetch(`http://localhost:5000/users/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -104,7 +104,7 @@ const ProfilePage = () => {
     }
 
     try {
-      const response = await fetch(`http://192.168.48.255:5000/users/update/${userId}`, {
+      const response = await fetch(`http://localhost:5000/users/update/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
