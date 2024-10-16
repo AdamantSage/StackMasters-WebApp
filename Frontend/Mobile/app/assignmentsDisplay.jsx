@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Alert, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAssignmentContext } from '@/components/assignmentContext';
 import { getUserId } from './utils';
@@ -19,6 +19,8 @@ const AssignmentsDisplay = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [cameraRef, setCameraRef] = useState(null);
   const [moduleCode, setModuleCode] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const uploadVideoApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/routes/uploads';
   const compressVideoApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/routes/test-compress';
@@ -170,6 +172,11 @@ const AssignmentsDisplay = () => {
   };
 
   const handleSubmit = async () => {
+    if (isUploading) return; // Prevent multiple submissions
+
+    setIsUploading(true); // Set uploading state to true
+    setUploadProgress(0); // Reset upload progress
+
     try {
       const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const submissionData = {
@@ -210,6 +217,7 @@ const AssignmentsDisplay = () => {
         throw new Error('Failed to create user submission');
       }
 
+      // Track upload progress
       const uploadResponse = await uploadVideo(videoUri);
       if (!uploadResponse) return;
 
@@ -217,6 +225,8 @@ const AssignmentsDisplay = () => {
     } catch (error) {
       console.error('Error during submission process:', error);
       Alert.alert('Error during submission process', error.message);
+    } finally {
+      setIsUploading(false); // Reset uploading state
     }
   };
 
@@ -257,6 +267,14 @@ const AssignmentsDisplay = () => {
             Video Selected: {videoName ? videoName : `${videoUri.substring(0, 30)}...`}
           </Text>
         )}
+
+        {isUploading && (
+          <View style={styles.progressContainer}>
+            <Text style={styles.progressText}>Uploading: {uploadProgress}%</Text>
+            <ActivityIndicator size="small" color="#0000ff" />
+          </View>
+        )}
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={chooseVideo}>
             <Entypo name="folder-video" size={50} color="#fff" />
@@ -278,7 +296,11 @@ const AssignmentsDisplay = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity 
+          style={styles.submitButton} 
+          onPress={handleSubmit} 
+          disabled={isUploading} // Disable while uploading
+        >
           <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -352,6 +374,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     marginTop: 20,
+  },
+  progressContainer: {
+    marginVertical: 20,
+    alignItems: 'center',
+  },
+  progressText: {
+    fontSize: 16,
   },
 });
 
