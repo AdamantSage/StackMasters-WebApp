@@ -26,7 +26,7 @@ const Assignments = () => {
 
   useEffect(() => {
     if(selectedModule){
-      fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignment/${selectedModule}`).then(response => response.json()).then((data) =>{
+      fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignmentModule/${selectedModule}`).then(response => response.json()).then((data) =>{
         console.log('Fetched assignments:', data);
         setAssignments(data);
       }).catch((error) => {
@@ -62,7 +62,7 @@ const Assignments = () => {
               }}
             >
             <Text>Assignment Name: {item.assign_name}</Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
           </View>
         )}
       />

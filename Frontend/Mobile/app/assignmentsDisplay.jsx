@@ -41,7 +41,7 @@ const AssignmentsDisplay = () => {
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignments/${assignmentId}`);
+        const response = await fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignmentID/${assignmentId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
