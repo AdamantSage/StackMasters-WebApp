@@ -12,20 +12,9 @@ const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
 
     const [assignmentCounts, setAssignmentCounts] = useState({ created: 0, submitted: 0 });
-    const [gradeData, setGradeData] = useState({ labels: [], datasets: [] });
+  
     const [userCounts, setUserCounts] = useState({ lecturers: 0, students: 0 });
-    const [chartData, setChartData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Videos Uploaded',
-                data: [],
-                fill: false,
-                backgroundColor: 'rgba(75, 192, 192, 1)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-            },
-        ],
-    });
+    
 
     const fetchAssignmentCounts = async () => {
         try {
@@ -45,75 +34,14 @@ const AdminDashboard = () => {
         }
     };
 
-    const fetchVideoCountsByHour = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/videos/hour');
-            const hours = response.data.map(item => item.upload_hour);
-            const counts = response.data.map(item => item.video_count);
+  
 
-            setChartData({
-                labels: hours,
-                datasets: [
-                    {
-                        label: 'Videos Uploaded',
-                        data: counts,
-                        fill: false,
-                        backgroundColor: 'rgba(75, 192, 192, 1)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                    },
-                ],
-            });
-        } catch (error) {
-            console.error('Error fetching video counts:', error);
-        }
-    };
-
-    const fetchGradeDistribution = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/grades-distribution');
-            const modules = response.data.map(item => `Module ${item.assignment_id}`);
-            const gradeRanges = {
-                '0-50': response.data.map(item => item['0-50']),
-                '51-70': response.data.map(item => item['51-70']),
-                '71-85': response.data.map(item => item['71-85']),
-                '86-100': response.data.map(item => item['86-100']),
-            };
-
-            setGradeData({
-                labels: modules,
-                datasets: [
-                    {
-                        label: '0-50%',
-                        data: gradeRanges['0-50'],
-                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                    },
-                    {
-                        label: '51-70%',
-                        data: gradeRanges['51-70'],
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    },
-                    {
-                        label: '71-85%',
-                        data: gradeRanges['71-85'],
-                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                    },
-                    {
-                        label: '86-100%',
-                        data: gradeRanges['86-100'],
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    },
-                ],
-            });
-        } catch (error) {
-            console.error('Error fetching grade distribution:', error);
-        }
-    };
+   
 
     useEffect(() => {
         fetchAssignmentCounts();
         fetchUserCounts();
-        fetchVideoCountsByHour();
-        fetchGradeDistribution();
+       
     }, []);
 
     useEffect(() => {
@@ -176,43 +104,9 @@ const AdminDashboard = () => {
                 ))}
             </ul>
 
-            <div>
-                <h2>Video Upload Counts by Hour</h2>
-                <Bar
-                    data={chartData}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                            },
-                        },
-                    }}
-                />
-            </div>
+          
 
-            <div>
-                <h2>Grade Distribution by Module</h2>
-                <Bar
-                    data={gradeData}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Students',
-                                },
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Modules',
-                                },
-                            },
-                        },
-                    }}
-                />
-            </div>
+           
         </div>
     );
 };
@@ -223,13 +117,12 @@ const LecturerDashboard = () => {
     const [students, setStudents] = useState([]);
 
     const [assignmentCounts, setAssignmentCounts] = useState({ created: 0, submitted: 0 });
-    const [videoCounts, setVideoCounts] = useState({ labels: [], datasets: [] });
-    const [gradeData, setGradeData] = useState({ labels: [], datasets: [] });
+   
 
     // Fetch Assignment Counts
     const fetchAssignmentCounts = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/assignment/counts');
+            const response = await axios.get('http://localhost:5000/assignment/total');
             setAssignmentCounts(response.data);
         } catch (error) {
             console.error('Error fetching assignment counts:', error);
@@ -237,69 +130,9 @@ const LecturerDashboard = () => {
     };
 
     // Fetch Video Upload Counts by Hour
-    const fetchVideoCountsByHour = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/videos/hour');
-            const hours = response.data.map(item => `${item.hour}:00`);
-            const videoUploads = response.data.map(item => item.uploadCount);
-
-            setVideoCounts({
-                labels: hours,
-                datasets: [
-                    {
-                        label: 'Videos Uploaded',
-                        data: videoUploads,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                    },
-                ],
-            });
-        } catch (error) {
-            console.error('Error fetching video counts by hour:', error);
-        }
-    };
-
+   
     // Fetch Grade Distribution
-    const fetchGradeDistribution = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/grades-distribution');
-            const modules = response.data.map(item => `Module ${item.assignment_id}`);
-            const gradeRanges = {
-                '0-50': response.data.map(item => item['0-50']),
-                '51-70': response.data.map(item => item['51-70']),
-                '71-85': response.data.map(item => item['71-85']),
-                '86-100': response.data.map(item => item['86-100']),
-            };
-
-            setGradeData({
-                labels: modules,
-                datasets: [
-                    {
-                        label: '0-50%',
-                        data: gradeRanges['0-50'],
-                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                    },
-                    {
-                        label: '51-70%',
-                        data: gradeRanges['51-70'],
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    },
-                    {
-                        label: '71-85%',
-                        data: gradeRanges['71-85'],
-                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
-                    },
-                    {
-                        label: '86-100%',
-                        data: gradeRanges['86-100'],
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    },
-                ],
-            });
-        } catch (error) {
-            console.error('Error fetching grade distribution:', error);
-        }
-    };
+    
 
     // Fetch students for searching
     const fetchStudents = async () => {
@@ -323,8 +156,7 @@ const LecturerDashboard = () => {
     // Fetch data on initial load
     useEffect(() => {
         fetchAssignmentCounts();
-        fetchVideoCountsByHour();
-        fetchGradeDistribution();
+       
         fetchStudents();
     }, []);
 
@@ -367,53 +199,9 @@ const LecturerDashboard = () => {
                 ))}
             </ul>
 
-            <div>
-                <h2>Video Upload Counts by Hour</h2>
-                <Bar
-                    data={videoCounts}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Videos',
-                                },
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Time of Day (Hour)',
-                                },
-                            },
-                        },
-                    }}
-                />
-            </div>
+          
 
-            <div>
-                <h2>Grade Distribution by Module</h2>
-                <Bar
-                    data={gradeData}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: 'Number of Students',
-                                },
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Modules',
-                                },
-                            },
-                        },
-                    }}
-                />
-            </div>
+           
         </div>
     );
 };
