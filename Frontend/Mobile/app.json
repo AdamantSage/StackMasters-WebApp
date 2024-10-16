@@ -28,8 +28,11 @@
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE",
-        "RECORD_AUDIO"
-      ]
+        "RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.adamantsage.Mobile"
     },
     "web": {
       "bundler": "metro",
@@ -52,4 +55,3 @@
     }
   }
 }
-

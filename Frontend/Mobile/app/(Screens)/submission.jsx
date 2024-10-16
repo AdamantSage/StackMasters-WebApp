@@ -37,7 +37,7 @@ const Submission = () => {
   const fetchSubmissions = async (userId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await axios.get(`http://192.168.48.255:5000/submissions?userId=${userId}`, {
+      const response = await axios.get(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/submissions?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSubmissions(response.data);
@@ -52,7 +52,7 @@ const Submission = () => {
   const fetchFeedbacks = async (subId) => {
     try {
       const token = await AsyncStorage.getItem('jwt');
-      const response = await axios.get(`http://192.168.48.255:5000/feedback/${subId}`, {
+      const response = await axios.get(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/feedback/${subId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
   
