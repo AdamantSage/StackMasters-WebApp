@@ -42,6 +42,7 @@ exports.createUserSubmission = (req, res) =>{
     Submission.createUserSubmission({
         user_id,
         sub_id,
+        module_code
         }, (err, results) => {
         if(err){
             console.log(err); // Log any errors
