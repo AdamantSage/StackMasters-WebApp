@@ -1,10 +1,11 @@
-// src/components/LandingPage.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+// Import the image from the src folder
+import logo from '../CMYK_NWU_Logo-Purple.png'; // Adjusted path to import the image
 
 function LandingPage() {
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate();
 
   const handleGetStarted = () => {
     navigate('/login');
@@ -50,11 +51,11 @@ function LandingPage() {
         <div className="container">
           <div className="info">
             <h1>Welcome</h1>
-            <p>Just an overview maybe</p>
+                <p className="motto"> It All Starts Here.</p>
             <button onClick={handleGetStarted} className="get-started-button">Get Started</button>
           </div>
           <div className="image">
-            /* Add image here */
+            <img src={logo} alt="Overview" className="landing-image" /> {/* Use the imported logo */}
           </div>
         </div>
       </div>

@@ -278,6 +278,10 @@ button:focus, button:active, button:hover {
 /* index.css */
 /* Existing styles... */
 
+
+.info{
+  padding-left: 100px;
+}
 .links-container {
   display: flex;
   flex-direction: column; /* Stack links vertically */
@@ -394,6 +398,13 @@ ul {
   .landing-page header .links li {
     margin-left: auto;
   }
+}
+.logo{
+  padding-left: 100px;
+}
+.motto{
+  text-align: center;
+  
 }
 .landing-page header .links li:last-child {
   border-radius: 20px;
@@ -669,6 +680,14 @@ table th {
   display: flex;
   align-items: center;
 }
+
+.landing-image {
+  width: 100%; /* Adjust as necessary */
+  height: 500px; /* Maintain aspect ratio */
+  max-width: 400px; /* Set a max width */
+  margin-top: 20px; /* Add space above */
+}
+
 
 .profile-image {
   width: 40px;
