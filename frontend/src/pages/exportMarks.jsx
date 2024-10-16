@@ -6,7 +6,7 @@ const ExportMarks = () => {
   const handleExport = async () => {
     setLoading(true); // Show loading spinner
     try {
-      const response = await fetch('http://localhost:5000/users/exportMarks', {
+      const response = await fetch('http://localhost:5000/exportMarks', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
