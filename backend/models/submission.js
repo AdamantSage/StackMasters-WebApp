@@ -5,6 +5,7 @@ class Submission{
         db.query('INSERT INTO submission SET ?',{
             sub_date: submissionData.sub_date,
             assignment_id: submissionData.assignment_id,
+            feed_id: submissionData.feed_id || null
         }, callback);
     }
 

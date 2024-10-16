@@ -37,7 +37,7 @@ router.get('/dashboard', authenticateToken, checkRole(['admin', 'lecturer', 'stu
 });
 // Route to get marks exported
 //admin and lecturer can export marks
-router.get('/exportMarks', authenticateToken, checkRole(['admin', 'lecturer']), async (req, res) => {
+router.get('/exportMarks', async (req, res) => {
     try {
         await exportMarksToExcel(res);
     } catch (error) {
