@@ -51,7 +51,7 @@ const Register = () => {
       try {
         data = JSON.parse(text);
       } catch (error) {
-        Alert.alert('Error', 'Failed to parse server response');
+        Alert.alert('Error', 'email or user already exists');
         setLoading(false);
         return;
       }

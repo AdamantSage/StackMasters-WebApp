@@ -18,7 +18,6 @@ const AssignmentsDisplay = () => {
   const [videoName, setVideoName] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [cameraRef, setCameraRef] = useState(null);
-  const [moduleCode, setModuleCode] = useState(null);
 
   const uploadVideoApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/routes/uploads';
   const compressVideoApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/routes/test-compress';
@@ -48,7 +47,6 @@ const AssignmentsDisplay = () => {
         const assignmentData = await response.json();
         if (assignmentData.length > 0) {
           setAssignment(assignmentData[0]);
-          setModuleCode(assignmentData[0].module_code);
         } else {
           console.log('No assignment data available.');
         }
@@ -202,7 +200,6 @@ const AssignmentsDisplay = () => {
     const userOnSubmissionData = {
       user_id: userId,
       sub_id: submissionId,
-      module_code: moduleCode
     };
 
     console.log("Creating user submission with data:", userOnSubmissionData);
