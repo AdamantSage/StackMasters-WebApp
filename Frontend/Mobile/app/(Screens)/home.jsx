@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,8 +20,8 @@ const Home = ({ loggedInUserId }) => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('jwt'); // Remove the JWT token
-      await AsyncStorage.removeItem('userId'); // Remove the user ID
+      await AsyncStorage.removeItem('jwt');
+      await AsyncStorage.removeItem('userId');
       router.push('/sign-in');
     } catch (error) {
       console.error('Error during logout:', error);
@@ -32,8 +32,9 @@ const Home = ({ loggedInUserId }) => {
   return (
     <View style={styles.container}>
       <View style={styles.sidebar}>
+        <Text style={styles.logo}>HMS-StackMasters</Text>
         <TouchableOpacity style={styles.sidebarButton} onPress={goToProfile}>
-          <Text style={styles.sidebarButtonText}>Go to Profile</Text>
+          <Text style={styles.sidebarButtonText}>Profile</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.sidebarButton} onPress={goToAssignments}>
           <Text style={styles.sidebarButtonText}>Assignments</Text>
@@ -48,9 +49,9 @@ const Home = ({ loggedInUserId }) => {
 
       <View style={styles.mainContent}>
         <Text style={styles.title}>Welcome Home!</Text>
+        <Image source={{ uri: 'https://img.freepik.com/free-vector/multi-ethnic-group-school-students-kids_3446-667.jpg?t=st=1729092255~exp=1729095855~hmac=e5f2132e5c4d023c8865289d02fbffd187989a0fe9a0d77253963e13f78473b2&w=740' }} style={styles.profilePic} />
         <Text style={styles.subtitle}>Designed by Michael, Tintswalo, Charmaine, and Marco</Text>
-        <Text style={styles.subtitle}>What would you like to do?</Text>
-        {/* Removed the Go to Profile button from here */}
+        <Text style={styles.subtitle}>What would you like to do today?</Text>
       </View>
     </View>
   );
@@ -60,23 +61,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#afdde5', // Light background color
+    backgroundColor: '#eaf4f7', // Light background color
   },
   sidebar: {
-    width: '30%', // Adjust width as needed
-    backgroundColor: '#003135', // Dark teal for sidebar
+    width: '30%',
+    backgroundColor: '#003135',
     padding: 20,
     justifyContent: 'flex-start',
+  },
+  logo: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   sidebarButton: {
     paddingVertical: 15,
     paddingHorizontal: 10,
     marginBottom: 10,
     borderRadius: 10,
-    backgroundColor: '#663399', // Purple button color for sidebar
+    backgroundColor: '#663399',
   },
   sidebarButtonText: {
-    color: '#fff', // White text for sidebar buttons
+    color: '#fff',
     fontSize: 16,
     textAlign: 'center',
   },
@@ -88,25 +96,20 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    color: '#003135', // Dark teal for title
+    color: '#003135',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: '#003135', // Dark teal for subtitle
+    color: '#003135',
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: '#663399', // Purple button color
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    marginBottom: 15,
-  },
-  buttonText: {
-    color: '#fff', // White text for buttons
-    fontSize: 16,
+  profilePic: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
   },
 });
 
-export default Home; // Use PascalCase for component names
+export default Home;

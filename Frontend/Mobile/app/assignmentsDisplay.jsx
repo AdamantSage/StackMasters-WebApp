@@ -90,7 +90,6 @@ const AssignmentsDisplay = () => {
     }
   };
 
-  // 2. Compress Video
   const compressVideo = async (uri) => {
     const formData = new FormData();
     formData.append('video', {
@@ -119,8 +118,7 @@ const AssignmentsDisplay = () => {
   };
 
   const getMimeTypeFromUri = (uri) => {
-    const extension = uri.split('.').pop(); // Get the file extension from the URI
-  
+    const extension = uri.split('.').pop();
     switch (extension) {
       case 'mp4':
         return 'video/mp4';
@@ -131,11 +129,10 @@ const AssignmentsDisplay = () => {
       case 'mkv':
         return 'video/x-matroska';
       default:
-        return 'application/octet-stream'; // Fallback for unknown types
+        return 'application/octet-stream';
     }
   };
 
-  // 3. Upload Video
   const uploadVideo = async (uri) => {
     const videoType = getMimeTypeFromUri(videoUri);
 
@@ -146,14 +143,12 @@ const AssignmentsDisplay = () => {
       name: videoName,
     });
 
-    formData.append('filename', videoName); // File name (optional)
-    formData.append('mimetype', videoType); // MIME type (optional)
-    formData.append('size', ''); // Size left empty (optional)
-    formData.append('path', videoUri); // Use the videoUri as the file path
-    formData.append('uploadAt', ''); // UploadAt left empty (optional)
-    formData.append('user_id', userId); // ID of the logged-in user
-
-    console.log('Uploading video with FormData:', formData);
+    formData.append('filename', videoName);
+    formData.append('mimetype', videoType);
+    formData.append('size', '');
+    formData.append('path', videoUri);
+    formData.append('uploadAt', '');
+    formData.append('user_id', userId);
 
     try {
       const response = await fetch(uploadVideoApi, {
@@ -182,51 +177,41 @@ const AssignmentsDisplay = () => {
         assignment_id: assignmentId
       };
 
-    console.log("Creating submission with data:", submissionData);
-    const createSubmissionResponse = await fetch(createSubmissionApi, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(submissionData),
-    });
+      const createSubmissionResponse = await fetch(createSubmissionApi, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData),
+      });
 
-    if (!createSubmissionResponse.ok) {
-      throw new Error('Failed to create submission');
-    }
+      if (!createSubmissionResponse.ok) {
+        throw new Error('Failed to create submission');
+      }
 
-    const submissionResult = await createSubmissionResponse.json();
-    console.log("Submission Result:", submissionResult);
-    const submissionId = submissionResult.sub_id;
+      const submissionResult = await createSubmissionResponse.json();
+      const submissionId = submissionResult.sub_id;
 
-    const userOnSubmissionData = {
-      user_id: userId,
-      sub_id: submissionId,
-      module_code: moduleCode
-    };
+      const userOnSubmissionData = {
+        user_id: userId,
+        sub_id: submissionId,
+        module_code: moduleCode
+      };
 
-    console.log("Creating user submission with data:", userOnSubmissionData);
-    const userSubmissionResponse = await fetch(createUserSubmission, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userOnSubmissionData),
-    });
+      const userSubmissionResponse = await fetch(createUserSubmission, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userOnSubmissionData),
+      });
 
-    if (!userSubmissionResponse.ok) {
-      throw new Error('Failed to create user submission');
-    }
+      if (!userSubmissionResponse.ok) {
+        throw new Error('Failed to create user submission');
+      }
 
-    // Now upload the video after user submission is created
-    const uploadResponse = await uploadVideo(videoUri);
-    if (!uploadResponse) return;
-
-    // Then compress the video after upload
-    //const compressedVideoUrl = await compressVideo(videoUri);
-    /*if (compressedVideoUrl) {
-      setCompressedVideoUrl(compressedVideoUrl); // Store the compressed video URL if needed
-    }*/
+      const uploadResponse = await uploadVideo(videoUri);
+      if (!uploadResponse) return;
 
       Alert.alert('Submission successful!');
     } catch (error) {
@@ -235,15 +220,14 @@ const AssignmentsDisplay = () => {
     }
   };
 
-
   const startRecording = async () => {
     if (cameraRef) {
       try {
         const videoRecordPromise = cameraRef.recordAsync();
         if (videoRecordPromise) {
           const data = await videoRecordPromise;
-          setVideoUri(data.uri); // Get the video URI from the recorded video
-          setIsRecording(false); // Stop recording
+          setVideoUri(data.uri);
+          setIsRecording(false);
         }
       } catch (error) {
         console.error('Error recording video:', error);
@@ -268,8 +252,11 @@ const AssignmentsDisplay = () => {
         <Text style={styles.descHead}>Assignment Description:</Text>
         <Text style={styles.desc}>{assignment?.assign_desc}</Text>
 
-        {videoUri && <Text style={styles.Video}>Video Selected: {videoUri}</Text>}
-
+        {videoUri && (
+          <Text style={styles.Video}>
+            Video Selected: {videoName ? videoName : `${videoUri.substring(0, 30)}...`}
+          </Text>
+        )}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={chooseVideo}>
             <Entypo name="folder-video" size={50} color="#fff" />
@@ -286,22 +273,14 @@ const AssignmentsDisplay = () => {
               }
             }}
           >
-            <AntDesign name="videocamera" size={50} color="#fff" />
-            <Text style={styles.buttonText}>{isRecording ? 'Stop Recording' : 'Record Video'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <AntDesign name="checksquare" size={50} color="#fff" />
-            <Text style={styles.buttonText}>Submit Video</Text>
+            <AntDesign name="camera" size={50} color="#fff" />
+            <Text style={styles.buttonText}>{isRecording ? 'Stop Recording' : 'Record'}</Text>
           </TouchableOpacity>
         </View>
 
-        {isRecording && (
-          <Camera
-            style={styles.camera}
-            ref={(ref) => setCameraRef(ref)}
-            type={Camera.Constants.Type.back}
-          />
-        )}
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -310,80 +289,70 @@ const AssignmentsDisplay = () => {
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: 'blue', // Change background color to blue
-    padding: 20,
+    backgroundColor: '#f5f5f5',
   },
   scrollContainer: {
-    alignItems: 'center',
-    paddingBottom: 40,
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
   },
   Heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    textAlign: 'center',
     marginBottom: 10,
   },
   date: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#555',
-    marginVertical: 5,
   },
   dateDisplay: {
-    fontSize: 16,
-    color: '#777',
-    marginBottom: 15,
+    fontSize: 14,
+    marginBottom: 10,
   },
   descHead: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
   },
   desc: {
-    fontSize: 16,
-    color: '#444',
+    fontSize: 14,
     marginBottom: 20,
-    textAlign: 'center',
   },
   Video: {
     fontSize: 16,
     color: '#333',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'space-evenly',
     marginBottom: 20,
   },
   button: {
-    flex: 1,
-    backgroundColor: '#3b5998',
+    backgroundColor: '#007bff',
     borderRadius: 8,
-    paddingVertical: 15,
-    paddingHorizontal: 10,
+    padding: 16,
     alignItems: 'center',
-    marginHorizontal: 5,
   },
   buttonText: {
-    fontSize: 16,
     color: '#fff',
     marginTop: 5,
   },
-  camera: {
-    width: '100%',
-    height: 300,
+  submitButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 16,
     borderRadius: 8,
-    marginTop: 20,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   loadingText: {
-    fontSize: 20,
-    color: '#555',
+    textAlign: 'center',
+    fontSize: 18,
+    marginTop: 20,
   },
 });
-
 
 export default AssignmentsDisplay;
