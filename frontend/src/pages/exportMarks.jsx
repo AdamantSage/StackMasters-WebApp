@@ -6,7 +6,7 @@ const ExportMarks = () => {
   const handleExport = async () => {
     setLoading(true); // Show loading spinner
     try {
-      const response = await fetch('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/users/exportMarks', {
+      const response = await fetch('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/exportMarks', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
