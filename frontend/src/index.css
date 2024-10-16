@@ -404,7 +404,7 @@ ul {
 }
 .motto{
   text-align: center;
-  
+
 }
 .landing-page header .links li:last-child {
   border-radius: 20px;
@@ -1065,6 +1065,18 @@ table th {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
+.updateButton, .toggleButton {
+  background-color: #673AB7; /* Purple color */
+  color: white; /* White text color */
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
+.updateButton:hover, .toggleButton:hover {
+  background-color: #5E35B1; /* Darker purple on hover */
+}
 /* profile */
 

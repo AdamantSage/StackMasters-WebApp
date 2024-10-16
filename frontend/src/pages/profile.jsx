@@ -143,12 +143,13 @@ const ProfilePage = () => {
   return (
     <div className="profileContainer">
       <h1 className="header">Profile</h1>
-      <button className="updateButton" onClick={handleUpdateProfile}>
-        Update
-      </button>
-      <button className="logoutButton" onClick={handleLogout}>
-        Logout
-      </button>
+      
+      <div className="summaryBox">
+        <p><strong>Name:</strong> {name}</p>
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Role:</strong> {role}</p>
+      </div>
+      
 
       <input
         className="input"
@@ -164,6 +165,8 @@ const ProfilePage = () => {
         onChange={(e) => setEmail(e.target.value)}
         value={email}
       />
+      <p className="label">Role: {role}</p>
+
       <div className="passwordContainer">
         <input
           className="passwordInput"
@@ -188,8 +191,10 @@ const ProfilePage = () => {
           {confirmPasswordVisible ? 'Hide' : 'Show'}
         </button>
       </div>
+      <button className="updateButton" onClick={handleUpdateProfile}>
+        Update
+      </button>
 
-      <p className="label">Role: {role}</p>
     </div>
   );
 };

@@ -47,7 +47,7 @@ const LecturerPage = ({user}) => {
         <div className="user-page">
             <aside className="sidebar">
                 <div className="profile-section">
-                    <img src="lecturer-profile-pic.jpg" alt="Lecturer" className="profile-pic" />
+                    
                     {user ? (
                          <p>Welcome, {userName ? userName : 'Guest'}!</p>
                     ) : (

@@ -116,7 +116,7 @@ const UserAdminPage = ({ user }) => {
             {/* Sidebar for navigation */}
             <aside className="sidebar">
                 <div className="profile-section">
-                    <img src="admin-profile-pic.jpg" alt="Admin" className="profile-pic" />
+            
                     {name ? (
                         <p>Welcome, {name}!</p> // Display the fetched user name
                     ) : (
