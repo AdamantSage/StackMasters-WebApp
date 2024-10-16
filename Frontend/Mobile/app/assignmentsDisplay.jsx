@@ -223,10 +223,10 @@ const AssignmentsDisplay = () => {
     if (!uploadResponse) return;
 
     // Then compress the video after upload
-    const compressedVideoUrl = await compressVideo(videoUri);
-    if (compressedVideoUrl) {
+    //const compressedVideoUrl = await compressVideo(videoUri);
+    /*if (compressedVideoUrl) {
       setCompressedVideoUrl(compressedVideoUrl); // Store the compressed video URL if needed
-    }
+    }*/
 
       Alert.alert('Submission successful!');
     } catch (error) {
