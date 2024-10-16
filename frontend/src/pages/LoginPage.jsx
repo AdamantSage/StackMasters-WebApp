@@ -65,7 +65,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/create/', {
+      const response = await fetch('http://localhost:5000/users/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/login/', {
+      const response = await fetch('http://localhost:5000/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
