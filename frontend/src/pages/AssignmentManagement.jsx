@@ -21,7 +21,7 @@ const AssignmentManagement = () => {
   // Fetch assignments from API and extract distinct module codes
   const fetchAssignments = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/assignment');
+      const response = await axios.get('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignment');
       console.log('API Response:', response.data);
       setAssignments(response.data);
 

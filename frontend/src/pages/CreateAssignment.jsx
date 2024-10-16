@@ -49,7 +49,7 @@ const CreateAssignment = ({ userId }) => {
              // Emit the 'createAssignment' event to the server
              socket.emit('createAssignment', assignmentData);
              
-            const response = await axios.post('http://localhost:5000/assignment', assignmentData);
+            const response = await axios.post('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignment', assignmentData);
             console.log('Assignment created successfully:', response.data);
             if (response.status === 201) {
                 setNotification('Assignment created successfully!');
