@@ -6,6 +6,9 @@ import ExportMarks from './exportMarks';
 import { AdminDashboard } from './Dashboard';
 import UserManagement from './UserManagement';
 import AssignmentManagement from './AssignmentManagement';
+import VideoFeedback from './VideoFeedback';
+import CreateAssignment from './CreateAssignment';
+import ProfilePage from './profile';
 
 import io from 'socket.io-client';
 
@@ -14,6 +17,7 @@ const socket = io('http://localhost:5000'); // Connect to your backend socket se
 const UserAdminPage = ({ user }) => {  // Accept user prop here
     const [activeSection, setActiveSection] = useState('dashboard'); // Default section
     const [notifications, setNotifications] = useState([]); // State to track notifications
+    const [selectedVideoId, setSelectedVideoId] = useState(null);
 
     const userName = localStorage.getItem('userName');
 
@@ -48,14 +52,22 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
         switch (activeSection) {
             case 'dashboard':
                 return <AdminDashboard />;
+                case 'profile':
+                return <ProfilePage user={user} />;
             case 'list-videos':
                 return <ListVideos />;
             case 'list-assignments':
                 return <ListAssignments />;
+                case 'watch-feedback':
+                    return <VideoFeedback videoId={selectedVideoId} />;
+                case 'create-assignment':
+                    return <CreateAssignment />; 
             case 'export-marks':
                 return <ExportMarks />;
                 case 'assignment-management':
                     return <AssignmentManagement />;
+                   
+                       
             
             case 'user-management':
                 return <UserManagement />;
@@ -80,17 +92,21 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                 <nav className="nav-menu">
                     <ul>
                         <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
+                        <li><button onClick={() => setActiveSection('profile')}>Profile</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
+                        <li><button onClick={() => setActiveSection('create-assignment')}>Create Assignment</button></li>
+                        <li><button onClick={() => setActiveSection('watch-feedback')}>Video Feedback</button></li>
                         <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
                         <li><button onClick={() => setActiveSection('assignment-management')}>Assignment Management</button></li>
+                        
+                        
                         <li><button onClick={() => setActiveSection('user-management')}>User Management</button></li>
                     </ul>
                 </nav>
                 {/* Logout Button */}
                 <button className="logout-button" onClick={handleLogout}>Log Out</button>
             </aside>
-
             {/* Main content area where different sections will be rendered */}
             <main className="main-content">
                 {renderSection()}

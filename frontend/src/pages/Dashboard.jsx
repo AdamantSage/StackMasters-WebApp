@@ -47,7 +47,7 @@ const AdminDashboard = () => {
 
     const fetchVideoCountsByHour = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/videos/counts/hour');
+            const response = await axios.get('http://localhost:5000/videos/hour');
             const hours = response.data.map(item => item.upload_hour);
             const counts = response.data.map(item => item.video_count);
 
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
 
     const fetchGradeDistribution = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/submission/grades-distribution');
+            const response = await axios.get('http://localhost:5000/grades-distribution');
             const modules = response.data.map(item => `Module ${item.assignment_id}`);
             const gradeRanges = {
                 '0-50': response.data.map(item => item['0-50']),
@@ -239,7 +239,7 @@ const LecturerDashboard = () => {
     // Fetch Video Upload Counts by Hour
     const fetchVideoCountsByHour = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/videos/upload-counts-by-hour');
+            const response = await axios.get('http://localhost:5000/videos/hour');
             const hours = response.data.map(item => `${item.hour}:00`);
             const videoUploads = response.data.map(item => item.uploadCount);
 
@@ -262,7 +262,7 @@ const LecturerDashboard = () => {
     // Fetch Grade Distribution
     const fetchGradeDistribution = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/submission/grades-distribution');
+            const response = await axios.get('http://localhost:5000/grades-distribution');
             const modules = response.data.map(item => `Module ${item.assignment_id}`);
             const gradeRanges = {
                 '0-50': response.data.map(item => item['0-50']),

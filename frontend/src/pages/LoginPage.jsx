@@ -2,24 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import paper from 'paper';
 import '../index.css';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Importing eye icons
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const LoginPage = () => {
   const [usernameLogin, setUsernameLogin] = useState('');
   const [passwordLogin, setPasswordLogin] = useState('');
   const [emailSignup, setEmailSignup] = useState('');
-  const [usernameSignup, setUsernameSignup] = useState(''); // Added username for signup
+  const [usernameSignup, setUsernameSignup] = useState('');
   const [passwordSignup, setPasswordSignup] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState(''); // Confirm password state
-  const [role, setRole] = useState('admin'); // Default role
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState('admin');
   const [error, setError] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [loginPasswordVisible, setLoginPasswordVisible] = useState(false); // State for login password visibility
-  const navigate = useNavigate(); // For navigation
+  const [loginPasswordVisible, setLoginPasswordVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Paper.js animation setup
+    // Initialize Paper.js animations
     paper.install(window);
     paper.setup(document.getElementById('canvas'));
     initializeShapes();
@@ -48,24 +48,24 @@ const LoginPage = () => {
     paper.view.viewSize = new paper.Size(canvas.width, canvas.height);
   };
 
+  // Signup handler
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
+    setError('');
 
-    // Check for empty fields
+    // Validation checks
     if (!emailSignup || !passwordSignup || !confirmPassword || !usernameSignup) {
       setError('Please fill in all fields!');
       return;
     }
 
-    // Validate password confirmation
     if (passwordSignup !== confirmPassword) {
       setError('Passwords do not match!');
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/create', {
+      const response = await fetch('http://localhost:5000/users/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ const LoginPage = () => {
 
       if (response.ok) {
         console.log('Signup successful');
-        navigate('/login'); // Redirect to login page after successful signup
+        navigate('/login'); // Redirect to login after signup
       } else {
         setError(data.message || 'Signup failed');
       }
@@ -92,71 +92,63 @@ const LoginPage = () => {
     }
   };
 
+  // Login handler
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
+    setError('');
 
     if (!usernameLogin || !passwordLogin) {
-        setError('Please fill in both username and password!');
-        return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(usernameLogin)) {
-        setError('Please enter a valid email address!');
-        return;
+      setError('Please fill in both username and password!');
+      return;
     }
 
     try {
-        const response = await fetch('http://localhost:5000/users/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: usernameLogin, password: passwordLogin }),
-        });
+      const response = await fetch('http://localhost:5000/users/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: usernameLogin, password: passwordLogin }),
+      });
 
-        const data = await response.json();
-        console.log(data); // Log the response data
+      const data = await response.json();
+      console.log(data); // Debugging the response data
 
-        if (response.ok) {
-            if (data.userId) {
-                localStorage.setItem('jwt', data.token);
-                localStorage.setItem('userId', JSON.stringify(data.userId));
-                localStorage.setItem('userName', data.name); // Store the user's name
+      if (response.ok) {
+        if (data.userId) {
+          // Store JWT and user data
+          localStorage.setItem('jwt', data.token);
+          localStorage.setItem('userId', JSON.stringify(data.userId));
+          localStorage.setItem('userName', data.name);
 
-                const userRole = data.role;
-                switch (userRole) {
-                    case 'Admin':
-                        navigate('/user-admin');
-                        break;
-                    case 'Lecturer':
-                        navigate('/user-lecturer');
-                        break;
-                    case 'Student':
-                        navigate('/profile'); // Redirect to profile page for Student
-                        break;
-                    default:
-                        setError('Role is not recognized.');
-                }
-            } else {
-                setError('User ID is not available.');
-            }
+          const userRole = data.role;
+          // Role-based redirection
+          switch (userRole) {
+            case 'Admin':
+              navigate('/user-admin');
+              break;
+            case 'Lecturer':
+              navigate('/user-lecturer');
+              break;
+            case 'Student':
+              navigate('/profile');
+              break;
+            default:
+              setError('Unrecognized role.');
+          }
         } else {
-            // Check for specific error messages based on response status
-            if (response.status === 401) {
-                setError('Incorrect username or password.');
-            } else {
-                setError(data.message || 'An unexpected error occurred.');
-            }
+          setError('User ID is not available.');
         }
+      } else {
+        setError(response.status === 401 ? 'Incorrect username or password.' : data.message || 'An unexpected error occurred.');
+      }
     } catch (error) {
-        console.error('Error occurred:', error);
-        setError('Unable to connect. Please check your internet connection and try again.');
+      console.error('Error occurred:', error);
+      setError('Unable to connect. Please check your internet connection.');
     }
-};
+  };
 
-
+  // Switch between signup and login forms
   const goToSignUp = () => {
     document.getElementById('slideBox').style.marginLeft = '0';
     document.querySelector('.topLayer').style.marginLeft = '100%';
@@ -178,13 +170,12 @@ const LoginPage = () => {
           <div className="left">
             <div className="content">
               <h2>Sign Up</h2>
-              <form id="form-signup" method="post" onSubmit={handleSignUp}>
+              <form id="form-signup" onSubmit={handleSignUp}>
                 <div className="form-element form-stack">
                   <label htmlFor="email" className="form-label">Email</label>
                   <input
                     id="email"
                     type="email"
-                    name="email"
                     required
                     value={emailSignup}
                     onChange={(e) => setEmailSignup(e.target.value)}
@@ -195,7 +186,6 @@ const LoginPage = () => {
                   <input
                     id="username-signup"
                     type="text"
-                    name="username"
                     required
                     value={usernameSignup}
                     onChange={(e) => setUsernameSignup(e.target.value)}
@@ -207,7 +197,6 @@ const LoginPage = () => {
                     <input
                       id="password-signup"
                       type={passwordVisible ? 'text' : 'password'}
-                      name="password"
                       required
                       value={passwordSignup}
                       onChange={(e) => setPasswordSignup(e.target.value)}
@@ -223,7 +212,6 @@ const LoginPage = () => {
                     <input
                       id="confirm-password"
                       type={confirmPasswordVisible ? 'text' : 'password'}
-                      name="confirmPassword"
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
@@ -243,6 +231,8 @@ const LoginPage = () => {
                   >
                     <option value="admin">Admin</option>
                     <option value="lecturer">Lecturer</option>
+                   
+                   
                   </select>
                 </div>
                 <div className="form-element form-submit">
@@ -250,7 +240,7 @@ const LoginPage = () => {
                   <button type="button" id="goLeft" className="signup off" onClick={goToLogin}>Log In</button>
                 </div>
               </form>
-              {error && <p style={{ color: 'red' }}>{error}</p>}
+              {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error messages */}
             </div>
           </div>
           <div className="right">
@@ -289,7 +279,7 @@ const LoginPage = () => {
                   <button type="button" id="goRight" className="login off" onClick={goToSignUp}>Sign Up</button>
                 </div>
               </form>
-              {error && <p style={{ color: 'red' }}>{error}</p>}
+              {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error messages */}
             </div>
           </div>
         </div>
@@ -299,3 +289,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

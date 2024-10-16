@@ -7,6 +7,7 @@ import CreateAssignment from './CreateAssignment';
 import ExportMarks from './exportMarks';
 import { LecturerDashboard } from './Dashboard'; 
 import AssignmentManagement from './AssignmentManagement';
+import ProfilePage from './profile';
 
 const LecturerPage = ({user}) => {
     const [activeSection, setActiveSection] = useState('dashboard-overview'); 
@@ -22,6 +23,8 @@ const LecturerPage = ({user}) => {
         switch (activeSection) {
             case 'dashboard':
                 return <LecturerDashboard />;
+                case 'profile':
+                return <ProfilePage user={user} />;
             case 'list-videos':
                 return <ListVideos onSelectVideo={setSelectedVideoId} />;
             case 'list-assignments':
@@ -34,15 +37,10 @@ const LecturerPage = ({user}) => {
                     return <ExportMarks/>;
                     case 'assignment-management':
                         return <AssignmentManagement/>;
+                        
                 
 
-                case 'settings':
-                    return (
-                        <section className="settings">
-                            <h2>Settings</h2>
-                            {/* Settings content here */}
-                        </section>
-                    );
+                
             default:
                 return <LecturerDashboard />;
         }
@@ -62,13 +60,15 @@ const LecturerPage = ({user}) => {
                 <nav className='nav-menu'>
                     <ul>
                         <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
+                        <li><button onClick={() => setActiveSection('profile')}>Profile</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
                         <li><button onClick={() => setActiveSection('create-assignment')}>Create Assignment</button></li>
                         <li><button onClick={() => setActiveSection('watch-feedback')}>Video Feedback</button></li>
                         <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
                         <li><button onClick={() => setActiveSection('assignment-management')}>Assignment Management</button></li>
-                        <li><button onClick={() => setActiveSection('settings')}>Settings</button></li>
+                        
+                        
                     </ul>
                 </nav>
                 <button className="logout-button" onClick={handleLogout}>Log Out</button>

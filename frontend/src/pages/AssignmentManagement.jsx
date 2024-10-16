@@ -1,209 +1,186 @@
-// src/components/AssignmentManagement.jsx
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import axios from 'axios';
 
 const AssignmentManagement = () => {
-    const [assignments, setAssignments] = useState([]);
-    const [formData, setFormData] = useState({
-        assignment_id: "",
-        module_code: "",
-        assign_name: "",
-        upload_date: "",
-        due_date: "",
-        assign_desc: "",
-    });
-    const [editing, setEditing] = useState(false);
-    const [error, setError] = useState("");
+  const [assignments, setAssignments] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [showMore, setShowMore] = useState(false);
+  const [selectedModule, setSelectedModule] = useState('');
+  const [moduleFilter] = useState('');
+  const [distinctModuleCodes, setDistinctModuleCodes] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentAssignment, setCurrentAssignment] = useState(null);
+  const [editAssignment, setEditAssignment] = useState({
+    assign_name: '',
+    module_code: '',
+    // other fields as necessary
+  });
 
-    useEffect(() => {
-        fetchAssignments();
-    }, []);
+  // Fetch assignments from API and extract distinct module codes
+  const fetchAssignments = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/assignment');
+      console.log('API Response:', response.data);
+      setAssignments(response.data);
 
-    const fetchAssignments = async () => {
-        try {
-            const response = await axios.get("http://localhost:5000/assignment");
-            setAssignments(response.data);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to fetch assignments.");
-        }
-    };
+      // Extract distinct module codes
+      const uniqueModules = [...new Set(response.data.map(assignment => assignment.module_code))];
+      setDistinctModuleCodes(uniqueModules);
+    } catch (error) {
+      console.error('Error fetching assignments:', error);
+    }
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+  useEffect(() => {
+    fetchAssignments();
+  }, []); // Fetch assignments on component mount
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await updateAssignment();
-        setFormData({
-            assignment_id: "",
-            module_code: "",
-            assign_name: "",
-            upload_date: "",
-            due_date: "",
-            assign_desc: "",
-        });
-        setEditing(false);
-    };
+  // Handle toggling show more / show less
+  const toggleShowMore = () => {
+    setShowMore(!showMore);
+    setVisibleCount(showMore ? 3 : assignments.length);
+  };
 
-    const updateAssignment = async () => {
-        try {
-            await axios.put(`http://localhost:5000/assignment/${formData.assignment_id}`, formData);
-            fetchAssignments(); // Refresh the list after updating
-        } catch (err) {
-            console.error(err);
-            setError("Failed to update assignment.");
-        }
-    };
+  // Filter assignments based on selected module and module filter
+  const filteredAssignments = assignments.filter(assignment =>
+    (selectedModule ? assignment.module_code === selectedModule : true) &&
+    (moduleFilter ? assignment.module_code.toLowerCase().includes(moduleFilter.toLowerCase()) : true)
+  );
 
-    const handleEdit = (assignment) => {
-        setFormData(assignment);
-        setEditing(true);
-    };
+  // Handle open dialog for editing an assignment
+  const handleOpenDialog = (assignment) => {
+    setCurrentAssignment(assignment);
+    setEditAssignment({ assign_name: assignment.assign_name, module_code: assignment.module_code });
+    setOpenDialog(true);
+  };
 
-    const handleDelete = async (assignment_id) => {
-        try {
-            await axios.delete(`http://localhost:5000/assignment/${assignment_id}`);
-            fetchAssignments(); // Refresh the list after deleting
-        } catch (err) {
-            console.error(err);
-            setError("Failed to delete assignment.");
-        }
-    };
+  // Handle close dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
 
-    return (
-        <div className="page">
-            <header>
-                <div className="container">
-                    <h1 className="page-heading">Manage Assignments</h1>
-                    {error && <p>{error}</p>}
-                </div>
-            </header>
-            <div className="page-Container">
-                {editing && (
-                    <form onSubmit={handleSubmit} className="manageAssignForm">
-                        <input
-                            type="hidden"
-                            name="assignment_id"
-                            value={formData.assignment_id}
-                        />
-                        <div className="inputContainer">
-                            <label className="form-label" htmlFor="moduleCode">
-                                Module Code
-                            </label>
-                            <input
-                                type="text"
-                                name="module_code"
-                                id="moduleCode"
-                                placeholder="Module Code"
-                                value={formData.module_code}
-                                onChange={handleInputChange}
-                                className="assign-Input"
-                                required
-                            />
-                        </div>
-                        <div className="inputContainer">
-                            <label className="form-label" htmlFor="assignName">
-                                Assignment Name
-                            </label>
-                            <input
-                                type="text"
-                                name="assign_name"
-                                id="assignName"
-                                placeholder="Assignment Name"
-                                value={formData.assign_name}
-                                onChange={handleInputChange}
-                                className="assign-Input"
-                                required
-                            />
-                        </div>
-                        <div className="inputContainer">
-                            <label className="form-label" htmlFor="uploadDate">
-                                Upload Date
-                            </label>
-                            <input
-                                type="datetime-local"
-                                name="upload_date"
-                                id="uploadDate"
-                                value={formData.upload_date}
-                                onChange={handleInputChange}
-                                className="assign-Input"
-                                required
-                            />
-                        </div>
-                        <div className="inputContainer">
-                            <label className="form-label" htmlFor="dueDate">
-                                Due Date
-                            </label>
-                            <input
-                                type="datetime-local"
-                                name="due_date"
-                                id="dueDate"
-                                value={formData.due_date}
-                                onChange={handleInputChange}
-                                className="assign-Input"
-                                required
-                            />
-                        </div>
-                        <div className="inputContainer">
-                            <label className="form-label" htmlFor="assignDesc">
-                                Description
-                            </label>
-                            <textarea
-                                name="assign_desc"
-                                id="assignDesc"
-                                placeholder="Description"
-                                value={formData.assign_desc}
-                                onChange={handleInputChange}
-                                className="assign-Input"
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="get-started-button">
-                            Update Assignment
-                        </button>
-                    </form>
-                )}
-    
-                <h2>Existing Assignments</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Assignment ID</th>
-                            <th>Module Code</th>
-                            <th>Assignment Name</th>
-                            <th>Upload Date</th>
-                            <th>Due Date</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {assignments.map((assignment) => (
-                            <tr key={assignment.assignment_id}>
-                                <td>{assignment.assignment_id}</td>
-                                <td>{assignment.module_code}</td>
-                                <td>{assignment.assign_name}</td>
-                                <td>{new Date(assignment.upload_date).toLocaleString()}</td>
-                                <td>{new Date(assignment.due_date).toLocaleString()}</td>
-                                <td>{assignment.assign_desc}</td>
-                                <td>
-                                    <button onClick={() => handleEdit(assignment)}>Edit</button>
-                                    <button onClick={() => handleDelete(assignment.assignment_id)}>Delete</button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+  // Handle update assignment
+  const handleUpdateAssignment = async () => {
+    try {
+      await axios.put(`http://localhost:5000/assignment/${currentAssignment.assignment_id}`, editAssignment);
+      fetchAssignments(); // Refresh the assignment list
+      handleCloseDialog(); // Close dialog
+    } catch (error) {
+      console.error('Error updating assignment:', error);
+    }
+  };
+
+  // Handle delete assignment
+  const handleDeleteAssignment = async (assignmentId) => {
+    try {
+      await axios.delete(`http://localhost:5000/assignment/${assignmentId}`);
+      fetchAssignments(); // Refresh the assignment list
+    } catch (error) {
+      console.error('Error deleting assignment:', error);
+    }
+  };
+
+  return (
+    <div className="page">
+      <header>
+        <div className="container">
+          <h1 className="page-heading">Assignment Management</h1>
+          
         </div>
-    );
-    
+      </header>
+      <div className="page-Container">
+        {/* Dropdown for module selection */}
+        <div className="module-container">
+          <label htmlFor="module">Select Module:</label>
+          <select
+            id="module"
+            value={selectedModule}
+            onChange={(e) => setSelectedModule(e.target.value)}
+          >
+            <option value="">All Modules</option>
+            {distinctModuleCodes.map((module, index) => (
+              <option key={index} value={module}>
+                {module}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* List of Assignments */}
+        <TableContainer component={Paper} className="fixed-table-container">
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell><strong>Title</strong></TableCell>
+                <TableCell><strong>Submitted By</strong></TableCell>
+                <TableCell><strong>Time Submitted</strong></TableCell>
+                <TableCell><strong>Module</strong></TableCell>
+                <TableCell><strong>Actions</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredAssignments.slice(0, visibleCount).map(assignment => (
+                <TableRow key={assignment.assignment_id}>
+                  <TableCell>{assignment.assign_name}</TableCell>
+                  <TableCell>{assignment.user_id}</TableCell>
+                  <TableCell>{new Date(assignment.upload_date).toLocaleString()}</TableCell>
+                  <TableCell>{assignment.module_code}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleOpenDialog(assignment)}>Edit</Button>
+                    <Button color="error" onClick={() => handleDeleteAssignment(assignment.assignment_id)}>Delete</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Button to toggle show more/less */}
+        <button
+          className="get-started-button"
+          onClick={toggleShowMore}
+        >
+          {showMore ? 'Show Less' : 'Show More'}
+        </button>
+
+        {/* Dialog for editing assignment */}
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>Edit Assignment</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              To edit this assignment, please modify the fields below.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Title"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={editAssignment.assign_name}
+              onChange={(e) => setEditAssignment({ ...editAssignment, assign_name: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Module Code"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={editAssignment.module_code}
+              onChange={(e) => setEditAssignment({ ...editAssignment, module_code: e.target.value })}
+            />
+            {/* Add more fields as necessary */}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={handleUpdateAssignment}>Update</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </div>
+  );
 };
 
 export default AssignmentManagement;

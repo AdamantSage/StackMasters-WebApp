@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Example import for your API fetching functions
-// import { fetchUsers, updateUser, deleteUser } from '../api'; 
-
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [editing, setEditing] = useState(false);
@@ -20,9 +17,8 @@ const UserManagement = () => {
         // Fetch users from the API
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:5000/users/users'); // Replace with your API endpoint
-                const data = await response.json();
-                setUsers(data);
+                const response = await axios.get('http://localhost:5000/users/users'); 
+                setUsers(response.data);
             } catch (err) {
                 setError('Failed to fetch users');
             }
@@ -30,6 +26,7 @@ const UserManagement = () => {
         fetchUsers();
     }, []);
 
+    // Handle user editing
     const handleEdit = (user) => {
         setEditing(true);
         setFormData({
@@ -40,18 +37,41 @@ const UserManagement = () => {
         });
     };
 
+    // Handle user deletion
     const handleDelete = async (userId) => {
-        // Add your delete logic here
-        setNotification(`User with ID ${userId} deleted successfully`);
-        // Optionally refresh users after deletion
+        try {
+            await axios.delete(`http://localhost:5000/users/delete/${userId}`);
+            setNotification(`User with ID ${userId} deleted successfully`);
+            
+            // Refresh the list of users
+            setUsers(users.filter((user) => user.user_id !== userId));
+        } catch (error) {
+            setError(`Failed to delete user with ID ${userId}`);
+        }
     };
 
+    // Handle form submission for updating user
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Add your update logic here
-        setEditing(false);
-        setNotification(`User updated successfully`);
-        // Optionally refresh users after update
+        try {
+            await axios.put(`http://localhost:5000/users/update/${formData.user_id}`, {
+                name: formData.name,
+                email: formData.email,
+                role: formData.role
+            });
+            setNotification('User updated successfully');
+            setEditing(false);
+            
+            // Refresh the list of users
+            const updatedUsers = users.map((user) =>
+                user.user_id === formData.user_id
+                    ? { ...user, name: formData.name, email: formData.email, role: formData.role }
+                    : user
+            );
+            setUsers(updatedUsers);
+        } catch (error) {
+            setError('Failed to update user');
+        }
     };
 
     const setName = (value) => {
@@ -78,15 +98,15 @@ const UserManagement = () => {
                     {error && <p>{error}</p>}
                 </div>
             </header>
-            <div className="page-Container">
+            <div className="page-container">
                 {editing && (
-                    <form onSubmit={handleSubmit} className="manageUserForm">
+                    <form onSubmit={handleSubmit} className="manage-user-form">
                         <input
                             type="hidden"
                             name="user_id"
                             value={formData.user_id}
                         />
-                        <div className="inputContainer">
+                        <div className="input-container">
                             <label className="form-label" htmlFor="userName">
                                 Name
                             </label>
@@ -96,11 +116,11 @@ const UserManagement = () => {
                                 placeholder="Enter user's name"
                                 value={formData.name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="assign-Input"
+                                className="assign-input"
                                 required
                             />
                         </div>
-                        <div className="inputContainer">
+                        <div className="input-container">
                             <label className="form-label" htmlFor="userEmail">
                                 Email
                             </label>
@@ -110,11 +130,11 @@ const UserManagement = () => {
                                 placeholder="Enter user's email"
                                 value={formData.email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="assign-Input"
+                                className="assign-input"
                                 required
                             />
                         </div>
-                        <div className="inputContainer">
+                        <div className="input-container">
                             <label className="form-label" htmlFor="userRole">
                                 Role
                             </label>
@@ -122,7 +142,7 @@ const UserManagement = () => {
                                 id="userRole"
                                 value={formData.role}
                                 onChange={(e) => setRole(e.target.value)}
-                                className="assign-Input"
+                                className="assign-input"
                                 required
                             >
                                 <option value="">Select role</option>
@@ -167,7 +187,7 @@ const UserManagement = () => {
                 {notification && (
                     <div className="notification">
                         {notification}
-                        <button onClick={handleCloseNotification} className="close-button"></button>
+                        <button onClick={handleCloseNotification} className="close-button">X</button>
                     </div>
                 )}
             </div>

@@ -11,10 +11,10 @@ import LecturerPage from './pages/lecturerPage';
 import ExportMarks from './pages/exportMarks';
 import UserManagement from './pages/UserManagement';
 import AssignmentManagement from './pages/AssignmentManagement';
+import ProfilePage from './pages/profile';
 
 
 
-import logo from './logo.svg';
 import './App.css';
 
 const App = () => {
@@ -32,6 +32,7 @@ const App = () => {
         <Route path="/user-lecturer" element={<LecturerPage />} />
         <Route path="/export-marks" element={<ExportMarks />} />
         <Route path="/assignment-management" element={<AssignmentManagement />} />
+        <Route path="/profile" element={<ProfilePage />} />
         
       </Routes>
     </Router>
