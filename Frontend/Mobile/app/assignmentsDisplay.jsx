@@ -177,7 +177,7 @@ const AssignmentsDisplay = () => {
       const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const submissionData = {
         sub_date: formattedDate,
-        assignment_id: assignmentId,
+        assignment_id: assignmentId
       };
 
     console.log("Creating submission with data:", submissionData);
