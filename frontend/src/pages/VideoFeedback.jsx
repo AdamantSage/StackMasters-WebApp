@@ -17,7 +17,7 @@ const VideoFeedback = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/submission/feedback', {
+      const response = await axios.post('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/submission/feedback', {
         assignment_id, // Updated key name
         user_id, // Updated key name
         sub_id, // Updated key name

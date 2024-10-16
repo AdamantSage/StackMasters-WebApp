@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
 // Import the image from the src folder
 import logo from '../CMYK_NWU_Logo-Purple.png'; // Adjusted path to import the image
-
+import '../index.css';
 function LandingPage() {
   const navigate = useNavigate();
 
