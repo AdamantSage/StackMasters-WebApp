@@ -17,7 +17,7 @@ const CreateAssignment = ({ userId }) => {
     useEffect(() => {
         const fetchModuleCodes = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/assignment'); // Adjust API endpoint as needed
+                const response = await axios.get('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignment'); // Adjust API endpoint as needed
                 const distinctModules = [...new Set(response.data.map(module => module.module_code))]; // Ensure distinct values
                 setModuleCodes(distinctModules); // Set the distinct module codes
             } catch (error) {

@@ -15,7 +15,7 @@ const ListVideos = () => {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/video-submissions');
+        const response = await axios.get('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/video-submissions');
         setVideos(response.data);
 
         // Extract distinct assignment names after fetching videos
