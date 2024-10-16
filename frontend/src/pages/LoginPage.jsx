@@ -65,7 +65,7 @@ const LoginPage = () => {
     }
 
     try {
-        const response = await fetch('http://localhost:5000/users/create', {
+        const response = await fetch('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net//users/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/login', {
+      const response = await fetch('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net//users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -64,7 +64,7 @@ const AssignmentManagement = () => {
   // Handle update assignment
   const handleUpdateAssignment = async () => {
     try {
-      await axios.put(`http://localhost:5000/assignment/${currentAssignment.assignment_id}`, editAssignment);
+      await axios.put(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net//assignment/${currentAssignment.assignment_id}`, editAssignment);
       fetchAssignments(); // Refresh the assignment list
       handleCloseDialog(); // Close dialog
     } catch (error) {
@@ -75,7 +75,7 @@ const AssignmentManagement = () => {
   // Handle delete assignment
   const handleDeleteAssignment = async (assignmentId) => {
     try {
-      await axios.delete(`http://localhost:5000/assignment/${assignmentId}`);
+      await axios.delete(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net//assignment/${assignmentId}`);
       fetchAssignments(); // Refresh the assignment list
     } catch (error) {
       console.error('Error deleting assignment:', error);

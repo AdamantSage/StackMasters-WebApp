@@ -16,12 +16,7 @@ function LandingPage() {
       <header>
         <div className="container">
           <a href="#" className="logo">Stack <b>Masters</b></a>
-          <ul className="links">
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-            
-          </ul>
+          
         </div>
       </header>
       <div className="content">

@@ -33,7 +33,7 @@ const UserAdminPage = ({ user }) => {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5000/users/users/${userId}`, {
+            const response = await fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net//users/users/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
