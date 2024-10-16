@@ -3,8 +3,6 @@ import '../index.css';
 import ListVideos from './ListVideos';
 import ListAssignments from './ListAssignments';
 import ExportMarks from './exportMarks';
-import { AdminDashboard } from './Dashboard';
-import UserManagement from './UserManagement';
 import AssignmentManagement from './AssignmentManagement';
 import VideoFeedback from './VideoFeedback';
 import CreateAssignment from './CreateAssignment';
@@ -50,8 +48,7 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
     // Render different sections based on active button
     const renderSection = () => {
         switch (activeSection) {
-            case 'dashboard':
-                return <AdminDashboard />;
+            
                 case 'profile':
                 return <ProfilePage user={user} />;
             case 'list-videos':
@@ -69,11 +66,9 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                    
                        
             
-            case 'user-management':
-                return <UserManagement />;
+            
               
-            default:
-                return <AdminDashboard />;
+           
         }
     };
 
@@ -91,7 +86,7 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                 </div>
                 <nav className="nav-menu">
                     <ul>
-                        <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
+                        
                         <li><button onClick={() => setActiveSection('profile')}>Profile</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>
@@ -99,9 +94,6 @@ const UserAdminPage = ({ user }) => {  // Accept user prop here
                         <li><button onClick={() => setActiveSection('watch-feedback')}>Video Feedback</button></li>
                         <li><button onClick={() => setActiveSection('export-marks')}>Export Marks</button></li>
                         <li><button onClick={() => setActiveSection('assignment-management')}>Assignment Management</button></li>
-                        
-                        
-                        <li><button onClick={() => setActiveSection('user-management')}>User Management</button></li>
                     </ul>
                 </nav>
                 {/* Logout Button */}

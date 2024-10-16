@@ -5,7 +5,6 @@ import ListAssignments from './ListAssignments';
 import VideoFeedback from './VideoFeedback';
 import CreateAssignment from './CreateAssignment';
 import ExportMarks from './exportMarks';
-import { LecturerDashboard } from './Dashboard'; 
 import AssignmentManagement from './AssignmentManagement';
 import ProfilePage from './profile';
 
@@ -21,8 +20,7 @@ const LecturerPage = ({user}) => {
 
     const renderSection = () => {
         switch (activeSection) {
-            case 'dashboard':
-                return <LecturerDashboard />;
+            
                 case 'profile':
                 return <ProfilePage user={user} />;
             case 'list-videos':
@@ -41,8 +39,7 @@ const LecturerPage = ({user}) => {
                 
 
                 
-            default:
-                return <LecturerDashboard />;
+            
         }
     };
 
@@ -59,7 +56,7 @@ const LecturerPage = ({user}) => {
                 </div>
                 <nav className='nav-menu'>
                     <ul>
-                        <li><button onClick={() => setActiveSection('dashboard')}>Dashboard</button></li>
+                        
                         <li><button onClick={() => setActiveSection('profile')}>Profile</button></li>
                         <li><button onClick={() => setActiveSection('list-assignments')}>List of Assignments</button></li>
                         <li><button onClick={() => setActiveSection('list-videos')}>List of Videos</button></li>

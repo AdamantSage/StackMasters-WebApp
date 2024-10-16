@@ -9,7 +9,6 @@ import ListVideos from './pages/ListVideos';
 import VideoFeedback from './pages/VideoFeedback';
 import LecturerPage from './pages/lecturerPage';
 import ExportMarks from './pages/exportMarks';
-import UserManagement from './pages/UserManagement';
 import AssignmentManagement from './pages/AssignmentManagement';
 import ProfilePage from './pages/profile';
 
@@ -28,7 +27,6 @@ const App = () => {
         <Route path="/create-assignment" element={<CreateAssignment />} />
         <Route path="/list-videos" element={<ListVideos />} />
         <Route path="/watch-feedback/:id" element={<VideoFeedback />} />
-        <Route path="/user-management" element={<UserManagement />} />
         <Route path="/user-lecturer" element={<LecturerPage />} />
         <Route path="/export-marks" element={<ExportMarks />} />
         <Route path="/assignment-management" element={<AssignmentManagement />} />

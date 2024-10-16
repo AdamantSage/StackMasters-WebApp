@@ -76,7 +76,7 @@ const ProfilePage = () => {
     try {
       localStorage.removeItem('jwt'); // Remove the JWT token
       localStorage.removeItem('userId'); // Remove the user ID
-      navigate('/sign-in'); // Updated to use navigate
+      navigate('/login'); // Updated to use navigate
     } catch (error) {
       console.error('Error during logout:', error);
       alert('Error: Unable to log out, please try again.');
