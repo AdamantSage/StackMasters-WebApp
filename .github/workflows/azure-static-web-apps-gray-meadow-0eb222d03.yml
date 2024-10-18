@@ -22,21 +22,22 @@ jobs:
 
       - name: List directory contents
         run: |
+          echo "Listing the root directory:"
           ls -R
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # Adjust as needed
+          node-version: '16' # Adjust this to your Node.js version
 
       - name: Install Dependencies
         run: |
-          cd StackMasters-WebApp/Frontend
+          cd Frontend || exit 1  # Navigate to Frontend directory
           npm install
 
       - name: Build
         run: |
-          cd StackMasters-WebApp/Frontend
+          cd Frontend || exit 1  # Navigate to Frontend directory
           npm run build
 
       - name: Build And Deploy
@@ -44,8 +45,8 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_MEADOW_0EB222D03 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # For GitHub integrations (e.g., PR comments)
           action: "upload"
-          app_location: "StackMasters-WebApp/Frontend"  # Path to your app
-          api_location: ""                                # Optional, leave empty if not used
-          output_location: "StackMasters-WebApp/Frontend/build"  # Where the built files are located
+          app_location: "Frontend"          # Path to your app
+          api_location: ""                   # Leave empty if not used
+          output_location: "Frontend/build"  # Path to the build output
