@@ -19,24 +19,24 @@ jobs:
         with:
           submodules: true
           lfs: false
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16' # Specify your Node.js version
 
       - name: List directory contents
         run: |
-          ls -R # Check the directory structure
-      
+          ls -R
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # Adjust as needed
+
       - name: Install Dependencies
         run: |
-          cd Frontend
+          cd StackMasters-WebApp/Frontend
           npm install
 
       - name: Build
         run: |
-          cd Frontend
+          cd StackMasters-WebApp/Frontend
           npm run build
 
       - name: Build And Deploy
@@ -46,18 +46,6 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_MEADOW_0EB222D03 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
           action: "upload"
-          app_location: "Frontend"          # Path to your app
-          api_location: ""                   # Optional
-          output_location: "Frontend/build"  # Where the built files are located
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        id: closepullrequest
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GRAY_MEADOW_0EB222D03 }}
-          action: "close"
+          app_location: "StackMasters-WebApp/Frontend"  # Path to your app
+          api_location: ""                                # Optional, leave empty if not used
+          output_location: "StackMasters-WebApp/Frontend/build"  # Where the built files are located
