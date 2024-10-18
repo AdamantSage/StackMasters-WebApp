@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/static/css/main.636eb40d.css",
+    "main.js": "/static/js/main.a62049ef.js",
+    "static/js/453.8ab44547.chunk.js": "/static/js/453.8ab44547.chunk.js",
+    "static/media/CMYK_NWU_Logo-Purple.png": "/static/media/CMYK_NWU_Logo-Purple.353bcb792ea58362c906.png",
+    "static/media/graduates.jpg": "/static/media/graduates.287e94ba98897f221ee6.jpg",
+    "index.html": "/index.html",
+    "main.636eb40d.css.map": "/static/css/main.636eb40d.css.map",
+    "main.a62049ef.js.map": "/static/js/main.a62049ef.js.map",
+    "453.8ab44547.chunk.js.map": "/static/js/453.8ab44547.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.636eb40d.css",
+    "static/js/main.a62049ef.js"
+  ]
+}
