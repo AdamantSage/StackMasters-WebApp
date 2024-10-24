@@ -16,7 +16,7 @@ const Assignments = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch('https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/module')
+    fetch('http://192.168.49.123:5000/module')
       .then(response => response.json())
       .then(data => {
         const formattedModule = data.map(module => ({
@@ -32,7 +32,7 @@ const Assignments = () => {
   useEffect(() => {
     if (selectedModule) {
       setLoading(true);
-      fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignmentModule/${selectedModule}`)
+      fetch(`http://192.168.49.123:5000/assignmentModule/${selectedModule}`)
         .then(response => response.json())
         .then(data => {
           setAssignments(data);

@@ -22,10 +22,10 @@ const AssignmentsDisplay = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const uploadVideoApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/routes/uploads';
-  const compressVideoApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/routes/test-compress';
-  const createSubmissionApi = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/submission';
-  const createUserSubmission = 'https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/userSubmission';
+  const uploadVideoApi = 'http://192.168.49.123:5000/routes/uploads';
+  const compressVideoApi = 'http://192.168.49.123:5000/routes/test-compress';
+  const createSubmissionApi = 'http://192.168.49.123:5000/submission';
+  const createUserSubmission = 'http://192.168.49.123:5000/userSubmission';
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -43,7 +43,7 @@ const AssignmentsDisplay = () => {
   useEffect(() => {
     const fetchAssignmentDetails = async () => {
       try {
-        const response = await fetch(`https://hmsstackmasters-hvfcb8drb4d0egf8.southafricanorth-01.azurewebsites.net/assignmentID/${assignmentId}`);
+        const response = await fetch(`http://192.168.49.123:5000/assignmentID/${assignmentId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch assignment details');
         }
@@ -149,7 +149,7 @@ const AssignmentsDisplay = () => {
     formData.append('mimetype', videoType);
     formData.append('size', '');
     formData.append('path', videoUri);
-    formData.append('uploadAt', '');
+    formData.append('uploadAt', new Date().toISOString());
     formData.append('user_id', userId);
 
     try {
