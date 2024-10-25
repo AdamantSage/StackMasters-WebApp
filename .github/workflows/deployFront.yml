@@ -19,11 +19,11 @@ jobs:
           node-version: '16'
 
       - name: Install dependencies
-        working-directory: /Frontend  # Navigate to the Frontend folder where package.json is located
+        working-directory: ./Frontend  # Navigate to the Frontend folder where package.json is located
         run: npm install
 
       - name: Build the project
-        working-directory: /Frontend  # Run the build command within the Frontend folder
+        working-directory: ./Frontend  # Run the build command within the Frontend folder
         run: npm run build
 
       - name: Deploy to Netlify
